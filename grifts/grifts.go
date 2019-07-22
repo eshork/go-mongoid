@@ -33,7 +33,7 @@ var _ = Add("test", func(c *Context) error {
 	if lookErr != nil {
 		panic(lookErr)
 	}
-	args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-skipMeasurements"}
+	args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-r", "-keepGoing", "-skipMeasurements"}
 	env := os.Environ()
 	execErr := syscall.Exec(binary, args, env)
 	if execErr != nil {
@@ -49,7 +49,7 @@ var _ = Namespace("test", func() {
 		if lookErr != nil {
 			panic(lookErr)
 		}
-		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "watch", "-v", "-skipMeasurements"}
+		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "watch", "-v", "-r", "-keepGoing", "-skipMeasurements"}
 		env := os.Environ()
 		execErr := syscall.Exec(binary, args, env)
 		if execErr != nil {
