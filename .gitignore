@@ -1,0 +1,13 @@
+# Ref: https://www.gitignore.io/
+
+# Mac common ignores
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Test binary, built with `go test -c`
+*.test
+
+# ignore grift
+.grifter
