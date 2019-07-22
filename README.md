@@ -1,6 +1,6 @@
 # go-mongoid
 
-**work in progress**
+**work in progress ([all work is currently happening here](https://github.com/eshork/go-mongoid/tree/v1dev))**
 
 
 ![alt text](etc/assets/go-mongoid-100.png "Mongoid for Go")
