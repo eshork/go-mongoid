@@ -33,7 +33,7 @@ var _ = Add("test", func(c *Context) error {
 	if lookErr != nil {
 		panic(lookErr)
 	}
-	args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-r", "-keepGoing", "-skipMeasurements"}
+	args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-r", "-skipMeasurements"}
 	env := os.Environ()
 	execErr := syscall.Exec(binary, args, env)
 	if execErr != nil {
@@ -49,7 +49,22 @@ var _ = Namespace("test", func() {
 		if lookErr != nil {
 			panic(lookErr)
 		}
-		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "watch", "-v", "-r", "-keepGoing", "-skipMeasurements"}
+		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "watch", "-v", "-r", "-skipMeasurements"}
+		env := os.Environ()
+		execErr := syscall.Exec(binary, args, env)
+		if execErr != nil {
+			panic(execErr)
+		}
+		return nil
+	})
+
+	Desc("all", "run all tests even if some fail")
+	Add("all", func(c *Context) error {
+		binary, lookErr := exec.LookPath("go")
+		if lookErr != nil {
+			panic(lookErr)
+		}
+		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-r", "-keepGoing", "-skipMeasurements"}
 		env := os.Environ()
 		execErr := syscall.Exec(binary, args, env)
 		if execErr != nil {
@@ -64,7 +79,7 @@ var _ = Namespace("test", func() {
 		if lookErr != nil {
 			panic(lookErr)
 		}
-		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-focus", "performance"}
+		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-r", "-keepGoing", "-focus", "performance"}
 		env := os.Environ()
 		execErr := syscall.Exec(binary, args, env)
 		if execErr != nil {
