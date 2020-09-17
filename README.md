@@ -1,6 +1,6 @@
 # go-mongoid
 
-**work in progress ([all work is currently happening here](https://github.com/eshork/go-mongoid/tree/v1dev))**
+**a work in progress to make go webscale**
 
 
 ![alt text](etc/assets/go-mongoid-100.png "Mongoid for Go")
@@ -13,6 +13,8 @@ Not everything perfectly translates from Ruby to Go, but the Document-related in
 > **Note:** Preserving syntactic sugar and developer experience/productivity is held as a primary concern. This can result in liberal usage of Go's _reflect_ package, but it is arguable that servers are fast/cheap and the costs of performing reflection is more than paid by the dividends gained by developer productivity. Also, let's not forget that Go is typically quite fast in comparison to almost every runtime interpretted scripting language, so I'd be quite interested to see some real-world benchmarks against the Ruby Mongoid implementation as a comparison to identify "slowness" within this library.
 >
 > If your specific use-case is highly sensitive to latency, you might elect to start here but then later optimize the time sensitive bits of your application to a more direct driver interface (for which this library is intended to also happily provide direct access into).
+>
+> This package has not yet been performance optimized, or even yet scrutinized with performance in mind. Some operations may take milliseconds to complete (yep, whole milliseconds. darn). Exhaustive performance optimizations are planned once the package reaches v1 status. Until then, feel free to [contribute](CONTRIBUTING.md).
 
 # Target features (for v1)
 
@@ -44,3 +46,26 @@ Not everything perfectly translates from Ruby to Go, but the Document-related in
 - Custom Validations for document lifecycle events (onCreate, onUpdate, onDelete)
 
 - Plugin architecture allows for adhoc add-on functionality (think: Mongoid::Paranoia, Mongoid::Versioning, etc)
+
+# Installation & Usage
+
+TODO How does this work for Go modules?!?!
+
+TODO How does this work for _not_ Go modules?!?!
+
+Within your project directory, add/update the library to the latest stable release version
+
+```bash
+go get -u github.com/eshork/go-mongoid
+```
+
+Within any relevant project files, import the package as usual
+```go
+// Add this basic import to your project file
+import mongoid "github.com/eshork/go-mongoid"
+```
+
+# Development
+
+## Running Unit Tests
+`grift test`

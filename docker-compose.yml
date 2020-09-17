@@ -1,0 +1,15 @@
+version: '3'
+services:
+
+  # documentdb compatible mongo version for local dev/test
+  # documentdb:
+  #   image: mongo:3.6
+  #   command: --smallfiles
+  #   ports:
+  #     - "27017:27017"
+
+  mongo:
+    image: mongo:4.0
+    command: --smallfiles
+    ports:
+      - "27017:27017"
