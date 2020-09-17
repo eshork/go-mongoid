@@ -61,6 +61,8 @@ import mongoid "github.com/eshork/go-mongoid"
 
 Refer to the `examples` directory for use case examples to get you started.
 
+Run `grift docs` to start a godoc server to view embedded documentation.
+
 # Development
 
 ## Running Unit Tests

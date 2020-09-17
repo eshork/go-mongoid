@@ -191,7 +191,7 @@ func (c *Client) connectionTest(ctx context.Context) error {
 	return nil
 }
 
-// MongoDriver returns the underlying Mongo Driver Client (go.mongodb.org/mongo-driver/mongo) for the mongoid.Client it was called upon
+// MongoDriverClient returns the underlying Mongo Driver Client (go.mongodb.org/mongo-driver/mongo) for the mongoid.Client it was called upon
 func (c *Client) MongoDriverClient() *mongo.Client {
 	if c.mongoClient != nil {
 		return c.mongoClient

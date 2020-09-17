@@ -27,6 +27,23 @@ var _ = Namespace("env", func() {
 	})
 })
 
+var _ = Desc("docs", "run a local doc server")
+var _ = Add("docs", func(c *Context) error {
+	binary, lookErr := exec.LookPath("go")
+	if lookErr != nil {
+		panic(lookErr)
+	}
+	args := []string{"go", "run", "golang.org/x/tools/cmd/godoc", "-index", "-http", "localhost:6060", "-goroot", "./"}
+	env := os.Environ()
+	env = append(env, "GO111MODULE=on")
+	fmt.Printf("Starting godoc server at: http://localhost:6060/\n")
+	execErr := syscall.Exec(binary, args, env)
+	if execErr != nil {
+		panic(execErr)
+	}
+	return nil
+})
+
 var _ = Desc("test", "run basic tests (no benchmarks)")
 var _ = Add("test", func(c *Context) error {
 	binary, lookErr := exec.LookPath("go")
