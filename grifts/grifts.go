@@ -58,8 +58,8 @@ var _ = Namespace("test", func() {
 		return nil
 	})
 
-	Desc("all", "run all tests even if some fail")
-	Add("all", func(c *Context) error {
+	Desc("force", "run all tests even if some fail")
+	Add("force", func(c *Context) error {
 		binary, lookErr := exec.LookPath("go")
 		if lookErr != nil {
 			panic(lookErr)

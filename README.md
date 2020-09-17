@@ -64,3 +64,8 @@ Within any relevant project files, import the package as usual
 // Add this basic import to your project file
 import mongoid "github.com/eshork/go-mongoid"
 ```
+
+# Development
+
+## Running Unit Tests
+`grift test`

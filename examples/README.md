@@ -5,7 +5,7 @@ The examples are themed around a pet store application, and demonstrate some com
 
 The following list of examples begins with basic topics and progresses to more advanced features.
 
-- [Basic data model definition and registration](models.go)
+- [Basic data model definition and registration](model_example.go)
 - Basic CRUD
   - Creating new records in the database
   - Retrieving records by ID
