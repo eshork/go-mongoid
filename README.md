@@ -6,15 +6,9 @@
 ![alt text](etc/assets/go-mongoid-100.png "Mongoid for Go")
 
 
-This is a reimplementation of [https://github.com/mongodb/mongoid](Mongoid) for Go, using the (still in progress) official [mongo-go-driver](https://github.com/mongodb/mongo-go-driver) as the connection interface.
+This is a reimplementation of [https://github.com/mongodb/mongoid](Mongoid) for Go, using the official [mongo-go-driver](https://github.com/mongodb/mongo-go-driver) as the connection interface.
 
 Not everything perfectly translates from Ruby to Go, but the Document-related interfaces of the Mongoid API are replicated as closely as possible with adjustments as necessarily to facilitate language differences.
-
-> **Note:** Preserving syntactic sugar and developer experience/productivity is held as a primary concern. This can result in liberal usage of Go's _reflect_ package, but it is arguable that servers are fast/cheap and the costs of performing reflection is more than paid by the dividends gained by developer productivity. Also, let's not forget that Go is typically quite fast in comparison to almost every runtime interpretted scripting language, so I'd be quite interested to see some real-world benchmarks against the Ruby Mongoid implementation as a comparison to identify "slowness" within this library.
->
-> If your specific use-case is highly sensitive to latency, you might elect to start here but then later optimize the time sensitive bits of your application to a more direct driver interface (for which this library is intended to also happily provide direct access into).
->
-> This package has not yet been performance optimized, or even yet scrutinized with performance in mind. Some operations may take milliseconds to complete (yep, whole milliseconds. darn). Exhaustive performance optimizations are planned once the package reaches v1 status. Until then, feel free to [contribute](CONTRIBUTING.md).
 
 # Target features (for v1)
 
@@ -64,6 +58,8 @@ Within any relevant project files, import the package as usual
 // Add this basic import to your project file
 import mongoid "github.com/eshork/go-mongoid"
 ```
+
+Refer to the `examples` directory for use case examples to get you started.
 
 # Development
 
