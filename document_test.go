@@ -208,7 +208,7 @@ var _ = Describe("Document", func() {
 			Expect(invalidList).To(BeEmpty(), "found non-marshallable complex types within BSON key path(s) from: "+fmt.Sprintf("%+v", bsonM))
 		})
 
-		FIt("can be Save()'ed and Find()'ed", func() {
+		It("can be Save()'ed and Find()'ed", func() {
 			By("object creation")
 			newObj := mongoid.M("ExampleDocument").New().(*ExampleDocument)
 			Expect(newObj).ToNot(BeNil(), "expects a real object to be created")
