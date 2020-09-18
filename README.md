@@ -6,7 +6,7 @@
 ![alt text](etc/assets/go-mongoid-100.png "Mongoid for Go")
 
 
-This is a reimplementation of [https://github.com/mongodb/mongoid](Mongoid) for Go, using the official [mongo-go-driver](https://github.com/mongodb/mongo-go-driver) as the connection interface.
+This is a reimplementation of [Mongoid](https://github.com/mongodb/mongoid) for Go, using the official [mongo-go-driver](https://github.com/mongodb/mongo-go-driver) as the connection interface.
 
 Not everything perfectly translates from Ruby to Go, but the Document-related interfaces of the Mongoid API are replicated as closely as possible with adjustments as necessarily to facilitate language differences.
 
