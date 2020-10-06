@@ -9,8 +9,6 @@ import (
 	. "github.com/onsi/ginkgo"
 )
 
-var gLiveTestDatabase bool // when true, a live test database is configured and attached (allowing more tests to occurr)
-
 var _ = BeforeSuite(func() {
 	// set up the test database connection, if we should...
 
@@ -46,8 +44,6 @@ var _ = BeforeSuite(func() {
 		if mongoid.Configuration().DefaultClient.ConnectionTest() != nil {
 			log.Fatal("MONGOID_TEST_DB=1 but MongoDB failed connection test. Cannot continue.")
 		}
-
-		gLiveTestDatabase = true
 	}
 })
 

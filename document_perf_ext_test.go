@@ -33,6 +33,7 @@ func BenchLoop(b Benchmarker, interations int, fn func()) {
 
 var _ = Describe("DocumentBase", func() {
 	Context("performance", func() {
+		// `type ExampleDocument struct` is from document_test.go:~16
 		Measure("ExampleDocuments.New() creation", func(b Benchmarker) {
 			BenchLoop(b, 200, func() {
 				ExampleDocuments.New()

@@ -143,14 +143,17 @@ func (model *ModelType) GetDefaultBSON() BsonDocument {
 	return BsonDocumentDeepCopy(model.defaultValue)
 }
 
-func (model *ModelType) SetDefaultScope() {
-	// log.Panic("NYI")
-	log.Error("NYI - ModelType.SetDefaultScope")
-}
-func (model *ModelType) AddIndex() {
-	// log.Panic("NYI")
-	log.Error("NYI - ModelType.AddIndex")
-}
+// NYI - ref: https://github.com/eshork/go-mongoid/issues/17
+// func (model *ModelType) SetDefaultScope() {
+// 	// log.Panic("NYI")
+// 	log.Error("NYI - ModelType.SetDefaultScope")
+// }
+
+// NYI - ref: https://github.com/eshork/go-mongoid/issues/18
+// func (model *ModelType) AddIndex() {
+// 	// log.Panic("NYI")
+// 	log.Error("NYI - ModelType.AddIndex")
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

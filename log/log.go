@@ -13,14 +13,9 @@ var logrusEntry *logrus.Entry
 var stdLogLogger *stdLog.Logger
 
 func init() {
-	// stdLog.Print("mongoid.log init")
 	logrusLogger = logrus.New()
 	setDefaultLogLevel()
-	// logrusLogger.SetLevel(logrus.ErrorLevel) // TODO default should be INFO
-	// logrusLogger.SetLevel(logrus.DebugLevel) // TODO default should be INFO
-	// logrusLogger.SetLevel(logrus.TraceLevel) // TODO default should be INFO
 
-	// uncomment for stark color difference compared to rest of incidental outputs //TODO remove before mongoid breakout into own module
 	logrusLogger.SetFormatter(&logrus.TextFormatter{
 		ForceColors:   true,
 		FullTimestamp: false,
