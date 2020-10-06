@@ -197,7 +197,7 @@ var _ = Describe("Document", func() {
 			newValue := gofakeit.HipsterWord()
 			newObj.StringField = newValue
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
-			wasValue, _ := newObj.Was_("string_field")
+			wasValue, _ := newObj.Was("string_field")
 			Expect(wasValue).To(Equal(oldValue), "expect old value to be preserved")
 		})
 

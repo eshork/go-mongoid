@@ -43,8 +43,8 @@ func (d *Base) Changes() BsonDocument {
 	return diffBson
 }
 
-// Was_ provides the previous field value and indicates if a change has occurred
-func (d *Base) Was_(fieldPath string) (interface{}, bool) {
+// Was provides the previous field value and indicates if a change has occurred
+func (d *Base) Was(fieldPath string) (interface{}, bool) {
 	log.Panicf("NYI -Base.Was_(%s)", fieldPath)
 	return nil, false
 }
