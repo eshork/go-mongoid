@@ -9,12 +9,13 @@ import (
 
 var _ = Describe("Create Basic Example", func() {
 	Describe("createNewPet", func() {
-		It("creates a new pet record", func() {
+		PIt("creates a new pet record", func() {
 			OnlineDatabaseOnly(func() {
 				By("Running the example to create a new record")
 				newPetID := createNewPet()
 				Expect(newPetID.IsZero()).To(BeFalse())
 				By("Retrieving the new record")
+				Expect(true).To(BeFalse(), "TEST NOT FINISHED")
 				// findRes := Pets.Find(newPetID)
 				// Expect(len(findRes) > 0 ).To(BeFalse())
 			})
