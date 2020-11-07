@@ -191,7 +191,8 @@ var _ = Describe("Document", func() {
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
 		})
 
-		XIt("recalls a previous field value via Was_(fieldName)", func() {
+		PIt("recalls a previous field value via Was(fieldName)", func() {
+			// marked pending because .Was is currently NYI - ref gihub issue #5
 			newObj := ExampleDocuments.New().(*ExampleDocument)
 			oldValue := newObj.StringField
 			newValue := gofakeit.HipsterWord()
