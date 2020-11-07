@@ -63,7 +63,4 @@ Refer to the `examples` directory for use case examples to get you started.
 
 Run `grift docs` to start a godoc server to view embedded documentation.
 
-# Development
-
-## Running Unit Tests
-`grift test`
+Be sure to check [the wiki](https://github.com/eshork/go-mongoid/wiki) for additional information and examples.
