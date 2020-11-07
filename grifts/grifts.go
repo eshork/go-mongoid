@@ -27,6 +27,21 @@ var _ = Namespace("env", func() {
 	})
 })
 
+var _ = Desc("fmt", "runs gofmt in the standard project manner")
+var _ = Add("fmt", func(c *Context) error {
+	binary, lookErr := exec.LookPath("gofmt")
+	if lookErr != nil {
+		panic(lookErr)
+	}
+	args := []string{"gofmt", "-l", "-w", "."}
+	env := os.Environ()
+	execErr := syscall.Exec(binary, args, env)
+	if execErr != nil {
+		panic(execErr)
+	}
+	return nil
+})
+
 var _ = Desc("docs", "run a local doc server")
 var _ = Add("docs", func(c *Context) error {
 	binary, lookErr := exec.LookPath("go")

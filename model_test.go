@@ -11,18 +11,21 @@ type TestModel1 struct {
 	mongoid.Base
 	ID mongoid.ObjectID `bson:"_id"`
 }
+
 var TestModel1s = mongoid.Register(&TestModel1{})
 
 type TestModel2 struct {
 	mongoid.Base `mongoid:"collection:otherCollection"`
-	ID mongoid.ObjectID `bson:"_id"`
+	ID           mongoid.ObjectID `bson:"_id"`
 }
+
 var TestModel2s = mongoid.Register(&TestModel2{})
 
 type TestModel3 struct {
 	mongoid.Base `mongoid:"database:otherDatabase"`
-	ID mongoid.ObjectID `bson:"_id"`
+	ID           mongoid.ObjectID `bson:"_id"`
 }
+
 var TestModel3s = mongoid.Register(&TestModel3{})
 
 var _ = Describe("Model", func() {
@@ -44,7 +47,9 @@ var _ = Describe("Model", func() {
 			Expect(mongoid.M("TestModel1").GetCollectionName()).To(Equal("test_model_1"))
 		})
 		It("reports default Database name", func() {
-			Expect(mongoid.M("TestModel1").GetDatabaseName()).To(Equal(mongoid.DefaultClient().Database))
+			OnlineDatabaseOnly(func() {
+				Expect(mongoid.M("TestModel1").GetDatabaseName()).To(Equal(mongoid.DefaultClient().Database))
+			})
 		})
 	})
 	Context("TestModel2", func() {

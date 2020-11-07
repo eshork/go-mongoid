@@ -1,8 +1,8 @@
 package util
 
 import (
-	"reflect"
 	"fmt"
+	"reflect"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
@@ -48,12 +48,10 @@ func IsIfaceBsonMarshalSafe(obj interface{}) bool {
 // objPtrInterfaceFromObjInterface := func(){}
 // objInterfaceFromObjPtrInterface := func(){}
 
-
 // ValidateBson returns a list of bson keys holding invalid content
 func ValidateBson(bsonM bson.M) []string {
 	return findInvalidBsonM(bsonM, "")
 }
-
 
 // returns a list of bsonM keys holding invalid content (ie, complex types such as non-nil pointers, structs, non-bsonA slices or arrays, funcs, channels, interfaces, etc)
 func findInvalidBsonM(bsonM bson.M, prepend string) []string {
