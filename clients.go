@@ -36,7 +36,7 @@ type ClientOptions struct {
 	Connect            string        // Force the driver to connect in a specific way instead of auto-discovering. Can be one of: "direct", "replica_set", "sharded".
 	HeartbeatFrequency time.Duration // Change the default time the server monitors refresh their status via ismaster commands. (default: 10 seconds)
 	ConnectTimeout     time.Duration // The time to wait to establish a connection before timing out. (default: 10 seconds)
-	MaxPoolSize        uint16        // The maximum number of connections in the connection pool. (default: 5)
+	MaxPoolSize        uint64        // The maximum number of connections in the connection pool. (default: 5)
 
 	//NYI WaitQueueTimeout   int    // The time to wait, in seconds, in the connection pool for a connection to be checked in before timing out. (default: 1)
 	SocketTimeout          time.Duration // The timeout to wait to execute operations on a socket before raising an error. (default: 0 / infinite)
@@ -99,10 +99,10 @@ func (opts *ClientOptions) GetServerSelectionTimeout() time.Duration {
 	return opts.ServerSelectionTimeout
 }
 
-const constDefaultMaxPoolSize uint16 = 5
+const constDefaultMaxPoolSize uint64 = 5
 
 // GetMaxPoolSize gives the effective max pool size
-func (opts *ClientOptions) GetMaxPoolSize() uint16 {
+func (opts *ClientOptions) GetMaxPoolSize() uint64 {
 	if opts == nil || opts.MaxPoolSize == 0 {
 		return constDefaultMaxPoolSize
 	}
