@@ -16,6 +16,7 @@ type Q = Query
 type Criteria interface {
 	Find(ids ...ObjectID) Criteria
 	Where(where ...Query) Criteria
+	X() *Result // see: [criteria_x.go] func (criteria *criteriaStruct) X() *Result
 	getPrevCriteria() Criteria
 	toBsonD() bson.D
 }
