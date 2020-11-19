@@ -12,15 +12,10 @@ Not everything perfectly translates from Ruby to Go, but the Document-related in
 
 # Target features (for v1)
 
-- MongoDB connection configuration via JSON, YAML, or ENV vars
-
 - Uses Go structs as the primary document interface - ie, build your own custom document definitions using native syntax
   - Supports all native Go data-types as document field-types
   - Supports custom field data-types (nyi - some initial work already done, but api needs firming up)
   - Supports generic Go maps as dynamic field-types
-
-- Compatible with officially released mongo-go-driver versions
-  - not yet true as of pre-v1; currently uses a commit-ref-id off master as certain bleeding-edge functionality is required/better; this will be resolved before a 1.0 release
 
 - Change tracking - identify which fields have been altered since new object creation or since loading from the database, as well as the previous values
 
@@ -39,13 +34,14 @@ Not everything perfectly translates from Ruby to Go, but the Document-related in
 
 - Custom Validations for document lifecycle events (onCreate, onUpdate, onDelete)
 
-- Plugin architecture allows for adhoc add-on functionality (think: Mongoid::Paranoia, Mongoid::Versioning, etc)
+- Plugin architecture allows for adhoc add-on functionality (think Mongoid::Paranoia, Mongoid::Versioning, etc)
+
+- MongoDB connection configuration via JSON, YAML, or ENV vars
+
+- Use officially released mongo-go-driver versions
+
 
 # Installation & Usage
-
-TODO How does this work for Go modules?!?!
-
-TODO How does this work for _not_ Go modules?!?!
 
 Within your project directory, add/update the library to the latest stable release version
 
