@@ -14,7 +14,7 @@ type Q = Query
 
 // Criteria facilitate the query-building process
 type Criteria interface {
-	Find(ids ...ObjectID) Criteria
+	// Find(ids ...ObjectID) Criteria
 	Where(where ...Query) Criteria
 	X() *Result // see: [criteria_x.go] func (criteria *criteriaStruct) X() *Result
 	getPrevCriteria() Criteria

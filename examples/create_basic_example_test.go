@@ -1,10 +1,8 @@
 package examples
 
 import (
-	// "bce/incidental/dao/mongodb/mongoid"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	// "time"
 )
 
 var _ = Describe("Create Basic Example", func() {
@@ -15,14 +13,9 @@ var _ = Describe("Create Basic Example", func() {
 				newPetID := createNewPet()
 				Expect(newPetID.IsZero()).To(BeFalse())
 				By("Retrieving the new record")
-				Expect(true).To(BeFalse(), "TEST NOT FINISHED")
-				// findRes := Pets.Find(newPetID)
-				// Expect(len(findRes) > 0 ).To(BeFalse())
+				foundPetID := findPetByID(newPetID)
+				Expect(foundPetID).To(Equal(newPetID))
 			})
 		})
 	})
-
-	Describe("createNewPetByLateBinding", func() {
-	})
-
 })

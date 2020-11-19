@@ -11,3 +11,9 @@ func createNewPet() mongoid.ObjectID {
 	newPet.Save()           // Save() will store the document to the database
 	return newPet.ID        // If an ID was not explicitly provided, one will be automatically created
 }
+
+func findPetByID(id mongoid.ObjectID) mongoid.ObjectID {
+	res, _ := Pets.Find(id)        // use Model.Find() to retrieve one or more records by _id
+	foundPet := res.First().(*Pet) // a Result can contain several records, but we're only expecting one, so just grab the First() and cast it back into a *Pet
+	return foundPet.ID             // return back some (weak) proof that we found the record
+}
