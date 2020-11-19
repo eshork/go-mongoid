@@ -1,9 +1,5 @@
 package mongoid
 
-/*
-This file implements IDocumentBase methods relating to persistable entities. It is split out from the document.go file to make the code easier to consume.
-*/
-
 import (
 	"context"
 	"mongoid/log"
@@ -73,9 +69,8 @@ func (d *Base) saveByInsert() error {
 	log.Debug("saveByInsert()")
 	// insert a new object
 
-	// TODO: TEMP FIX ME
 	collection := d.getMongoDriverCollectionRef()
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, _ := context.WithTimeout(context.TODO(), 5*time.Second) // todo context with arbitrary 5sec timeout
 
 	insertBson := d.ToBson()
 	// log.Error("insertBson: ", insertBson)
@@ -85,9 +80,14 @@ func (d *Base) saveByInsert() error {
 	if found {
 		objectID, ok := idObjInterface.(ObjectID)
 		if ok && objectID == ZeroObjectID() {
+			// REF ISSUE #19 - is it better to make a new ObjectID here, or let the MongoDB driver do it for us?
+
+			// METHOD 1 - this way simply makes a new ObjectID here (ie within go-mongoid)
 			// insertBson["_id"] = NewObjectID()
-			// TODO: maybe let the server make the ID for us? (MongoDB will make one for us automatically when _id is missing, and perhaps in a more cluster-safe manner)
+
+			// METHOD 2 - this way deletes _id field so that the Mongo driver will be forced to figure it out for us
 			delete(insertBson, "_id")
+
 		}
 	}
 
