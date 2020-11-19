@@ -2,6 +2,7 @@ package mongoid
 
 import (
 	"fmt"
+	"go.mongodb.org/mongo-driver/mongo"
 	"mongoid/log"
 	"reflect"
 	"strings"
@@ -188,6 +189,18 @@ func modelTypeTagOptsFromString(tagString string) modelTypeTagOpts {
 		}
 	}
 	return ret
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// returns a handle to the mongo driver collection for this ModelType
+func (model *ModelType) getMongoCollectionHandle() *mongo.Collection {
+	client := model.GetClient()
+	dbName := model.GetDatabaseName()
+	collectionName := model.GetCollectionName()
+	collectionRef := client.getMongoCollectionHandle(dbName, collectionName)
+	return collectionRef
 }
 
 ////////////////////////////////////////////////////////////////////////////////

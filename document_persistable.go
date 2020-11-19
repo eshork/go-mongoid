@@ -69,7 +69,7 @@ func (d *Base) saveByInsert() error {
 	log.Debug("saveByInsert()")
 	// insert a new object
 
-	collection := d.getMongoDriverCollectionRef()
+	collection := d.getMongoCollectionHandle()
 	ctx, _ := context.WithTimeout(context.TODO(), 5*time.Second) // todo context with arbitrary 5sec timeout
 
 	insertBson := d.ToBson()
@@ -109,16 +109,7 @@ func (d *Base) saveByInsert() error {
 }
 
 // returns a handle to the mongo driver collection for this document instance
-func (d *Base) getMongoDriverCollectionRef() *mongo.Collection {
+func (d *Base) getMongoCollectionHandle() *mongo.Collection {
 	dModel := d.Model()
-	client := dModel.GetClient()
-	// log.Error(client)
-	dbName := dModel.GetDatabaseName()
-	collectionName := dModel.GetCollectionName()
-	// log.Error(dbName, ":", collectionName)
-
-	collectionRef := client.getMongoCollectionHandle(dbName, collectionName)
-	// log.Fatal(collectionRef)
-
-	return collectionRef
+	return dModel.getMongoCollectionHandle()
 }
