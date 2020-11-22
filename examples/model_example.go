@@ -39,15 +39,16 @@ type Pet struct {
 }
 
 // Pets model registration must occur before objects can be stored to or read from the database; all it takes is a pointer to a reference object of the desired type.
-// You can register models before or after database connections have been established (via Mongoid.Configure), but the recommendation is to register models prior.
-// This is a typical way to register a model type while storing a global convenience handle for future use.
-// It is the same as `mongoid.Model(&Pet{})`; but `Pets.Find()` reads better than either `mongoid.M(&Pet{}).Find()` or `mongoid.M("Pet").Find()`
-// Model names must be globally unique to reliably use the string-based lookup function `mongoid.M("MyModelName")`, but models are ultimately registered by actual type,
+// You can register models before or after database connections have been established (via `mongoid.Configure()`), but the recommendation is to register models prior.
+//
+// The following example is a typical way to register a model type while storing a global convenience handle for future use.
 // rather than name, so name overlap is technically permitted (convenience handles like this one make those situations easier to deal with)
 var Pets = mongoid.Register(&Pet{})
 
-// This is also an option which doesn't create a global variable - but you'll need to use the `mongoid.Model(ref_or_name)` method to recall it later
-// var _ = mongoid.Register(&Pet{})
+// If you'd rather not create a convenience handle at the module-global level, you can simply discard the return value like so.
+//     var _ = mongoid.Register(&Pet{})
+// Without a convenience handle, you'll need to use the `mongoid.Model(ref_or_name)` method to retrieve a handle when you need one.
+// Note: Model names must be globally unique to reliably use the string-based lookup function `mongoid.M("MyModelName")`, but models are ultimately registered by actual type,
 
 func init() {
 	// You can register models within an init function as well, if that's preferable to you.
@@ -56,7 +57,8 @@ func init() {
 	// Once a model is registered, you can declare one or more indexes for it, which will be automatically created if missing once database connections are established (via background index creation so as not to block)
 	// Pets.Index( /* indexDefinition */ ) // TODO
 
-	// You can also reconfigure various options after a model has been registered (though after mongoid is Configured these will often raise warning messages)
+	// You can reconfigure various options after a model has been registered (once mongoid.Configured() is true, these may generate warning log messages)
+	// For instace you can change the name of the collection that will be used
 	Pets = Pets.SetCollectionName("our_pets")
 
 	// You can even redefine the model name as used by `mongoid.M("MyModelName")` and  `mongoid.Model("MyModelName")`
