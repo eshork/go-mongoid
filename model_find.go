@@ -20,19 +20,20 @@ func (model *ModelType) Find(ids ...ObjectID) (*Result, error) {
 	defer cancel()
 	cur, err := collection.Find(ctx, bson.D{})
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	defer cur.Close(ctx)
 	for cur.Next(ctx) {
 		var result bson.M
 		err := cur.Decode(&result)
 		if err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
+		log.Panic(result)
 		// do something with result....
 	}
 	if err := cur.Err(); err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	return nil, nil
 }

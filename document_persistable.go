@@ -16,6 +16,11 @@ func (d *Base) IsPersisted() bool {
 	return d.persisted
 }
 
+// sets the peristed state
+func (d *Base) setPersisted(val bool) {
+	d.persisted = val
+}
+
 // IsChanged returns true if the document instance has changed from the last retrieved value from the datastore, false otherwise.
 // Newly created but documents begin in a Changed()=false state, as the document begins with all default values.
 func (d *Base) IsChanged() bool {
@@ -70,7 +75,8 @@ func (d *Base) saveByInsert() error {
 	// insert a new object
 
 	collection := d.getMongoCollectionHandle()
-	ctx, _ := context.WithTimeout(context.TODO(), 5*time.Second) // todo context with arbitrary 5sec timeout
+	ctx, ctxCancel := context.WithTimeout(context.TODO(), 5*time.Second) // todo context with arbitrary 5sec timeout
+	defer ctxCancel()
 
 	insertBson := d.ToBson()
 	// log.Error("insertBson: ", insertBson)
