@@ -109,7 +109,7 @@ func (d *Base) saveByInsert() error {
 		log.Panic(err)
 	}
 
-	d.persisted = true           // this is now persisted
+	d.setPersisted(true)         // this is now persisted
 	d.refreshPreviousValueBSON() // update change tracking with current values
 	return nil
 }
