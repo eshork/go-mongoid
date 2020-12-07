@@ -34,6 +34,7 @@ var _ = BeforeSuite(func() {
 	testDbName := fetchEnv("MONGOID_TEST_DBNAME", "_mongoid_test_db_") // made up database name
 
 	if testDb == "1" {
+		fmt.Println("")
 		fmt.Println("MONGOID TESTS REQUIRING MONGOID_TEST_DB ACTIVATED")
 		MONGOID_TEST_DB = true
 		gTestMongoidConfig := mongoid.Config{

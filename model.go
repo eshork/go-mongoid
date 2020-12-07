@@ -2,10 +2,11 @@ package mongoid
 
 import (
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
 	"mongoid/log"
 	"reflect"
 	"strings"
+
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // ModelType represents a mongoid model/document type and provides methods to interact with the collection
@@ -127,10 +128,13 @@ func (model *ModelType) GetClient() *Client {
 // Note: Due to the strongly typed nature of Go, you'll need to perform a type assertion (as the value is returned as an interface{})
 func (model *ModelType) New() IDocumentBase {
 	log.Debug("ModelType.New()")
-	typeRef := reflect.Indirect(reflect.ValueOf(model.rootTypeRef))                 // model.rootTypeRef is always a ptr to an example object, so we need to use Indirect()
-	ret := reflect.New(typeRef.Type())                                              // finally have a solid object type, so make one
-	retAsIDocumentBase := ret.Interface().(IDocumentBase)                           // convert into a IDocumentBase interface
-	retAsIDocumentBase.initDocumentBase(retAsIDocumentBase, model.GetDefaultBSON()) // call the self init
+
+	retAsIDocumentBase := makeDocument(model, model.GetDefaultBSON())
+
+	// typeRef := reflect.Indirect(reflect.ValueOf(model.rootTypeRef))                 // model.rootTypeRef is always a ptr to an example object, so we need to use Indirect()
+	// ret := reflect.New(typeRef.Type())                                              // finally have a solid object type, so make one
+	// retAsIDocumentBase := ret.Interface().(IDocumentBase)                           // convert into a IDocumentBase interface
+	// retAsIDocumentBase.initDocumentBase(retAsIDocumentBase, model.GetDefaultBSON()) // call the self init
 
 	// apply the default values and reset "changed" state
 
