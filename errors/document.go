@@ -13,6 +13,7 @@ package errors
 
 // FieldNotFound -
 type FieldNotFound struct {
+	MongoidError
 	FieldName string
 }
 
