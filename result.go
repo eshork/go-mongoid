@@ -206,8 +206,17 @@ func (res *Result) readNextToLookback() bool {
 	return more
 }
 
-// read the next result from the query cursor and write it to the referenced bson.M
+// readNext reads the next result from the query cursor, and writes it into the bson.M at the given pointer.
+// This will advance res.cursorIndex, but does not save the result within lookback cache.
+// This method will panic if the Result is not Streaming().
 func (res *Result) readNext(v *bson.M) bool {
+	log.Trace("Result.readNext()")
+	if !res.streaming {
+		log.Panic(&mongoidError.InvalidOperation{
+			MethodName: "Result.readNext",
+			Reason:     "Expected Result.IsStreaming()",
+		})
+	}
 	more := res.cursor.Next(res.context)
 	// check for driver errors
 	if err := res.cursor.Err(); err != nil {
