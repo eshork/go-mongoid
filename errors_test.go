@@ -2,7 +2,6 @@ package mongoid_test
 
 import (
 	"mongoid"
-	// "github.com/brianvoe/gofakeit"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -14,7 +13,7 @@ type ErrorTestModel1 struct {
 }
 
 var ErrorTestModel1s = mongoid.Register(&ErrorTestModel1{})
-var _ = Describe("Result", func() {
+var _ = XDescribe("Result", func() {
 	Context(".Streaming()", func() {
 		Context(".At()", func() {
 			It("should panic InvalidOperation", func() {

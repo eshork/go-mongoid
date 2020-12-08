@@ -99,15 +99,42 @@ func Fatalln(v ...interface{}) {
 
 // Panic methods //////////////////////////////////////////////////////////////
 
+// recovers from the panic raised by logrus Panic functions (only)
+func recoverLogrusPanic() {
+	if err := recover(); err != nil {
+		// log.Warn("Recovered")
+		// log.Warn(reflect.TypeOf(err))
+		switch v := err.(type) {
+		case (*logrus.Entry):
+		case (logrus.Entry):
+		case (*logrus.Logger):
+		case (logrus.Logger):
+		default:
+			panic(v)
+		}
+	}
+
+}
+
 // Panic ...
 func Panic(v ...interface{}) {
 	if logger := fieldLogger(); logger != nil {
-		logger.Panic(v...)
+		func() {
+			defer recoverLogrusPanic()
+			logger.Panic(v...)
+		}()
 	} else if logger := stdLogger(); logger != nil {
-		logger.Panic(v...)
+		func() {
+			defer recoverLogrusPanic()
+			logger.Panic(v...)
+		}()
 	} else {
 		stdLog.Panic(v...)
 	}
+	if len(v) == 1 {
+		panic(v[0])
+	}
+	panic(v)
 }
 
 // Panicf ...
