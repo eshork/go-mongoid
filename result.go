@@ -20,13 +20,14 @@ type Result struct {
 
 	// First() IDocumentBase
 	// Last() IDocumentBase
-	// Count() int
+	// Count() uint
 	// At(index int) IDocumentBase
-	//
-	// ToA() error
-	// ForEach(f func () error) error
+
+	// ToAry() error
+	// ForEach(f func (v IDocumentBase) error) error
+
 	lookback    []bson.M // cache of records, to support random access via At(), First(), Last(), etc
-	cursorIndex uint     // the current index of the driver cursor
+	cursorIndex uint     // the current index of the driver cursor, what the next read will yield
 	streaming   bool     // track streaming access
 	closed      bool     // track closed state
 }
@@ -203,4 +204,68 @@ func (res *Result) readNextToLookback() bool {
 		res.Close()
 	}
 	return more
+}
+
+// read the next result from the query cursor and write it to the referenced bson.M
+func (res *Result) readNext(v *bson.M) bool {
+	more := res.cursor.Next(res.context)
+	// check for driver errors
+	if err := res.cursor.Err(); err != nil {
+		log.Panic(err)
+	}
+	if more { // process a new record if we found one
+		err := res.cursor.Decode(v)
+		if err != nil {
+			log.Panic(err)
+		}
+		res.cursorIndex++
+	}
+	return more
+}
+
+// ForEach will call the given function once for each result, in the order they were returned by the server.
+// The given function "fn" should accept an IDocumentBase as the only parameter.
+// The given function "fn" may return an error value to halt further iterations - that value will be passed upward and returned by ForEach.
+//
+// Example:
+//   ret := myResult.ForEach(func(v IDocumentBase) error {
+//   	// do something with v
+//   	// change it and save it, just read it, or delete it
+//   	return nil // or return some error value
+//   })
+//
+func (res *Result) ForEach(fn func(IDocumentBase) error) error {
+	// the heavy lifting is cleverly hidden within ForEachBson
+	return res.ForEachBson(func(v bson.M) error {
+		asIDocumentBase := makeDocument(res.model, v)
+		return fn(asIDocumentBase)
+	})
+}
+
+// ForEachBson is similar to ForEach, but provides the raw bson.M instead of an IDocumentBase
+func (res *Result) ForEachBson(fn func(bson.M) error) error {
+	if !res.streaming { // non-streaming implementation (records are stored to lookback cache as they are read)
+		for i := uint(0); res.readNextToLookback(); i++ {
+			// loop until there's nothing left to read into lookback
+			result := res.lookback[i] // fetch current value from lookback
+			r := fn(result)           // run the given fn
+			if r != nil {
+				return r // if fn had a non-nil return, then we should stop and bubble that value upward
+			}
+		}
+		return nil
+	}
+	// streaming implementation (records are not stored to lookback cache)
+	more := true
+	for more {
+		var result bson.M
+		more = res.readNext(&result)
+		if more {
+			r := fn(result) // run the given fn
+			if r != nil {
+				return r // if fn had a non-nil return, then we should stop and bubble that value upward
+			}
+		}
+	}
+	return nil
 }
