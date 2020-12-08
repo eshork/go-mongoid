@@ -234,7 +234,7 @@ func (res *Result) readNext(v *bson.M) bool {
 
 // ForEach will call the given function once for each result, in the order they were returned by the server.
 // The given function "fn" should accept an IDocumentBase as the only parameter.
-// The given function "fn" may return an error value to halt further iterations - that value will be passed upward and returned by ForEach.
+// The given function "fn" may return an non-nil error value to halt further iterations - that value will be passed upward and returned by ForEach.
 //
 // Example:
 //   ret := myResult.ForEach(func(v IDocumentBase) error {
@@ -244,7 +244,7 @@ func (res *Result) readNext(v *bson.M) bool {
 //   })
 //
 func (res *Result) ForEach(fn func(IDocumentBase) error) error {
-	// the heavy lifting is cleverly hidden within ForEachBson
+	// the heavy lifting is within ForEachBson
 	return res.ForEachBson(func(v bson.M) error {
 		asIDocumentBase := makeDocument(res.model, v)
 		return fn(asIDocumentBase)
@@ -258,8 +258,9 @@ func (res *Result) ForEachBson(fn func(bson.M) error) error {
 			// loop until there's nothing left to read into lookback
 			result := res.lookback[i] // fetch current value from lookback
 			r := fn(result)           // run the given fn
+			// if fn had a non-nil return, then we should stop and bubble that value upward
 			if r != nil {
-				return r // if fn had a non-nil return, then we should stop and bubble that value upward
+				return r
 			}
 		}
 		return nil
@@ -271,10 +272,26 @@ func (res *Result) ForEachBson(fn func(bson.M) error) error {
 		more = res.readNext(&result)
 		if more {
 			r := fn(result) // run the given fn
+			// if fn had a non-nil return, then we should stop and bubble that value upward
 			if r != nil {
-				return r // if fn had a non-nil return, then we should stop and bubble that value upward
+				return r
 			}
 		}
 	}
+	return nil
+}
+
+// ToAry returns the results as a slice of []IDocumentBase
+func (res *Result) ToAry() []IDocumentBase {
+	resultAry := make([]IDocumentBase, 0)
+	res.ForEach(func(v IDocumentBase) error {
+		resultAry = append(resultAry, v)
+		return nil
+	})
+	return resultAry
+}
+
+// ToAryBson returns the results as a slice of []bson.M
+func (res *Result) ToAryBson() []bson.M {
 	return nil
 }
