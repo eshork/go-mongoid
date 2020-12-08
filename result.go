@@ -122,7 +122,7 @@ func (res *Result) at(index uint) IDocumentBase {
 	for res.cursorIndex <= index {
 		more := res.readNextToLookback()
 		if !more {
-			log.Panic("ruh roh - no more data...")
+			log.Panic(&mongoidError.IndexOutOfBounds{})
 		}
 	}
 	result := res.lookback[index]
@@ -172,16 +172,13 @@ func (res *Result) OneAndClose() IDocumentBase {
 		if err != nil {
 			log.Panic(err)
 		}
-
 		retAsIDocumentBase := makeDocument(res.model, result)
 		return retAsIDocumentBase
-
 	}
 	if err := res.cursor.Err(); err != nil {
 		log.Panic(err)
 	}
-
-	log.Panic("NYI - Result.OneAndClose()") // <- this should be a panic for ItemNotFound or EmptyResultSet or similar
+	log.Panic(&mongoidError.NotFound{})
 	return nil
 }
 
