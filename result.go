@@ -135,9 +135,10 @@ func (res *Result) at(index uint) IDocumentBase {
 // The current implementation will read all remaining result items into memory, making this a poor choice for queries with large result sets.
 // TODO - Make a ModelType.Count(filter_query) to perform server-side document count queries
 func (res *Result) Count() uint {
+	log.Debug("Result.Count()")
 	if res.streaming {
 		log.Panic(&mongoidError.InvalidOperation{
-			MethodName: "Result.Count()",
+			MethodName: "Result.Count",
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
 	}
@@ -157,7 +158,7 @@ func (res *Result) OneAndClose() IDocumentBase {
 	log.Debug("Result.OneAndClose()")
 	if res.streaming {
 		log.Panic(&mongoidError.InvalidOperation{
-			MethodName: "Result.At()",
+			MethodName: "Result.OneAndClose",
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
 	}
@@ -184,6 +185,7 @@ func (res *Result) OneAndClose() IDocumentBase {
 
 // read the next result from the query cursor, and append it to the lookback cache
 func (res *Result) readNextToLookback() bool {
+	log.Trace("Result.readNextToLookback()")
 	more := res.cursor.Next(res.context)
 	// check for driver errors
 	if err := res.cursor.Err(); err != nil {
