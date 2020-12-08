@@ -20,6 +20,7 @@ var _ = Describe("Create Basic Example", func() {
 				By("Running the example again to create another new record")
 				newPetID2 := createNewPet()
 				By("Retrieving the new record along with the previous record")
+				// findTwoPetsByID(newPetID2, newPetID) // test
 				foundPetID1, foundPetID2 := findTwoPetsByID(newPetID2, newPetID)
 				Expect([]mongoid.ObjectID{foundPetID1, foundPetID2}).To(ContainElement(newPetID))
 				Expect([]mongoid.ObjectID{foundPetID1, foundPetID2}).To(ContainElement(newPetID2))

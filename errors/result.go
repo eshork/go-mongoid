@@ -22,10 +22,3 @@ package errors
 // 	}
 // 	return "FieldNotFound"
 // }
-
-// InvalidMethodCall can be raised when a method is called in an unexpected manner (out of operations order, etc)
-type InvalidMethodCall struct {
-	MongoidError
-	MethodName string
-	Reason     string
-}

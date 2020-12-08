@@ -42,7 +42,6 @@ func (model *ModelType) Find(ids ...ObjectID) (*Result, error) {
 		// this is a panic at the moment, because no one has yet looked to see what these errors might be, so we can't assume any of them are recoverable
 		log.Panic(err) // unknown bad stuff happened within the driver
 	}
-
 	return makeResult(ctx, cur, model), nil
 
 	// // old stuff below
