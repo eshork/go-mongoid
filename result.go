@@ -12,7 +12,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-// Result provides convenient access to the data produced by database operations
+// Result provides access to the response data produced by database query operations.
+// Result initially expects to be accessed randomly, and supports multiple access.
+// To support unpredictable access patterns, many access operations read the entire result set from the Mongo driver into memory before returning.
+// To avoid aggressive caching behavior, call the Streaming() method to declare one-time sequential only access.
 type Result struct {
 	cursor  *mongo.Cursor   // the mongo driver cursor for the query
 	context context.Context // context to pass to any future driver calls
@@ -49,18 +52,11 @@ func makeResult(ctx context.Context, cursor *mongo.Cursor, model *ModelType) *Re
 	}
 }
 
-// Close the Result, indicating you are done accessing the object and are ready to free the related resources.
-func (res *Result) Close() {
-	if !res.closed {
-		res.cursor.Close(res.context)
-		res.closed = true
-	}
-}
-
 // Streaming disables the lookback cache of the Result, which can be useful whenever memory usage is a concern (such as working with very large result sets).
 // Without a lookback cache, the Result is only readable once via either Result.ForEach() or Result.ToAry().
 // Attempting to read from a Streaming Result more than once will Panic - (TODO maybe we should change this into a re-execution of the query).
 // The call to enable Streaming() should be the first operation performed on the Result, otherwise the behavior is undefined.
+// Streaming returns a pointer back to the originating Result struct, so that it may be included within a naturally reading method call chain.
 // Calling certain methods on a Result after Streaming is declared can result in a panic -- affected methods indicate such within their documentation.
 func (res *Result) Streaming() *Result {
 	if !res.streaming && res.cursorIndex > 0 {
@@ -78,7 +74,7 @@ func (res *Result) IsStreaming() bool {
 	return res.streaming
 }
 
-// First returns an interface to the first document in the Result set.
+// First returns an interface to the first document in the Result set, or nil if the Result contains no records.
 // This method will panic if Streaming() was enabled.
 func (res *Result) First() IDocumentBase {
 	log.Debug("Result.First()")
@@ -88,6 +84,7 @@ func (res *Result) First() IDocumentBase {
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
 	}
+	res.Count() // cheap way to load all results and close the db cursor
 	return res.at(0)
 }
 
@@ -114,6 +111,7 @@ func (res *Result) At(index uint) IDocumentBase {
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
 	}
+	res.Count() // cheap way to load all results and close the db cursor
 	return res.at(index)
 }
 
@@ -152,14 +150,14 @@ func (res *Result) Count() uint {
 	return uint(len(res.lookback))
 }
 
-// OneAndClose is a convenience function to retrieve a single document and then Close the Result, as a combined step.
-// This is most useful for queries that only yield a single record.
-// Ex. `myDocObj := MyDocuments.Find("myDocumentID").OneAndClose().(*MyDocument)`
-func (res *Result) OneAndClose() IDocumentBase {
-	log.Debug("Result.OneAndClose()")
+// One returns a single document from the Result, also ensuring that only exactly one record was available to be read.
+// One will panic if the Result contains more than one record or zero records.
+// This method will panic if Streaming() was enabled.
+func (res *Result) One() IDocumentBase {
+	log.Debug("Result.One()")
 	if res.streaming {
 		log.Panic(&mongoidError.InvalidOperation{
-			MethodName: "Result.OneAndClose",
+			MethodName: "Result.One",
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
 	}
@@ -197,13 +195,14 @@ func (res *Result) readNextToLookback() bool {
 		}
 		res.lookback = append(res.lookback, result)
 		res.cursorIndex++
-	} else { // self close when we know there is no more data
-		res.Close()
+	} else { // close db cursor when we know there is no more data
+		res.cursor.Close(res.context)
 	}
 	return more
 }
 
-// readNext reads the next result from the query cursor, and writes it into the bson.M at the given pointer.
+// readNext reads the next result from the query cursor, if one is present it will write the value into the bson.M at the given pointer and return true.
+// If there are no more records available, it will return false.
 // This will advance res.cursorIndex, but does not save the result within lookback cache.
 // This method will panic if the Result is not Streaming().
 func (res *Result) readNext(v *bson.M) bool {
@@ -225,6 +224,8 @@ func (res *Result) readNext(v *bson.M) bool {
 			log.Panic(err)
 		}
 		res.cursorIndex++
+	} else { // close db cursor when we know there is no more data
+		res.cursor.Close(res.context)
 	}
 	return more
 }

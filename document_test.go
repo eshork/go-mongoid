@@ -243,7 +243,7 @@ var _ = Describe("Document", func() {
 
 				By("Find()'ing")
 				res := mongoid.M("ExampleDocument").Find(objectID)
-				foundObj := res.OneAndClose().(*ExampleDocument)
+				foundObj := res.One().(*ExampleDocument)
 				Expect(foundObj.ID).To(Equal(newObj.ID), "expects foundObj.ID == newObj.ID")
 			})
 		})
