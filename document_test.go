@@ -242,8 +242,7 @@ var _ = Describe("Document", func() {
 				Expect(newObj.GetID().(mongoid.ObjectID)).To(Equal(newObj.ID), "expects newObj.GetID().(ObjectID) == newObj.ID")
 
 				By("Find()'ing")
-				res, err := mongoid.M("ExampleDocument").Find(objectID)
-				Expect(err).ToNot(HaveOccurred())
+				res := mongoid.M("ExampleDocument").Find(objectID)
 				foundObj := res.OneAndClose().(*ExampleDocument)
 				Expect(foundObj.ID).To(Equal(newObj.ID), "expects foundObj.ID == newObj.ID")
 			})

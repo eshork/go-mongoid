@@ -18,10 +18,7 @@ var _ = Describe("Result", func() {
 	Context(".Streaming()", func() {
 		Context(".At()", func() {
 			It("should panic InvalidOperation", func() {
-				res, err := ErrorTestModels.Find()
-				if err != nil {
-					panic(err)
-				}
+				res := ErrorTestModels.Find()
 				defer res.Close()
 				res.Streaming()
 				Expect(func() {

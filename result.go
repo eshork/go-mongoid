@@ -23,7 +23,7 @@ type Result struct {
 	// Count() uint
 	// At(index int) IDocumentBase
 
-	// ToAry() error
+	// ToAry() []IDocumentBase
 	// ForEach(f func (v IDocumentBase) error) error
 
 	lookback    []bson.M // cache of records, to support random access via At(), First(), Last(), etc
@@ -40,7 +40,7 @@ func makeResult(ctx context.Context, cursor *mongo.Cursor, model *ModelType) *Re
 
 	return &Result{
 		cursor:      cursor,
-		context:     ctx,
+		context:     ctx, // yes, this is an anti-pattern
 		model:       model,
 		lookback:    make([]bson.M, 0),
 		cursorIndex: 0,
@@ -154,7 +154,7 @@ func (res *Result) Count() uint {
 
 // OneAndClose is a convenience function to retrieve a single document and then Close the Result, as a combined step.
 // This is most useful for queries that only yield a single record.
-// Ex. `myDocObj := MyDocuments.Find_("myDocumentID").OneAndClose().(*MyDocument)`
+// Ex. `myDocObj := MyDocuments.Find("myDocumentID").OneAndClose().(*MyDocument)`
 func (res *Result) OneAndClose() IDocumentBase {
 	log.Debug("Result.OneAndClose()")
 	if res.streaming {
@@ -163,9 +163,6 @@ func (res *Result) OneAndClose() IDocumentBase {
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
 	}
-
-	// For the moment, we can use this as the defacto method for fetching data within tests.
-	// We'll want to reimplement this later, but for the moment it serves as a great place to encapsulate a bunch of single-item fetch logic.
 
 	defer res.cursor.Close(res.context)
 	for res.cursor.Next(res.context) {
