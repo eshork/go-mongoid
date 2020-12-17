@@ -293,5 +293,10 @@ func (res *Result) ToAry() []IDocumentBase {
 
 // ToAryBson returns the results as a slice of []bson.M
 func (res *Result) ToAryBson() []bson.M {
-	return nil
+	resultAry := make([]bson.M, 0)
+	res.ForEachBson(func(v bson.M) error {
+		resultAry = append(resultAry, v)
+		return nil
+	})
+	return resultAry
 }
