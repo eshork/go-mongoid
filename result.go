@@ -125,6 +125,13 @@ func (res *Result) At(index uint) IDocumentBase {
 
 // retrieves the record at the given index, reading additional records from the db driver as needed
 func (res *Result) at(index uint) IDocumentBase {
+	result := res.atBson(index)
+	retAsIDocumentBase := makeDocument(res.model, result)
+	return retAsIDocumentBase
+}
+
+// retrieves the record bson at the given index, reading additional records from the db driver as needed
+func (res *Result) atBson(index uint) bson.M {
 	// read responses until we have the record we need in lookback cache
 	for res.cursorIndex <= index {
 		more := res.readNextToLookback()
@@ -133,8 +140,7 @@ func (res *Result) at(index uint) IDocumentBase {
 		}
 	}
 	result := res.lookback[index]
-	retAsIDocumentBase := makeDocument(res.model, result)
-	return retAsIDocumentBase
+	return result
 }
 
 // Count returns the number of documents in the Result.
@@ -261,10 +267,10 @@ func (res *Result) ForEach(fn func(IDocumentBase) error) error {
 // ForEachBson is similar to ForEach, but provides the raw bson.M instead of an IDocumentBase
 func (res *Result) ForEachBson(fn func(bson.M) error) error {
 	if !res.streaming { // non-streaming implementation (records are stored to lookback cache as they are read)
-		for i := uint(0); res.readNextToLookback(); i++ {
-			// loop until there's nothing left to read into lookback
-			result := res.lookback[i] // fetch current value from lookback
-			r := fn(result)           // run the given fn
+		count := res.Count()
+		for i := uint(0); i < count; i++ {
+			result := res.atBson(i)
+			r := fn(result) // run the given fn
 			// if fn had a non-nil return, then we should stop and bubble that value upward
 			if r != nil {
 				return r
