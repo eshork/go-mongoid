@@ -162,21 +162,16 @@ func (res *Result) One() IDocumentBase {
 		})
 	}
 
-	defer res.cursor.Close(res.context)
-	for res.cursor.Next(res.context) {
-		var result bson.M
-		err := res.cursor.Decode(&result)
-		if err != nil {
-			log.Panic(err)
+	// Count() will read all records into memory and cause the the cursor to be closed
+	if count := res.Count(); count <= 0 || count > 1 {
+		// panic here, because we have the wrong number of results
+		if count == 0 {
+			log.Panic(&mongoidError.NotFound{})
+		} else {
+			log.Panic(&mongoidError.MongoidError{}) // this could be a better type, maybe we need a new one
 		}
-		retAsIDocumentBase := makeDocument(res.model, result)
-		return retAsIDocumentBase
 	}
-	if err := res.cursor.Err(); err != nil {
-		log.Panic(err)
-	}
-	log.Panic(&mongoidError.NotFound{})
-	return nil
+	return res.at(0)
 }
 
 // read the next result from the query cursor, and append it to the lookback cache
