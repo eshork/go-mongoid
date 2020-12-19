@@ -182,7 +182,7 @@ func (res *Result) One() IDocumentBase {
 		if count == 0 {
 			log.Panic(&mongoidError.ResultNotFound{})
 		} else {
-			log.Panic(&mongoidError.MongoidError{}) // this could be a better type, maybe we need a new one
+			log.Panic(&mongoidError.ResultNotExpected{}) // this could be a better type, maybe we need a new one
 		}
 	}
 	return res.at(0)
