@@ -15,7 +15,7 @@ import (
 // Result provides access to the response data produced by database query operations.
 // Result initially expects to be accessed randomly, and supports multiple access.
 // To support unpredictable access patterns, many access operations read the entire result set from the Mongo driver into memory before returning.
-// To avoid aggressive caching behavior, call the Streaming() method to declare one-time sequential only access.
+// To avoid aggressive caching behavior, call the Streaming() method to declare the Result is for one-time sequential only access.
 type Result struct {
 	cursor  *mongo.Cursor   // the mongo driver cursor for the query
 	context context.Context // context to pass to any future driver calls
@@ -52,10 +52,18 @@ func makeResult(ctx context.Context, cursor *mongo.Cursor, model *ModelType) *Re
 	}
 }
 
+func (res *Result) close() {
+	if !res.closed {
+		res.closed = true
+		res.cursor.Close(res.context)
+		res.cursor = nil
+	}
+}
+
 // Streaming disables the lookback cache of the Result, which can be useful whenever memory usage is a concern (such as working with very large result sets).
 // Without a lookback cache, the Result is only readable once via either Result.ForEach() or Result.ToAry().
 // Attempting to read from a Streaming Result more than once will Panic - (TODO maybe we should change this into a re-execution of the query).
-// The call to enable Streaming() should be the first operation performed on the Result, otherwise the behavior is undefined.
+// The call to invoke Streaming should be the first operation performed on the Result, otherwise the behavior is undefined.
 // Streaming returns a pointer back to the originating Result struct, so that it may be included within a naturally reading method call chain.
 // Calling certain methods on a Result after Streaming is declared can result in a panic -- affected methods indicate such within their documentation.
 func (res *Result) Streaming() *Result {
@@ -98,7 +106,7 @@ func (res *Result) Last() IDocumentBase {
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
 	}
-	return res.at(res.Count() - 1) // this is the simplest implementation - res.Count will cause the full result to be read from the driver
+	return res.at(res.Count() - 1) // res.Count will cause the full result set to be read from the driver
 }
 
 // At returns an interface to the Document in the result set at the given index (range is 0 to count-1)
@@ -177,6 +185,9 @@ func (res *Result) One() IDocumentBase {
 // read the next result from the query cursor, and append it to the lookback cache
 func (res *Result) readNextToLookback() bool {
 	log.Trace("Result.readNextToLookback()")
+	if res.closed {
+		return false // closed cursor means there is definitely no more to read
+	}
 	more := res.cursor.Next(res.context)
 	// check for driver errors
 	if err := res.cursor.Err(); err != nil {
@@ -191,7 +202,7 @@ func (res *Result) readNextToLookback() bool {
 		res.lookback = append(res.lookback, result)
 		res.cursorIndex++
 	} else { // close db cursor when we know there is no more data
-		res.cursor.Close(res.context)
+		res.close()
 	}
 	return more
 }
@@ -208,6 +219,9 @@ func (res *Result) readNext(v *bson.M) bool {
 			Reason:     "Expected Result.IsStreaming()",
 		})
 	}
+	if res.closed {
+		return false // closed cursor means there is definitely no more to read
+	}
 	more := res.cursor.Next(res.context)
 	// check for driver errors
 	if err := res.cursor.Err(); err != nil {
@@ -220,7 +234,7 @@ func (res *Result) readNext(v *bson.M) bool {
 		}
 		res.cursorIndex++
 	} else { // close db cursor when we know there is no more data
-		res.cursor.Close(res.context)
+		res.close()
 	}
 	return more
 }
