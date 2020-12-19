@@ -1,14 +1,11 @@
 package mongoid
 
 import (
-
-	// "strings"
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	// "go.mongodb.org/mongo-driver/mongo"
 	"mongoid/log"
 )
 
@@ -35,8 +32,7 @@ func (model *ModelType) Find(ids ...ObjectID) *Result {
 	collection := model.getMongoCollectionHandle()
 	// ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second) // todo context with arbitrary 5sec timeout
 	// defer cancel()
-	ctx := context.TODO() // todo context with unlimited timeout
-
+	ctx := context.TODO() // TODO context with unlimited timeout
 	cur, err := collection.Find(ctx, q)
 	if err != nil {
 		// this is a panic at the moment, because no one has yet looked to see what these errors might be, so we can't assume any of them are recoverable
