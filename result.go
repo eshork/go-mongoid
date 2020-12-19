@@ -247,14 +247,19 @@ func (res *Result) readNext(v *bson.M) bool {
 
 // ForEach will call the given function once for each result, in the order they were returned by the server.
 // The given function "fn" should accept an IDocumentBase as the only parameter.
-// The given function "fn" may return an non-nil error value to halt further iterations - that value will be passed upward and returned by ForEach.
+// The given function "fn" may return a non-nil error value to halt further iterations - the return value is passed upward and returned by ForEach.
 //
 // Example:
-//   ret := myResult.ForEach(func(v IDocumentBase) error {
-//   	// do something with v
-//   	// change it and save it, just read it, or delete it
-//   	return nil // or return some error value
-//   })
+//    ret := myResult.ForEach(func(v IDocumentBase) error {
+//    	// do something with v
+//    	v.Attribute = "New Value" // change it...
+//    	v.Save() = "New Value" // save it...
+//    	v.Delete() // or delete it...
+//
+//    	// the return value signals whather processing should halt or continue
+//    	return nil // returning nil indicates we wish to continue - this function will be called again with the next record if there is one
+//    	// return error.New("done") // or we could return some non-nil error value to signal that we would like to halt, skipping any remaining records
+//    })
 //
 func (res *Result) ForEach(fn func(IDocumentBase) error) error {
 	// the heavy lifting is within ForEachBson
@@ -264,10 +269,10 @@ func (res *Result) ForEach(fn func(IDocumentBase) error) error {
 	})
 }
 
-// ForEachBson is similar to ForEach, but provides the raw bson.M instead of an IDocumentBase
+// ForEachBson is similar to ForEach, but provides the raw bson.M instead of an IDocumentBase object
 func (res *Result) ForEachBson(fn func(bson.M) error) error {
 	if !res.streaming { // non-streaming implementation (records are stored to lookback cache as they are read)
-		count := res.Count()
+		count := res.Count() // this will read all records and close the mongo driver cursor for us
 		for i := uint(0); i < count; i++ {
 			result := res.atBson(i)
 			r := fn(result) // run the given fn
