@@ -180,7 +180,7 @@ func (res *Result) One() IDocumentBase {
 	if count := res.Count(); count <= 0 || count > 1 {
 		// panic here, because we have the wrong number of results
 		if count == 0 {
-			log.Panic(&mongoidError.NotFound{})
+			log.Panic(&mongoidError.ResultNotFound{})
 		} else {
 			log.Panic(&mongoidError.MongoidError{}) // this could be a better type, maybe we need a new one
 		}
