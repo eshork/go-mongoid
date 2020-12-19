@@ -4,35 +4,36 @@ import (
 	"context"
 	mongoidError "mongoid/errors"
 	"mongoid/log"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	// "strconv"
 	"runtime"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Result provides access to the response data produced by database query operations.
 // Result initially expects to be accessed randomly, and supports multiple access.
 // To support unpredictable access patterns, many access operations read the entire result set from the Mongo driver into memory before returning.
-// To avoid aggressive caching behavior, call the Streaming() method to declare the Result is for one-time sequential only access.
+// To avoid aggressive caching behavior, call the Streaming() method to declare intent for one-time sequential-only access prior to making other calls.
 type Result struct {
-	cursor  *mongo.Cursor   // the mongo driver cursor for the query
-	context context.Context // context to pass to any future driver calls
-	model   *ModelType      // the ModelType associated with the query
-
+	// Streaming() *Result
+	// IsStreaming() bool
+	// Count() uint
+	// At(index uint) IDocumentBase
+	// One() IDocumentBase
 	// First() IDocumentBase
 	// Last() IDocumentBase
-	// Count() uint
-	// At(index int) IDocumentBase
-
+	// ForEach(fn func(IDocumentBase) error) error
+	// ForEachBson(fn func(bson.M) error) error
 	// ToAry() []IDocumentBase
-	// ForEach(f func (v IDocumentBase) error) error
+	// ToBsonAry() []bson.M
 
-	lookback    []bson.M // cache of records, to support random access via At(), First(), Last(), etc
-	cursorIndex uint     // the current index of the driver cursor, what the next read will yield
-	streaming   bool     // track streaming access
-	closed      bool     // track closed state
+	context     context.Context // context to pass to any future driver calls
+	model       *ModelType      // the ModelType associated with the query
+	streaming   bool            // track streaming access
+	lookback    []bson.M        // cache of records to support random access via At(), First(), Last(), etc
+	cursor      *mongo.Cursor   // the mongo driver cursor for the query
+	cursorIndex uint            // the current index of the driver cursor, what the next read will yield
+	closed      bool            // track cursor closed state
 }
 
 func makeResult(ctx context.Context, cursor *mongo.Cursor, model *ModelType) *Result {
