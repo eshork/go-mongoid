@@ -16,6 +16,11 @@ func (d *Base) IsPersisted() bool {
 	return d.persisted
 }
 
+// sets the peristed state
+func (d *Base) setPersisted(val bool) {
+	d.persisted = val
+}
+
 // IsChanged returns true if the document instance has changed from the last retrieved value from the datastore, false otherwise.
 // Newly created but documents begin in a Changed()=false state, as the document begins with all default values.
 func (d *Base) IsChanged() bool {
@@ -69,8 +74,9 @@ func (d *Base) saveByInsert() error {
 	log.Debug("saveByInsert()")
 	// insert a new object
 
-	collection := d.getMongoDriverCollectionRef()
-	ctx, _ := context.WithTimeout(context.TODO(), 5*time.Second) // todo context with arbitrary 5sec timeout
+	collection := d.getMongoCollectionHandle()
+	ctx, ctxCancel := context.WithTimeout(context.TODO(), 5*time.Second) // todo context with arbitrary 5sec timeout
+	defer ctxCancel()
 
 	insertBson := d.ToBson()
 	// log.Error("insertBson: ", insertBson)
@@ -103,22 +109,13 @@ func (d *Base) saveByInsert() error {
 		log.Panic(err)
 	}
 
-	d.persisted = true           // this is now persisted
+	d.setPersisted(true)         // this is now persisted
 	d.refreshPreviousValueBSON() // update change tracking with current values
 	return nil
 }
 
 // returns a handle to the mongo driver collection for this document instance
-func (d *Base) getMongoDriverCollectionRef() *mongo.Collection {
+func (d *Base) getMongoCollectionHandle() *mongo.Collection {
 	dModel := d.Model()
-	client := dModel.GetClient()
-	// log.Error(client)
-	dbName := dModel.GetDatabaseName()
-	collectionName := dModel.GetCollectionName()
-	// log.Error(dbName, ":", collectionName)
-
-	collectionRef := client.getMongoCollectionHandle(dbName, collectionName)
-	// log.Fatal(collectionRef)
-
-	return collectionRef
+	return dModel.getMongoCollectionHandle()
 }

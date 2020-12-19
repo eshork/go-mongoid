@@ -36,11 +36,12 @@ var _ = BeforeSuite(func() {
 		return defaultVal
 	}
 
-	testDb := fetchEnv("MONGOID_TEST_DB", "1")                         // overall live db test toggle, default is "on"
-	testDbHost := fetchEnv("MONGOID_TEST_DBHOST", "localhost:27017")   // assume localhost for tests
+	testDb := fetchEnv("MONGOID_TEST_DB", "1")                                 // overall live db test toggle, default is "on"
+	testDbHost := fetchEnv("MONGOID_TEST_DBHOST", "localhost:27017")           // assume localhost for tests
 	testDbName := fetchEnv("MONGOID_TEST_DBNAME", "_mongoid_test_example_db_") // made up database name
 
 	if testDb == "1" {
+		fmt.Println("")
 		fmt.Println("MONGOID TESTS REQUIRING MONGOID_TEST_DB ACTIVATED")
 		MONGOID_TEST_DB = true
 		gTestMongoidConfig := mongoid.Config{

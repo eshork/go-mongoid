@@ -1,5 +1,9 @@
 package mongoid
 
+import (
+	"mongoid/log"
+)
+
 // Model returns a ModelType interface, used as the root interface the query and creation methods that may be performed related to a registered Document/Model
 // The single input argument is either the string name that the model was registered under, or a pointer to an object of the desired type.
 // If the input does not resolve to a registered type, an error will be logged and Nil will be returned.
@@ -8,13 +12,12 @@ func Model(modelRef interface{}) *ModelType {
 	switch modelRef.(type) {
 	case string:
 		return getRegisteredModelTypeByName(modelRef.(string))
+	case IDocumentBase:
+		return getRegisteredModelTypeByDocRef(modelRef.(IDocumentBase))
 	default:
-		docBaseObj, ok := modelRef.(IDocumentBase)
-		if ok == true {
-			return getRegisteredModelTypeByDocRef(docBaseObj)
-		}
+		log.Error("given modelRef could not type assert to string or IDocumentBase")
+		return nil
 	}
-	return nil
 }
 
 // M is a shorthand function for Model()

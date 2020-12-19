@@ -236,16 +236,15 @@ var _ = Describe("Document", func() {
 
 				By("GetID()")
 				objectIDInt := newObj.GetID()
-				// print(objectIDInt)
 				Expect(objectIDInt).ToNot(BeNil(), "expects an ID value")
 				objectID, ok := objectIDInt.(mongoid.ObjectID)
 				Expect(ok).To(BeTrue(), "expects ID to type-assert into ObjectID")
 				Expect(newObj.GetID().(mongoid.ObjectID)).To(Equal(newObj.ID), "expects newObj.GetID().(ObjectID) == newObj.ID")
 
 				By("Find()'ing")
-				mongoid.M("ExampleDocument").Find(objectID)
-
-				Expect(true).To(BeFalse(), "TEST NOT FINISHED")
+				res := mongoid.M("ExampleDocument").Find(objectID)
+				foundObj := res.One().(*ExampleDocument)
+				Expect(foundObj.ID).To(Equal(newObj.ID), "expects foundObj.ID == newObj.ID")
 			})
 		})
 

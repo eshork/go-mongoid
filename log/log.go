@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	stdLog "log"
 	"os"
 	"strings"
@@ -22,6 +23,20 @@ func init() {
 	})
 
 	logrusEntry = logrusLogger.WithField("module", "mongoid")
+}
+
+var muted bool
+
+// Mute can be set to true to prevent all mongoid log output
+func Mute(mute bool) {
+	muted = mute
+}
+
+// WithMute will call the given func fn, wrapped by calls to Mute(true) and Mute(false)
+func WithMute(fn func()) {
+	Mute(true)
+	defer Mute(false)
+	fn()
 }
 
 //
@@ -63,9 +78,13 @@ func stdLogger() logrus.StdLogger {
 }
 
 // Fatal methods //////////////////////////////////////////////////////////////
+// Fatal methods still exit the application while muted, they just won't output to the log
 
 // Fatal ...
 func Fatal(v ...interface{}) {
+	if muted {
+		os.Exit(1) // if muted we just exit
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Fatal(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -77,6 +96,9 @@ func Fatal(v ...interface{}) {
 
 // Fatalf ...
 func Fatalf(format string, v ...interface{}) {
+	if muted {
+		os.Exit(1) // if muted we just exit
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Fatalf(format, v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -88,6 +110,9 @@ func Fatalf(format string, v ...interface{}) {
 
 // Fatalln ...
 func Fatalln(v ...interface{}) {
+	if muted {
+		os.Exit(1) // if muted we just exit
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Fatalln(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -98,20 +123,53 @@ func Fatalln(v ...interface{}) {
 }
 
 // Panic methods //////////////////////////////////////////////////////////////
+// Panic methods still raise the panic while muted, they just won't output to the log
+
+// recovers from the panic raised by logrus Panic functions (only)
+func recoverLogrusPanic() {
+	if err := recover(); err != nil {
+		// log.Warn("Recovered")
+		// log.Warn(reflect.TypeOf(err))
+		switch v := err.(type) {
+		case (*logrus.Entry):
+		case (logrus.Entry):
+		case (*logrus.Logger):
+		case (logrus.Logger):
+		default:
+			panic(v)
+		}
+	}
+
+}
 
 // Panic ...
 func Panic(v ...interface{}) {
-	if logger := fieldLogger(); logger != nil {
-		logger.Panic(v...)
-	} else if logger := stdLogger(); logger != nil {
-		logger.Panic(v...)
-	} else {
-		stdLog.Panic(v...)
+	if !muted {
+		if logger := fieldLogger(); logger != nil {
+			func() {
+				defer recoverLogrusPanic()
+				logger.Panic(v...)
+			}()
+		} else if logger := stdLogger(); logger != nil {
+			func() {
+				defer recoverLogrusPanic()
+				logger.Panic(v...)
+			}()
+		} else {
+			stdLog.Panic(v...)
+		}
 	}
+	if len(v) == 1 {
+		panic(v[0])
+	}
+	panic(v)
 }
 
 // Panicf ...
 func Panicf(format string, v ...interface{}) {
+	if muted {
+		panic(fmt.Sprintf(format, v...))
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Panicf(format, v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -123,6 +181,9 @@ func Panicf(format string, v ...interface{}) {
 
 // Panicln ...
 func Panicln(v ...interface{}) {
+	if muted {
+		panic(fmt.Sprintln(v...))
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Panicln(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -136,6 +197,9 @@ func Panicln(v ...interface{}) {
 
 // Print ...
 func Print(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Print(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -147,6 +211,9 @@ func Print(v ...interface{}) {
 
 // Printf ...
 func Printf(format string, v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Printf(format, v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -158,6 +225,9 @@ func Printf(format string, v ...interface{}) {
 
 // Println ...
 func Println(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Println(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -173,6 +243,9 @@ func Println(v ...interface{}) {
 
 // Error ...
 func Error(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Error(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -184,6 +257,9 @@ func Error(v ...interface{}) {
 
 // Errorf ...
 func Errorf(format string, v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Errorf(format, v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -195,6 +271,9 @@ func Errorf(format string, v ...interface{}) {
 
 // Errorln ...
 func Errorln(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Errorln(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -208,6 +287,9 @@ func Errorln(v ...interface{}) {
 
 // Warn ...
 func Warn(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Warn(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -219,6 +301,9 @@ func Warn(v ...interface{}) {
 
 // Warnf ...
 func Warnf(format string, v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Warnf(format, v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -230,6 +315,9 @@ func Warnf(format string, v ...interface{}) {
 
 // Warnln ...
 func Warnln(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Warnln(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -243,6 +331,9 @@ func Warnln(v ...interface{}) {
 
 // Info ...
 func Info(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Info(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -254,6 +345,9 @@ func Info(v ...interface{}) {
 
 // Infof ...
 func Infof(format string, v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Infof(format, v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -265,6 +359,9 @@ func Infof(format string, v ...interface{}) {
 
 // Infoln ...
 func Infoln(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Infoln(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -278,6 +375,9 @@ func Infoln(v ...interface{}) {
 
 // Debug ...
 func Debug(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Debug(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -289,6 +389,9 @@ func Debug(v ...interface{}) {
 
 // Debugf ...
 func Debugf(format string, v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Debugf(format, v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -300,6 +403,9 @@ func Debugf(format string, v ...interface{}) {
 
 // Debugln ...
 func Debugln(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Debugln(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -313,6 +419,9 @@ func Debugln(v ...interface{}) {
 
 // Trace ...
 func Trace(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Trace(v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -324,6 +433,9 @@ func Trace(v ...interface{}) {
 
 // Tracef ...
 func Tracef(format string, v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Tracef(format, v...)
 	} else if logger := stdLogger(); logger != nil {
@@ -335,6 +447,9 @@ func Tracef(format string, v ...interface{}) {
 
 // Traceln ...
 func Traceln(v ...interface{}) {
+	if muted {
+		return
+	}
 	if logger := fieldLogger(); logger != nil {
 		logger.Traceln(v...)
 	} else if logger := stdLogger(); logger != nil {
