@@ -11,9 +11,8 @@ import (
 )
 
 // Result provides access to the response data produced by database query operations.
-// Result initially expects to be accessed randomly, and supports multiple access.
-// To support unpredictable access patterns, many access operations read the entire result set from the Mongo driver into memory before returning.
-// To avoid aggressive caching behavior, call the Streaming() method to declare intent for one-time sequential-only access prior to making other calls.
+// To support random multiple-access patterns, many data access methods will read the entire result set from the Mongo driver into memory before returning.
+// To avoid aggressive caching behavior, call the Streaming() method -- see Result.Streaming() for further detail.
 type Result struct {
 	// Streaming() *Result
 	// IsStreaming() bool
@@ -145,9 +144,9 @@ func (res *Result) atBson(index uint) bson.M {
 }
 
 // Count returns the number of documents in the Result.
+//
 // This method will panic if Streaming() was enabled.
 // The current implementation will read all remaining result items into memory, making this a poor choice for queries with large result sets.
-// TODO - Make a ModelType.Count(filter_query) to perform server-side document count queries
 func (res *Result) Count() uint {
 	log.Debug("Result.Count()")
 	if res.streaming {
