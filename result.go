@@ -304,8 +304,8 @@ func (res *Result) ToAry() []IDocumentBase {
 	return resultAry
 }
 
-// ToAryBson returns the results as a slice of []bson.M
-func (res *Result) ToAryBson() []bson.M {
+// ToBsonAry returns the results as a slice of []bson.M
+func (res *Result) ToBsonAry() []bson.M {
 	resultAry := make([]bson.M, 0)
 	res.ForEachBson(func(v bson.M) error {
 		resultAry = append(resultAry, v)
