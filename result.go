@@ -284,6 +284,7 @@ func (res *Result) ForEachBson(fn func(bson.M) error) error {
 		return nil
 	}
 	// streaming implementation (records are not stored to lookback cache)
+	defer res.close() // remember to close the cursor, even if we abort early
 	more := true
 	for more {
 		var result bson.M
