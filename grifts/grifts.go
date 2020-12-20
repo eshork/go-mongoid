@@ -81,7 +81,7 @@ var _ = Namespace("test", func() {
 		if lookErr != nil {
 			panic(lookErr)
 		}
-		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "watch", "-v", "-r", "-skipMeasurements"}
+		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "watch", "-r", "-skipMeasurements", "-succinct"}
 		env := os.Environ()
 		execErr := syscall.Exec(binary, args, env)
 		if execErr != nil {
