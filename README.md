@@ -7,7 +7,9 @@
 
 This is a (sort of) reimplementation of [Mongoid](https://github.com/mongodb/mongoid) for Go, using [mongo-go-driver](https://github.com/mongodb/mongo-go-driver) as the connection interface. The primary focus is on ease of use, convenience.
 
-Many things (most things?) don't directly translate from Ruby to Go, but the spirit of Document-related interfaces from the Mongoid API are replicated as closely as possible, with adjustments as needed to facilitate language differences.
+> Mongoid is an ODM (Object-Document Mapper) framework for MongoDB in ~Ruby~ Go
+
+Many things (most things?) don't directly translate from Ruby to Go, but the major Document-related interfaces from the Mongoid API are replicated as closely as possible, with adjustments as needed to facilitate language differences.
 
 # Target features (for v1)
 
