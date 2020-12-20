@@ -6,6 +6,8 @@ import (
 	"mongoid/log"
 	"time"
 
+	mongoidError "mongoid/errors"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
@@ -184,7 +186,10 @@ func (c *Client) connectionTest(ctx context.Context) error {
 	if err != nil {
 		if err == context.DeadlineExceeded {
 			log.Error("ConnectionTest() FAILED")
-			return new(ErrorConnectionTimedOut)
+			return &mongoidError.OperationTimedOut{
+				MethodName: "connectionTest",
+				Reason:     "Deadline Exceeded",
+			}
 		}
 		return err
 	}

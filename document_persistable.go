@@ -105,7 +105,6 @@ func (d *Base) saveByInsert() error {
 	id := res.InsertedID
 	// log.Error("id: ", id)
 	if err := d.SetField("_id", id); err != nil {
-		log.Error(err)
 		log.Panic(err)
 	}
 

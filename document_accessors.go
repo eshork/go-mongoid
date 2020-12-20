@@ -22,7 +22,7 @@ func (d *Base) SetField(fieldNamePath string, newValue interface{}) error {
 		retVal.Set(newValue)
 		return nil
 	}
-	return &mongoidError.FieldNotFound{FieldName: fieldNamePath}
+	return &mongoidError.DocumentFieldNotFound{FieldName: fieldNamePath}
 }
 
 // GetField returns an interface to a value from the document via the bson field name path
@@ -33,7 +33,7 @@ func (d *Base) GetField(fieldNamePath string) (interface{}, error) {
 	if found { // if we find the field, return an interface to the value
 		return retVal.Interface(), nil
 	}
-	return nil, &mongoidError.FieldNotFound{FieldName: fieldNamePath}
+	return nil, &mongoidError.DocumentFieldNotFound{FieldName: fieldNamePath}
 }
 
 func getStructFieldValueRefByBsonName(rawStructPtr interface{}, fieldName string) (found bool, retVal reflect.Value, retField reflect.StructField) {

@@ -1,36 +1,57 @@
 package mongoid
 
 import (
+	mongoidError "mongoid/errors"
 	"mongoid/log"
 )
 
 // Configure sets up the given Config to be used by future requests to the module.
 // Calling Configure more than once is specifically prohibited to call attention to multiple-initialization scenarios,
 // but if that is your intent, you can safely call ReConfigure() for any configureation call (whether first or subsequent)
-func Configure(config *Config) (err error) {
+func Configure(config *Config) {
 	log.Debugf("Configure(%+v)\n", config)
 	if config == nil {
-		log.Warn(new(ErrorConfigRefIsNil).Error())
-		return new(ErrorConfigRefIsNil)
+		log.Panic(&mongoidError.InvalidOperation{
+			MethodName: "Configure",
+			Reason:     "Given config was nil",
+		})
 	}
 	mongoidConfigMutex.Lock()
 	defer mongoidConfigMutex.Unlock()
 	if mongoidConfig != nil { // fail badly if there is already an existing Config
-		return new(ErrorAlreadyInitialized)
+		log.Panic(&mongoidError.InvalidOperation{
+			MethodName: "Configure",
+			Reason:     "Already configured",
+		})
 	}
-	return configure(config) // do config work
+	if err := configure(config); err != nil {
+		log.Panic(&mongoidError.InvalidOperation{
+			MethodName: "Configure",
+			Reason:     err.Error(),
+		})
+	}
 }
 
 // ReConfigure clears the existing Config and reperforms the Configure process with the newly provided Config.
 // This is safe to perform as the first-time configure action, if that is desired.
-func ReConfigure(config *Config) (err error) {
+func ReConfigure(config *Config) {
 	if config == nil {
-		return new(ErrorConfigRefIsNil)
+		log.Panic(&mongoidError.InvalidOperation{
+			MethodName: "Configure",
+			Reason:     "Given config was nil",
+		})
 	}
+
 	mongoidConfigMutex.Lock()
 	defer mongoidConfigMutex.Unlock()
-	mongoidConfig = nil      // blow away any existing Config
-	return configure(config) // do config work
+	mongoidConfig = nil // blow away any existing Config
+
+	if err := configure(config); err != nil {
+		log.Panic(&mongoidError.InvalidOperation{
+			MethodName: "Configure",
+			Reason:     err.Error(),
+		})
+	}
 }
 
 // The actual configure function -- assumes that it is performing a clean Config build, meaning that all parts of the config are the new expected value.
