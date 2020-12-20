@@ -24,31 +24,3 @@ func Model(modelRef interface{}) *ModelType {
 func M(modelRef interface{}) *ModelType {
 	return Model(modelRef)
 }
-
-// mongoid.M(&MyThing{}).New()
-// mongoid.M(&MyThing{}).Create(options)
-// mongoid.M(&MyThing{}).Find(options)
-
-// mongoid.New("ModelName", contentBSON{}).(ModelObject)
-// mongoid.New(ModelObject{}).(ModelObject)
-
-// mongoid.Create("ModelName", contentBSON{}).(ModelObject)
-// mongoid.Create(ModelObject{}).(ModelObject)
-// mongoid.CreateV("ModelName", contentBSON{}).(ModelObject)
-// mongoid.CreateV(ModelObject{}).(ModelObject)
-
-// model-identifier + source-selector + query-builder + finality
-
-//Source-Selector
-// WithDatabase()
-// WithCollection()
-// WithClient()
-
-//Finality
-// First
-// Last
-// Pluck
-// All
-// Each? Iter? Next?
-
-// mongoid.M("Thing").Where(bson.Reasons{}).First
