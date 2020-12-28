@@ -12,21 +12,25 @@ import (
 	bsonPrimitive "go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// ObjectID ...
-// TODO: consider moving this to `type ObjectID = bsonPrimitive.ObjectID` instead
+// ObjectID is the BSON ObjectID type, as implemented by mongo-go-driver.
+// More details about ObjectID can be found within the MongoDB documentation:
+// https://docs.mongodb.com/manual/reference/method/ObjectId/
 type ObjectID = bsonPrimitive.ObjectID
 
-// ZeroObjectID is a zero-value ObjectID
+// ZeroObjectID returns a zero-value ObjectID, which can be used as a sentinel value.
+// Within the context of go-mongoid, a zero-value ObjectID is used as the initial value of the document `_id` field,
+// and it will be replaced by a newly generated unique ObjectID value during the first Save() operation.
 func ZeroObjectID() ObjectID {
 	return ObjectID{}
 }
 
-// NewObjectID generates a new ObjectID
+// NewObjectID generates a new (populated) ObjectID that is ready to be used as a unique identifier for documents.
+// This will never produce a zero-value ObjectID.
 func NewObjectID() ObjectID {
-	return ObjectID(bsonPrimitive.NewObjectID())
+	return bsonPrimitive.NewObjectID()
 }
 
-//NewObjectIDFromTimestamp generates a new ObjectID based on the given time
+// NewObjectIDFromTimestamp generates a new ObjectID based on the given time
 func NewObjectIDFromTimestamp(timestamp time.Time) ObjectID {
 	// 	return ObjectID(bsonPrimitive.NewObjectIDFromTimestamp(timestamp))
 	return bsonPrimitive.NewObjectIDFromTimestamp(timestamp)
@@ -39,39 +43,3 @@ func NewObjectIDFromHex(s string) (ObjectID, error) {
 	// 	return ObjectID(id), err
 	return bsonPrimitive.ObjectIDFromHex(s)
 }
-
-// IsZero returns true if id is the empty ObjectID.
-// func (id ObjectID) IsZero() bool {
-// 	return id.primitive().IsZero()
-// }
-
-// Timestamp extracts the time part of the ObjectId.
-// func (id ObjectID) Timestamp() time.Time {
-// 	return id.primitive().Timestamp()
-// }
-
-// Hex returns the hex encoding of the ObjectID as a string
-// func (id ObjectID) Hex() string {
-// 	return id.primitive().Hex()
-// }
-
-// func (id ObjectID) String() string {
-// 	return id.primitive().String()
-// }
-
-// MarshalJSON returns the ObjectID as a string
-// func (id ObjectID) MarshalJSON() ([]byte, error) {
-// 	return id.primitive().MarshalJSON()
-// }
-
-// func (id ObjectID) primitive() bsonPrimitive.ObjectID {
-// 	return bsonPrimitive.ObjectID(id)
-// }
-
-// UnmarshalJSON populates the byte slice with the ObjectID. If the byte slice is 64 bytes long, it
-// will be populated with the hex representation of the ObjectID. If the byte slice is twelve bytes
-// long, it will be populated with the BSON representation of the ObjectID. Otherwise, it will
-// return an error.
-// func (id *ObjectID) UnmarshalJSON(b []byte) error {
-// 	return (*bsonPrimitive.ObjectID)(id).UnmarshalJSON(b)
-// }
