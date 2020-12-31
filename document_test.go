@@ -66,29 +66,29 @@ type ExampleDocument struct {
 	// mongoid.Timestamps `bson:",inline"`
 	ID mongoid.ObjectID `bson:"_id"`
 
-	StringField    string
-	IntField       int
-	BoolField      bool
-	StringPtrField *string
-	IntPtrField    *int
-	BoolPtrField   *bool
+	StringField string
+	IntField    int
+	BoolField   bool
+	// StringPtrField *string
+	// IntPtrField    *int
+	// BoolPtrField   *bool
 
-	IntSliceField        []int
-	IntPtrSliceField     []*int
-	IntPtrSliceFieldNils []*int
+	// IntSliceField        []int
+	// IntPtrSliceField     []*int
+	// IntPtrSliceFieldNils []*int
 
-	// all 3 embed variations
-	SimpleEmbed       ExampleSimpleEmbeddableDocument
-	SimpleEmbedPtr    *ExampleSimpleEmbeddableDocument
-	SimpleEmbedPtrSet *ExampleSimpleEmbeddableDocument
+	// // all 3 embed variations
+	// SimpleEmbed       ExampleSimpleEmbeddableDocument
+	// SimpleEmbedPtr    *ExampleSimpleEmbeddableDocument
+	// SimpleEmbedPtrSet *ExampleSimpleEmbeddableDocument
 
-	// all 3 inline variations
-	SimpleInline       ExampleSimpeInlinableDocument1  `bson:",inline"`
-	SimpleInlinePtrSet *ExampleSimpeInlinableDocument2 `bson:",inline"`
-	SimpleInlinePtr    *ExampleSimpeInlinableDocument3 `bson:",inline"`
+	// // all 3 inline variations
+	// SimpleInline       ExampleSimpeInlinableDocument1  `bson:",inline"`
+	// SimpleInlinePtrSet *ExampleSimpeInlinableDocument2 `bson:",inline"`
+	// SimpleInlinePtr    *ExampleSimpeInlinableDocument3 `bson:",inline"`
 
-	SimpleEmbedSliceField    []ExampleSimpleEmbeddableDocument
-	SimpleEmbedPtrSliceField []*ExampleSimpleEmbeddableDocument
+	// SimpleEmbedSliceField    []ExampleSimpleEmbeddableDocument
+	// SimpleEmbedPtrSliceField []*ExampleSimpleEmbeddableDocument
 	// SimpleEmbedSlicePtr      *[]ExampleSimpleEmbeddableDocument
 
 	// StringPtrField1 *string // this little pointer gets one
@@ -96,7 +96,7 @@ type ExampleDocument struct {
 	// IntPtrField1    *int    // this little pointer gets one
 	// IntPtrField2    *int    // this little pointer gets none
 	// OmittedBoolField   bool `bson:"-"`
-	privateStringField string
+	// privateStringField string
 	// IntArrayField      []int // TODO: array known does not work yet
 
 	// DefaultEmbeddedStructPtr *ExampleEmbedableStruct1
@@ -127,16 +127,17 @@ var TmpSimpleEmbedSliceValue = []ExampleSimpleEmbeddableDocument{TmpSimpleEmbedV
 
 // register the model with some default values
 var ExampleDocuments = mongoid.Register(&ExampleDocument{
-	StringField:          "tacocat is tacocat backwards",
-	IntField:             42,
-	IntSliceField:        []int{1, 2, 4, 8, 16},
-	IntPtrSliceField:     []*int{&TmpIntFieldValue1, &TmpIntFieldValue2},
-	IntPtrSliceFieldNils: []*int{nil, nil, nil},
-	SimpleEmbedPtrSet:    &TmpSimpleEmbedValue,
-	SimpleInlinePtrSet:   &TmpSimpleInlineValue,
+	StringField: "tacocat is tacocat backwards",
+	IntField:    42,
+	BoolField:   true,
+	// IntSliceField:        []int{1, 2, 4, 8, 16},
+	// IntPtrSliceField:     []*int{&TmpIntFieldValue1, &TmpIntFieldValue2},
+	// IntPtrSliceFieldNils: []*int{nil, nil, nil},
+	// SimpleEmbedPtrSet:    &TmpSimpleEmbedValue,
+	// SimpleInlinePtrSet:   &TmpSimpleInlineValue,
 
-	SimpleEmbedSliceField:    []ExampleSimpleEmbeddableDocument{TmpSimpleEmbedValue, TmpSimpleEmbedValue},
-	SimpleEmbedPtrSliceField: []*ExampleSimpleEmbeddableDocument{&TmpSimpleEmbedValue, &TmpSimpleEmbedValue},
+	// SimpleEmbedSliceField:    []ExampleSimpleEmbeddableDocument{TmpSimpleEmbedValue, TmpSimpleEmbedValue},
+	// SimpleEmbedPtrSliceField: []*ExampleSimpleEmbeddableDocument{&TmpSimpleEmbedValue, &TmpSimpleEmbedValue},
 	// SimpleEmbedSlicePtr:      &TmpSimpleEmbedSliceValue,
 
 })
@@ -172,24 +173,24 @@ var _ = Describe("Document", func() {
 			Expect(newObj.IsChanged()).To(BeFalse(), "expects to not yet be changed")
 		})
 
-		It("identifies a simple change via IsChanged()", func() {
-			newObj := ExampleDocuments.New().(*ExampleDocument)
-			newObj.IntSliceField = []int{}
-			newObj.StringField = gofakeit.HipsterWord()
-			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
-		})
+		// It("identifies a simple change via IsChanged()", func() {
+		// 	newObj := ExampleDocuments.New().(*ExampleDocument)
+		// 	// newObj.IntSliceField = []int{}
+		// 	newObj.StringField = gofakeit.HipsterWord()
+		// 	Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
+		// })
 
-		It("identifies a simple slice field change via IsChanged()", func() {
-			newObj := ExampleDocuments.New().(*ExampleDocument)
-			newObj.IntSliceField = []int{gofakeit.Number(1, 99)}
-			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
-		})
+		// It("identifies a simple slice field change via IsChanged()", func() {
+		// 	newObj := ExampleDocuments.New().(*ExampleDocument)
+		// 	newObj.IntSliceField = []int{gofakeit.Number(1, 99)}
+		// 	Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
+		// })
 
-		It("identifies a slice field clearing via IsChanged()", func() {
-			newObj := ExampleDocuments.New().(*ExampleDocument)
-			newObj.IntSliceField = []int{}
-			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
-		})
+		// It("identifies a slice field clearing via IsChanged()", func() {
+		// 	newObj := ExampleDocuments.New().(*ExampleDocument)
+		// 	newObj.IntSliceField = []int{}
+		// 	Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
+		// })
 
 		PIt("recalls a previous field value via Was(fieldName)", func() {
 			// marked pending because .Was is currently NYI - ref gihub issue #5
@@ -209,7 +210,7 @@ var _ = Describe("Document", func() {
 			Expect(invalidList).To(BeEmpty(), "found non-marshallable complex types within BSON key path(s) from: "+fmt.Sprintf("%+v", bsonM))
 		})
 
-		PIt("can be Save()'ed and Find()'ed", func() {
+		It("can be Save()'ed and Find()'ed", func() {
 			OnlineDatabaseOnly(func() {
 
 				By("object creation")
@@ -223,6 +224,7 @@ var _ = Describe("Document", func() {
 				Expect(newObj.IsChanged()).To(BeFalse(), "expects to be unchanged")
 
 				initialObjectID := newObj.ID
+				Expect(initialObjectID).To(Equal(mongoid.ObjectID{}), "expects initialObjectID to be zero-value")
 
 				By("Save()'ing")
 				Expect(newObj.Save()).To(BeNil(), "expects no errors")
