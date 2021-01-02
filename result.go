@@ -85,7 +85,7 @@ func (res *Result) IsStreaming() bool {
 // First returns an interface to the first document in the Result set, or nil if the Result contains no records.
 // This method will panic if Streaming() was enabled.
 func (res *Result) First() IDocumentBase {
-	log.Debug("Result.First()")
+	log.Trace("Result.First()")
 	if res.streaming {
 		log.Panic(&mongoidError.InvalidOperation{
 			MethodName: "Result.First",
@@ -99,7 +99,7 @@ func (res *Result) First() IDocumentBase {
 // Last returns an interface to the last document in the result set
 // This method will panic if Streaming() was enabled.
 func (res *Result) Last() IDocumentBase {
-	log.Debug("Result.Last()")
+	log.Trace("Result.Last()")
 	if res.streaming {
 		log.Panic(&mongoidError.InvalidOperation{
 			MethodName: "Result.Last",
@@ -112,7 +112,7 @@ func (res *Result) Last() IDocumentBase {
 // At returns an interface to the Document in the result set at the given index (range is 0 to count-1)
 // This method will panic if Streaming() was enabled.
 func (res *Result) At(index uint) IDocumentBase {
-	log.Debug("Result.At()")
+	log.Trace("Result.At()")
 	if res.streaming {
 		log.Panic(&mongoidError.InvalidOperation{
 			MethodName: "Result.At",
@@ -148,7 +148,7 @@ func (res *Result) atBson(index uint) bson.M {
 // This method will panic if Streaming() was enabled.
 // The current implementation will read all remaining result items into memory, making this a poor choice for queries with large result sets.
 func (res *Result) Count() uint {
-	log.Debug("Result.Count()")
+	log.Trace("Result.Count()")
 	if res.streaming {
 		log.Panic(&mongoidError.InvalidOperation{
 			MethodName: "Result.Count",
@@ -168,7 +168,7 @@ func (res *Result) Count() uint {
 // One will panic if the Result contains more than one record or zero records.
 // This method will panic if Streaming() was enabled.
 func (res *Result) One() IDocumentBase {
-	log.Debug("Result.One()")
+	log.Trace("Result.One()")
 	if res.streaming {
 		log.Panic(&mongoidError.InvalidOperation{
 			MethodName: "Result.One",

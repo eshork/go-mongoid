@@ -11,6 +11,7 @@ type IDocumentBase interface {
 	Model() *ModelType
 
 	ToBson() BsonDocument
+	ToUpdateBson() BsonDocument
 
 	GetID() interface{}
 

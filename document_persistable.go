@@ -5,6 +5,7 @@ import (
 	"mongoid/log"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -12,7 +13,7 @@ import (
 // Returns false if the document is new or has been destroyed.
 // This is not a change tracker -- see: Changed() for that
 func (d *Base) IsPersisted() bool {
-	log.Debug("Base.IsPersisted()")
+	log.Trace("Base.IsPersisted()")
 	return d.persisted
 }
 
@@ -24,7 +25,7 @@ func (d *Base) setPersisted(val bool) {
 // IsChanged returns true if the document instance has changed from the last retrieved value from the datastore, false otherwise.
 // Newly created but documents begin in a Changed()=false state, as the document begins with all default values.
 func (d *Base) IsChanged() bool {
-	log.Debug("Base.IsChanged()")
+	log.Trace("Base.IsChanged()")
 	if len(d.Changes()) > 0 {
 		return true
 	}
@@ -37,7 +38,7 @@ func (d *Base) IsChanged() bool {
 // New or changed values will have a key/value pair that reflects the newly set entry value.
 // Unset or missing values will have an key/value pair with 'nil' as the value side, to reflect the unset status.
 func (d *Base) Changes() BsonDocument {
-	log.Debug("Base.Changes()")
+	log.Trace("Base.Changes()")
 	currentBson := d.ToBson()
 	previousBson := d.previousValue
 	diffBson := makeBsonDocumentDiff(previousBson, currentBson)
@@ -53,7 +54,7 @@ func (d *Base) Was(fieldPath string) (interface{}, bool) {
 // Save will store the changed attributes to the database atomically, or insert the document if flagged as a new record via Model#new_record?
 // Can bypass validations if wanted.
 func (d *Base) Save() error {
-	log.Debug("Base.Save()")
+	log.Trace("Base.Save()")
 
 	// if already persisted, this is an update, otherwise it's a new insert
 	if d.IsPersisted() {
@@ -64,14 +65,24 @@ func (d *Base) Save() error {
 }
 
 func (d *Base) saveByUpdate() error {
-	log.Debug("saveByUpdate()")
-	// insert a new object
-	log.Fatal("NYI Save() - PERSISTED")
+	log.Trace("saveByUpdate()")
+
+	collection := d.getMongoCollectionHandle()
+	ctx, ctxCancel := context.WithTimeout(context.TODO(), 5*time.Second) // todo context with arbitrary 5sec timeout
+	defer ctxCancel()
+
+	selectFilter := bson.M{"_id": d.GetID()}
+	updateBson := d.ToUpdateBson()
+	log.Debugf("collection[%s].UpdateOne %v %v", collection.Name(), selectFilter, updateBson)
+	_, err := collection.UpdateOne(ctx, selectFilter, updateBson)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return nil
 }
 
 func (d *Base) saveByInsert() error {
-	log.Debug("saveByInsert()")
+	log.Trace("saveByInsert()")
 	// insert a new object
 
 	collection := d.getMongoCollectionHandle()
@@ -93,10 +104,10 @@ func (d *Base) saveByInsert() error {
 
 			// METHOD 2 - this way deletes _id field so that the Mongo driver will be forced to figure it out for us
 			delete(insertBson, "_id")
-
 		}
 	}
 
+	log.Debugf("collection[%s].InsertOne %v", collection.Name(), insertBson)
 	res, err := collection.InsertOne(ctx, insertBson)
 	if err != nil {
 		log.Fatal(err)

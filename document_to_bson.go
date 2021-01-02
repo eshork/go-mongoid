@@ -19,6 +19,15 @@ func (d *Base) ToBson() BsonDocument {
 	return bsonOut
 }
 
+// ToUpdateBson converts the document model object into a BsonDocument
+func (d *Base) ToUpdateBson() BsonDocument {
+	updateBson := bson.M{
+		"$set": d.Changes(),
+	}
+	// TODO - add an $unset operator to appropriately remove unset fields (instead of just setting them to null, like it currently does)
+	return updateBson
+}
+
 func structToBsonM(rawStructPtr interface{}) bson.M {
 	// log.Trace("structToBsonM(<detecting>)")
 	retMap := make(bson.M)

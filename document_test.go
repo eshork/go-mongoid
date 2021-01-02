@@ -73,7 +73,7 @@ type ExampleDocument struct {
 	// IntPtrField    *int
 	// BoolPtrField   *bool
 
-	// IntSliceField        []int
+	IntSliceField []int
 	// IntPtrSliceField     []*int
 	// IntPtrSliceFieldNils []*int
 
@@ -130,7 +130,7 @@ var ExampleDocuments = mongoid.Register(&ExampleDocument{
 	StringField: "tacocat is tacocat backwards",
 	IntField:    42,
 	BoolField:   true,
-	// IntSliceField:        []int{1, 2, 4, 8, 16},
+	// IntSliceField: []int{1, 2, 4, 8, 16},
 	// IntPtrSliceField:     []*int{&TmpIntFieldValue1, &TmpIntFieldValue2},
 	// IntPtrSliceFieldNils: []*int{nil, nil, nil},
 	// SimpleEmbedPtrSet:    &TmpSimpleEmbedValue,
@@ -173,24 +173,24 @@ var _ = Describe("Document", func() {
 			Expect(newObj.IsChanged()).To(BeFalse(), "expects to not yet be changed")
 		})
 
-		// It("identifies a simple change via IsChanged()", func() {
-		// 	newObj := ExampleDocuments.New().(*ExampleDocument)
-		// 	// newObj.IntSliceField = []int{}
-		// 	newObj.StringField = gofakeit.HipsterWord()
-		// 	Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
-		// })
+		It("identifies a simple change via IsChanged()", func() {
+			newObj := ExampleDocuments.New().(*ExampleDocument)
+			// newObj.IntSliceField = []int{}
+			newObj.StringField = gofakeit.HipsterWord()
+			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
+		})
 
-		// It("identifies a simple slice field change via IsChanged()", func() {
-		// 	newObj := ExampleDocuments.New().(*ExampleDocument)
-		// 	newObj.IntSliceField = []int{gofakeit.Number(1, 99)}
-		// 	Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
-		// })
+		It("identifies a simple slice field change via IsChanged()", func() {
+			newObj := ExampleDocuments.New().(*ExampleDocument)
+			newObj.IntSliceField = []int{gofakeit.Number(1, 99)}
+			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
+		})
 
-		// It("identifies a slice field clearing via IsChanged()", func() {
-		// 	newObj := ExampleDocuments.New().(*ExampleDocument)
-		// 	newObj.IntSliceField = []int{}
-		// 	Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
-		// })
+		It("identifies a slice field clearing via IsChanged()", func() {
+			newObj := ExampleDocuments.New().(*ExampleDocument)
+			newObj.IntSliceField = []int{}
+			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
+		})
 
 		PIt("recalls a previous field value via Was(fieldName)", func() {
 			// marked pending because .Was is currently NYI - ref gihub issue #5
@@ -253,3 +253,51 @@ var _ = Describe("Document", func() {
 	})
 
 })
+
+var _ = Describe("Document", func() {
+
+	// Context("an unknown UnknownExampleDocument document model", func() {
+	// 	It("is not verifyably registered", func() {
+	// 		By("struct name")
+	// 		Expect(mongoid.M("UnknownExampleDocument")).To(BeNil())
+	// 		By("example ref object")
+	// 		Expect(mongoid.M(&UnknownExampleDocument{})).To(BeNil())
+	// 	})
+	// })
+	Context("verifying storage of Document field types", func() {
+		// test := func(structPtr interface{}, fieldPtr interface{}, exBson bson.M, bsonFieldName string) {
+		// 	fieldValue := reflect.Indirect(reflect.ValueOf(fieldPtr))
+		// 	_, ok := exBson[bsonFieldName]
+		// 	Expect(ok).To(Equal(true), "given bsonFieldName should be a valid key to the target value, so the test can validate successful assignment")
+		// 	Expect(fieldValue.Interface()).ToNot(Equal(exBson[bsonFieldName]), "initial struct field value should not already equal the target value of the test")
+		// 	structValuesFromBsonM(structPtr, exBson)
+		// 	Expect(fieldValue.Interface()).To(Equal(exBson[bsonFieldName]), "struct field value should equal the target value after assignment")
+		// }
+
+		// It("bool field", func() {
+		// 	boolFieldEx := struct{ BoolField bool }{true}
+		// 	test(&boolFieldEx, &boolFieldEx.BoolField, bson.M{"bool_field": false}, "bool_field")
+		// })
+
+		FIt("bool field", func() {
+			type BoolTestStruct struct {
+				mongoid.Base `mongoid:"collection:bool_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        bool
+			}
+			BoolTestStructs := mongoid.Register(&BoolTestStruct{Field: false})
+			newObj := BoolTestStructs.New().(*BoolTestStruct)
+			newObj.Field = true
+			newObj.Save()
+			sameObj := BoolTestStructs.Find(newObj.ID).One().(*BoolTestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = false
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = BoolTestStructs.Find(newObj.ID).One().(*BoolTestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+	})
+})
+
+// var ExampleDocuments = mongoid.Register(&ExampleDocument{
