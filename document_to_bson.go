@@ -14,13 +14,14 @@ import (
 // ToBson converts the document model object into a BsonDocument.
 // This makes the object easily serializable and comparable.
 func (d *Base) ToBson() BsonDocument {
-	log.Debug("ToBson()")
+	log.Trace("Base.ToBson()")
 	bsonOut := structToBsonM(d.DocumentBase())
 	return bsonOut
 }
 
 // ToUpdateBson converts the document model object into a BsonDocument
 func (d *Base) ToUpdateBson() BsonDocument {
+	log.Trace("Base.ToUpdateBson()")
 	updateBson := bson.M{
 		"$set": d.Changes(),
 	}
