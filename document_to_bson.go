@@ -4,6 +4,7 @@ import (
 	"mongoid/log"
 	"mongoid/util"
 	"reflect"
+	"strconv"
 
 	"github.com/iancoleman/strcase"
 	"go.mongodb.org/mongo-driver/bson"
@@ -133,7 +134,6 @@ func structFieldToBsonM(field reflect.StructField, fieldValue reflect.Value) bso
 	// if util.IsIfaceBsonMarshalSafe(fieldValue.Interface()) {
 	// 	log.Fatal("util.IsBsonMarshalSafe() is not a real thing -- that was more than 10 lies")
 	// }
-
 	if !util.IsIfaceBsonMarshalSafe(fieldValue.Interface()) {
 		switch fieldValueKind {
 		case reflect.Struct:
@@ -158,7 +158,10 @@ func structFieldToBsonM(field reflect.StructField, fieldValue reflect.Value) bso
 			retBsonA := indexableValueToBsonA(reflect.Indirect(fieldValue))
 			// log.Fatalf("STOP plz %+v", retBsonA) // TODO CLEANUP
 			return bson.M{fieldName: retBsonA}
+		case reflect.Uint64:
+			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
 		}
+
 	}
 
 	// standard values types and unknowns
@@ -173,6 +176,24 @@ func structFieldToBsonM(field reflect.StructField, fieldValue reflect.Value) bso
 	}
 	return bson.M{
 		fieldName: fieldValue.Interface(),
+	}
+}
+
+// Casts the given fromValue into a database suitable storage type, returning an interface to the newly cast value.
+// If fromValue does not require conversion, it may be returned directly, but it is not guaranteed to do so.
+// If a value conversion would result in loss of data or precision, this function will panic.
+func marshalToDB(fromValue interface{}) interface{} {
+	switch fromValue.(type) {
+	case *uint64:
+		if fromValue != nil {
+			return marshalToDB(*(fromValue.(*uint64)))
+		}
+		return nil
+	case uint64:
+		val := fromValue.(uint64)
+		return strconv.FormatUint(val, 10)
+	default:
+		return fromValue
 	}
 }
 

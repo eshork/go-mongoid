@@ -476,7 +476,7 @@ var _ = Describe("Document", func() {
 			sameObj = Uint32TestStructs.Find(newObj.ID).One().(*Uint32TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 		})
-		PIt("uint64 field", func() {
+		It("uint64 field", func() {
 			type Uint64TestStruct struct {
 				mongoid.Base `mongoid:"collection:bool_test"`
 				ID           mongoid.ObjectID `bson:"_id"`

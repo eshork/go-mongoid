@@ -142,9 +142,9 @@ func structFieldValueFromBsonM(field reflect.StructField, bsonM bson.M) (retValu
 	fieldType := field.Type
 	fieldTypeKind := fieldType.Kind()
 	// TODO: remove this - debug output
-	log.Debugf("fieldName: %s", fieldName)
-	log.Debugf("field type : %s", fieldType)
-	log.Debugf("field kind : %s", fieldTypeKind)
+	// log.Debugf("fieldName: %s", fieldName)
+	// log.Debugf("field type : %s", fieldType)
+	// log.Debugf("field kind : %s", fieldTypeKind)
 
 	// fetch the bsonM value (if present)
 	bsonMfieldValue, bsonMhasKey := bsonM[fieldName]

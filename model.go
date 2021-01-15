@@ -127,7 +127,7 @@ func (model *ModelType) GetClient() *Client {
 // The returned object will be preset with the defaults specified during initial document/model registration.
 // Note: Due to the strongly typed nature of Go, you'll need to perform a type assertion (as the value is returned as an interface{})
 func (model *ModelType) New() IDocumentBase {
-	log.Debug("ModelType.New()")
+	log.Debugf("%v.New()", model.GetModelName())
 	retAsIDocumentBase := makeDocument(model, model.GetDefaultBSON())
 	return retAsIDocumentBase // return the new object as an IDocumentBase interface
 }

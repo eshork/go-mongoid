@@ -54,7 +54,7 @@ func (d *Base) Was(fieldPath string) (interface{}, bool) {
 // Save will store the changed attributes to the database atomically, or insert the document if flagged as a new record via Model#new_record?
 // Can bypass validations if wanted.
 func (d *Base) Save() error {
-	log.Trace("Base.Save()")
+	log.Debugf("%v.Save()", d.Model().modelName)
 
 	// if already persisted, this is an update, otherwise it's a new insert
 	if d.IsPersisted() {
