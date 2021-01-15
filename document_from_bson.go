@@ -3,14 +3,14 @@ package mongoid
 import (
 	"mongoid/log"
 	"mongoid/util"
-
 	"reflect"
+	"strconv"
 
 	"github.com/iancoleman/strcase"
 	"go.mongodb.org/mongo-driver/bson"
-	// "strings"
-	// "time"
 )
+
+// "time"
 
 var reflectTypeObjectID = reflect.TypeOf(ZeroObjectID)
 
@@ -76,7 +76,38 @@ func marshalFromDB(intoType reflect.Type, fromValue interface{}) interface{} {
 		}
 		dst.SetInt(src.Int())
 		return dst.Interface()
+	case reflect.Uint8:
+		fallthrough
+	case reflect.Uint16:
+		fallthrough
+	case reflect.Uint32:
+		fallthrough
+	case reflect.Uint64:
+		fallthrough
+	case reflect.Uint:
+		dstPtr := reflect.New(intoType)
+		dst := reflect.Indirect(dstPtr)
+		var srcStr string
+		switch fromValue.(type) {
+		case int64:
+			srcStr = strconv.FormatInt(fromValue.(int64), 10)
+		case int32:
+			srcStr = strconv.FormatInt(int64(fromValue.(int32)), 10)
+		case string:
+			srcStr = fromValue.(string)
+		}
+		srcUint64, srcUint64Err := strconv.ParseUint(srcStr, 10, 64)
+		if srcUint64Err != nil {
+			log.Errorf("Error detected while storing %v within %v: %v", reflect.TypeOf(fromValue), intoType, srcUint64Err)
+		}
+		if dst.OverflowUint(srcUint64) {
+			log.Errorf("Overflow detected while storing %v within %v", reflect.TypeOf(fromValue), intoType)
+		}
+		dst.SetUint(srcUint64)
+		return dst.Interface()
 	}
+	log.Errorf("Unhandled kind: %v", intoType.Kind())
+
 	return nil
 }
 

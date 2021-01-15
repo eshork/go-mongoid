@@ -1,6 +1,7 @@
 package mongoid_test
 
 import (
+	"math"
 	"mongoid"
 	"mongoid/util"
 
@@ -325,7 +326,7 @@ var _ = Describe("Document", func() {
 			}
 			Int8TestStructs := mongoid.Register(&Int8TestStruct{Field: 0})
 			newObj := Int8TestStructs.New().(*Int8TestStruct)
-			newObj.Field = int8(127)
+			newObj.Field = int8(math.MaxInt8)
 			newObj.Save()
 			sameObj := Int8TestStructs.Find(newObj.ID).One().(*Int8TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
@@ -343,7 +344,7 @@ var _ = Describe("Document", func() {
 			}
 			Int16TestStructs := mongoid.Register(&Int16TestStruct{Field: 0})
 			newObj := Int16TestStructs.New().(*Int16TestStruct)
-			newObj.Field = int16(32767)
+			newObj.Field = int16(math.MaxInt16)
 			newObj.Save()
 			sameObj := Int16TestStructs.Find(newObj.ID).One().(*Int16TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
@@ -361,7 +362,7 @@ var _ = Describe("Document", func() {
 			}
 			Int32TestStructs := mongoid.Register(&Int32TestStruct{Field: 0})
 			newObj := Int32TestStructs.New().(*Int32TestStruct)
-			newObj.Field = int32(2147483647)
+			newObj.Field = int32(math.MaxInt32)
 			newObj.Save()
 			sameObj := Int32TestStructs.Find(newObj.ID).One().(*Int32TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
@@ -379,7 +380,7 @@ var _ = Describe("Document", func() {
 			}
 			Int64TestStructs := mongoid.Register(&Int64TestStruct{Field: 0})
 			newObj := Int64TestStructs.New().(*Int64TestStruct)
-			newObj.Field = int64(4294967296)
+			newObj.Field = int64(math.MaxInt64)
 			newObj.Save()
 			sameObj := Int64TestStructs.Find(newObj.ID).One().(*Int64TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
@@ -402,7 +403,7 @@ var _ = Describe("Document", func() {
 			Expect(newObj.ID).To(Equal(sameObj.ID), "retrieved document should have same ID")
 		})
 
-		PIt("uint field", func() {
+		It("uint field", func() {
 			type UintTestStruct struct {
 				mongoid.Base `mongoid:"collection:bool_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
@@ -421,7 +422,7 @@ var _ = Describe("Document", func() {
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 		})
 
-		PIt("uint8 field", func() {
+		It("uint8 field", func() {
 			type Uint8TestStruct struct {
 				mongoid.Base `mongoid:"collection:bool_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
@@ -429,7 +430,7 @@ var _ = Describe("Document", func() {
 			}
 			Uint8TestStructs := mongoid.Register(&Uint8TestStruct{Field: 0})
 			newObj := Uint8TestStructs.New().(*Uint8TestStruct)
-			newObj.Field = uint8(255)
+			newObj.Field = uint8(math.MaxUint8)
 			newObj.Save()
 			sameObj := Uint8TestStructs.Find(newObj.ID).One().(*Uint8TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
@@ -439,7 +440,7 @@ var _ = Describe("Document", func() {
 			sameObj = Uint8TestStructs.Find(newObj.ID).One().(*Uint8TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 		})
-		PIt("uint16 field", func() {
+		It("uint16 field", func() {
 			type Uint16TestStruct struct {
 				mongoid.Base `mongoid:"collection:bool_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
@@ -447,7 +448,7 @@ var _ = Describe("Document", func() {
 			}
 			Uint16TestStructs := mongoid.Register(&Uint16TestStruct{Field: 0})
 			newObj := Uint16TestStructs.New().(*Uint16TestStruct)
-			newObj.Field = uint16(65535)
+			newObj.Field = uint16(math.MaxUint16)
 			newObj.Save()
 			sameObj := Uint16TestStructs.Find(newObj.ID).One().(*Uint16TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
@@ -457,7 +458,7 @@ var _ = Describe("Document", func() {
 			sameObj = Uint16TestStructs.Find(newObj.ID).One().(*Uint16TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 		})
-		PIt("uint32 field", func() {
+		It("uint32 field", func() {
 			type Uint32TestStruct struct {
 				mongoid.Base `mongoid:"collection:bool_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
@@ -465,7 +466,7 @@ var _ = Describe("Document", func() {
 			}
 			Uint32TestStructs := mongoid.Register(&Uint32TestStruct{Field: 0})
 			newObj := Uint32TestStructs.New().(*Uint32TestStruct)
-			newObj.Field = uint32(4294967295)
+			newObj.Field = uint32(math.MaxUint32)
 			newObj.Save()
 			sameObj := Uint32TestStructs.Find(newObj.ID).One().(*Uint32TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
@@ -483,7 +484,7 @@ var _ = Describe("Document", func() {
 			}
 			Uint64TestStructs := mongoid.Register(&Uint64TestStruct{Field: 0})
 			newObj := Uint64TestStructs.New().(*Uint64TestStruct)
-			newObj.Field = uint64(18446744073709551615)
+			newObj.Field = uint64(math.MaxUint64)
 			newObj.Save()
 			sameObj := Uint64TestStructs.Find(newObj.ID).One().(*Uint64TestStruct)
 			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
