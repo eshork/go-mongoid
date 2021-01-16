@@ -257,28 +257,7 @@ var _ = Describe("Document", func() {
 
 var _ = Describe("Document", func() {
 
-	// Context("an unknown UnknownExampleDocument document model", func() {
-	// 	It("is not verifyably registered", func() {
-	// 		By("struct name")
-	// 		Expect(mongoid.M("UnknownExampleDocument")).To(BeNil())
-	// 		By("example ref object")
-	// 		Expect(mongoid.M(&UnknownExampleDocument{})).To(BeNil())
-	// 	})
-	// })
 	Context("verifying storage of Document field types", func() {
-		// test := func(structPtr interface{}, fieldPtr interface{}, exBson bson.M, bsonFieldName string) {
-		// 	fieldValue := reflect.Indirect(reflect.ValueOf(fieldPtr))
-		// 	_, ok := exBson[bsonFieldName]
-		// 	Expect(ok).To(Equal(true), "given bsonFieldName should be a valid key to the target value, so the test can validate successful assignment")
-		// 	Expect(fieldValue.Interface()).ToNot(Equal(exBson[bsonFieldName]), "initial struct field value should not already equal the target value of the test")
-		// 	structValuesFromBsonM(structPtr, exBson)
-		// 	Expect(fieldValue.Interface()).To(Equal(exBson[bsonFieldName]), "struct field value should equal the target value after assignment")
-		// }
-
-		// It("bool field", func() {
-		// 	boolFieldEx := struct{ BoolField bool }{true}
-		// 	test(&boolFieldEx, &boolFieldEx.BoolField, bson.M{"bool_field": false}, "bool_field")
-		// })
 
 		It("bool field", func() {
 			type BoolTestStruct struct {
