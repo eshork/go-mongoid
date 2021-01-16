@@ -128,10 +128,10 @@ var TmpSimpleEmbedSliceValue = []ExampleSimpleEmbeddableDocument{TmpSimpleEmbedV
 
 // register the model with some default values
 var ExampleDocuments = mongoid.Register(&ExampleDocument{
-	StringField: "tacocat is tacocat backwards",
-	IntField:    42,
-	BoolField:   true,
-	// IntSliceField: []int{1, 2, 4, 8, 16},
+	StringField:   "tacocat is tacocat backwards",
+	IntField:      42,
+	BoolField:     true,
+	IntSliceField: []int{1, 2, 4, 8, 16},
 	// IntPtrSliceField:     []*int{&TmpIntFieldValue1, &TmpIntFieldValue2},
 	// IntPtrSliceFieldNils: []*int{nil, nil, nil},
 	// SimpleEmbedPtrSet:    &TmpSimpleEmbedValue,
@@ -187,7 +187,7 @@ var _ = Describe("Document", func() {
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
 		})
 
-		PIt("identifies a slice field clearing via IsChanged()", func() {
+		It("identifies a slice field clearing via IsChanged()", func() {
 			newObj := ExampleDocuments.New().(*ExampleDocument)
 			newObj.IntSliceField = []int{}
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")

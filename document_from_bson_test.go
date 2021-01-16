@@ -114,6 +114,10 @@ var _ = Describe("structValuesFromBsonM()", func() {
 			By("native []string")
 			stringArrayFieldEx := struct{ StringArrayField []string }{StringArrayField: []string{"array", "example"}}
 			test(&stringArrayFieldEx, &stringArrayFieldEx.StringArrayField, bson.M{"string_array_field": []string{"play", "nice"}}, "string_array_field")
+
+			By("native []int")
+			intArrayFieldEx := struct{ IntArrayField []int }{IntArrayField: []int{1, 2, 3}}
+			test(&intArrayFieldEx, &intArrayFieldEx.IntArrayField, bson.M{"int_array_field": []int{42}}, "int_array_field")
 		})
 
 		It("map field", func() {

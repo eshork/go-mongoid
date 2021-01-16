@@ -233,7 +233,7 @@ func sliceValueFromUnknownAry(sliceType reflect.Type, unknownAry interface{}) (r
 	sliceElemType := sliceType.Elem()
 	sliceElemTypeKind := sliceElemType.Kind()
 
-	// log.Warn(bsonA)
+	// log.Warn("bsonA")
 	// log.Warn("sliceType = ", sliceType)
 	// log.Warn("sliceElemType = ", sliceElemType)
 	// log.Warn("sliceElemTypeKind = ", sliceElemTypeKind)
@@ -249,12 +249,9 @@ func sliceValueFromUnknownAry(sliceType reflect.Type, unknownAry interface{}) (r
 
 	if sliceElemTypeKind == reflect.Ptr { // pointer-based types
 		// assign each slice index by ptr
-		// log.Warn("PTRs!")
-
 		sliceElemBaseType := sliceElemType.Elem()
 		if sliceElemBaseType.Kind() == reflect.Struct {
 			// ptrs to custom struct type
-			// log.Warn("sliceElemBaseType = ", sliceElemBaseType)
 			for i := 0; i < lenBsonA; i++ {
 				// if bsonA[i] != nil { // only process non-nil values
 				if !reflect.ValueOf(unknownAry).Index(i).IsNil() { // only process non-nil values
@@ -282,13 +279,16 @@ func sliceValueFromUnknownAry(sliceType reflect.Type, unknownAry interface{}) (r
 				}
 			}
 		}
+	} else if sliceElemTypeKind == reflect.Interface { // interface type
+		for i := 0; i < lenBsonA; i++ {
+			bsonIndexValue := reflect.ValueOf(unknownAry).Index(i)
+			sliceIndexValue := sliceValue.Index(i)
+			sliceIndexValue.Set(bsonIndexValue)
+		}
 	} else { // non-pointer-based types (concrete types)
 		if sliceElemTypeKind == reflect.Struct {
 			// custom struct type
-			// log.Warn("sliceElemType = ", sliceElemType)
 			for i := 0; i < lenBsonA; i++ {
-				// log.Error("bsonA[i]= ", bsonA[i])
-				// bsonM, ok := bsonA[i].(bson.M)
 				bsonM, ok := reflect.ValueOf(unknownAry).Index(i).Interface().(bson.M)
 				if !ok {
 					log.Panicf("sliceValueFromBsonA - value at index %d must be valid bson.M when slice kind is struct of type: %s", i, sliceElemType)
@@ -297,15 +297,14 @@ func sliceValueFromUnknownAry(sliceType reflect.Type, unknownAry interface{}) (r
 				structValuesFromBsonM(newStructPtr.Interface(), bsonM)
 				sliceIndexValue := sliceValue.Index(i)
 				sliceIndexValue.Set(newStructPtr.Elem())
-				// log.Fatal("sliceElemTypeKind == reflect.Struct")
-
 			}
 		} else {
 			// other built-in type
 			for i := 0; i < lenBsonA; i++ {
 				bsonIndexValue := reflect.ValueOf(unknownAry).Index(i)
 				sliceIndexValue := sliceValue.Index(i)
-				sliceIndexValue.Set(bsonIndexValue)
+				indexValue := reflect.ValueOf(marshalFromDB(sliceElemType, bsonIndexValue.Interface()))
+				sliceIndexValue.Set(indexValue)
 			}
 		}
 	}
