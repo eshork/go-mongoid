@@ -17,7 +17,7 @@ Many things (most things?) don't directly translate from Ruby to Go, but the maj
   - Supports builtin Go data-types as document field-types
   - Supports custom structs as document field-types (embedded documents)
   - Supports maps and slices/arrays as dynamic field-types
-  - Supports custom field data-types
+  - Supports custom field data-types (custom structs with their own bson marshal/unmarshal methods)
 - Default values for new document objects
 - Change tracking - identify which fields have been altered since new object creation or since loading from the database, as well as the previous values
 - Atomic updates - only changed fields are written to the datastore during save operations, same as Ruby Mongoid
