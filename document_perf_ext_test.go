@@ -38,26 +38,26 @@ var _ = Describe("DocumentBase", func() {
 			BenchLoop(b, 200, func() {
 				ExampleDocuments.New()
 			})
-		}, 50)
+		}, 500)
 
 		Measure("PerfSimpleExampleDocuments.New() creation", func(b Benchmarker) {
 			BenchLoop(b, 200, func() {
 				PerfSimpleExampleDocuments.New()
 			})
-		}, 50)
+		}, 500)
 
 		Measure("ExampleDocuments.ToBson()", func(b Benchmarker) {
 			testDoc := ExampleDocuments.New()
 			BenchLoop(b, 200, func() {
 				testDoc.ToBson()
 			})
-		}, 50)
+		}, 500)
 
 		Measure("PerfSimpleExampleDocuments.ToBson()", func(b Benchmarker) {
 			testDoc := PerfSimpleExampleDocuments.New()
 			BenchLoop(b, 200, func() {
 				testDoc.ToBson()
 			})
-		}, 50)
+		}, 500)
 	})
 })
