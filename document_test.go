@@ -301,7 +301,7 @@ var _ = Describe("Document", func() {
 
 		It("int field", func() {
 			type IntTestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:int_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        int
 			}
@@ -320,7 +320,7 @@ var _ = Describe("Document", func() {
 
 		It("int8 field", func() {
 			type Int8TestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:int8_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        int8
 			}
@@ -338,7 +338,7 @@ var _ = Describe("Document", func() {
 		})
 		It("int16 field", func() {
 			type Int16TestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:int16_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        int16
 			}
@@ -356,7 +356,7 @@ var _ = Describe("Document", func() {
 		})
 		It("int32 field", func() {
 			type Int32TestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:int32_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        int32
 			}
@@ -374,7 +374,7 @@ var _ = Describe("Document", func() {
 		})
 		It("int64 field", func() {
 			type Int64TestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:int64_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        int64
 			}
@@ -393,7 +393,7 @@ var _ = Describe("Document", func() {
 
 		It("no field", func() {
 			type TestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:nofield_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 			}
 			TestStructs := mongoid.Register(&TestStruct{})
@@ -405,7 +405,7 @@ var _ = Describe("Document", func() {
 
 		It("uint field", func() {
 			type UintTestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:uint_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        uint
 			}
@@ -424,7 +424,7 @@ var _ = Describe("Document", func() {
 
 		It("uint8 field", func() {
 			type Uint8TestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:uint8_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        uint8
 			}
@@ -442,7 +442,7 @@ var _ = Describe("Document", func() {
 		})
 		It("uint16 field", func() {
 			type Uint16TestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:uint16_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        uint16
 			}
@@ -460,7 +460,7 @@ var _ = Describe("Document", func() {
 		})
 		It("uint32 field", func() {
 			type Uint32TestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:uint32_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        uint32
 			}
@@ -478,7 +478,7 @@ var _ = Describe("Document", func() {
 		})
 		It("uint64 field", func() {
 			type Uint64TestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:uint64_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        uint64
 			}
