@@ -14,16 +14,13 @@ Many things (most things?) don't directly translate from Ruby to Go, but the maj
 # Target features (for v1)
 
 - Uses Go structs as the primary document interface - ie, build your own custom document definitions using native syntax
-  - Supports all native Go data-types as document field-types
-  - Supports custom field data-types (nyi - some initial work already done, but api needs firming up)
-  - Supports generic Go maps as dynamic field-types
-
-- Change tracking - identify which fields have been altered since new object creation or since loading from the database, as well as the previous values
-
+  - Supports builtin Go data-types as document field-types
+  - Supports custom structs as document field-types (embedded documents)
+  - Supports maps and slices/arrays as dynamic field-types
+  - Supports custom field data-types
 - Default values for new document objects
-
+- Change tracking - identify which fields have been altered since new object creation or since loading from the database, as well as the previous values
 - Atomic updates - only changed fields are written to the datastore during save operations, same as Ruby Mongoid
-
 - Query builder interface - concatenate method calls to dynamically build queries
   - Save and recall query Scopes (as well as default scopes per ModelType)
 
@@ -39,7 +36,6 @@ Many things (most things?) don't directly translate from Ruby to Go, but the maj
 
 - MongoDB connection configuration via JSON, YAML, or ENV vars
 
-- Use officially released mongo-go-driver versions
 
 
 # Installation & Usage
