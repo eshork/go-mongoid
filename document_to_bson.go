@@ -159,45 +159,26 @@ func structFieldToBsonM(field reflect.StructField, fieldValue reflect.Value) bso
 		case reflect.Slice:
 			retBsonA := indexableValueToBsonA(reflect.Indirect(fieldValue))
 			return bson.M{fieldName: retBsonA}
-		case reflect.Bool:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.String:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.Int:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.Int8:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.Int16:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.Int32:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.Int64:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.Uint:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.Uint8:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.Uint16:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.Uint32:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
-		case reflect.Uint64:
-			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		default:
-			log.Panicf("unhandled builtin type: %v", fieldValueKind)
-			// 	return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
+			dbValue, ok := util.MarshalToDB(fieldValue.Interface())
+			if !ok {
+				log.Panicf("failed MarshalToDB: %v ", (fieldValueKind))
+			}
+			return bson.M{fieldName: dbValue}
 		}
 	}
 	if oid, ok := fieldValue.Interface().(primitive.ObjectID); ok {
-		return bson.M{fieldName: util.MarshalToDB(oid)}
-	}
-	if marshaler, ok := reflect.Indirect(fieldValue).Interface().(bsoncodec.Marshaler); ok {
-		log.Error("this code is untested (e17635b9)")
-		marshaledValue, err := marshaler.MarshalBSON()
-		if err != nil {
-			log.Panic(err)
+		dbValue, ok := util.MarshalToDB(oid)
+		if !ok {
+			log.Panicf("failed MarshalToDB: %v (primitive.ObjectID)", (fieldValueKind))
 		}
-		return bson.M{fieldName: util.MarshalToDB(marshaledValue)}
+		return bson.M{fieldName: dbValue}
+	}
+	if _, ok := reflect.Indirect(fieldValue).Interface().(bsoncodec.Marshaler); ok {
+		log.Error("this code is untested (e17635b9)")
+		// bsoncodec.Marshaler should be able to provide its own data definition to the driver
+		// this may or may not be the right way to pass this field for the driver to recognize it
+		return bson.M{fieldName: reflect.Indirect(fieldValue).Interface()}
 	}
 
 	// standard values types and unknowns
