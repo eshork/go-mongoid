@@ -3,30 +3,33 @@ package mongoid
 import (
 	"mongoid/log"
 	"mongoid/util"
-
 	"reflect"
+	"strconv"
 
 	"github.com/iancoleman/strcase"
 	"go.mongodb.org/mongo-driver/bson"
-	// "strings"
-	// "time"
 )
+
+// "time"
 
 var reflectTypeObjectID = reflect.TypeOf(ZeroObjectID)
 
-// Apply values to the given struct from the given bsonM
+// Apply matching values to the given struct (passed by pointer) from the given bsonM.
+// If a value for a field is not found within the given bsonM, it will be skipped without error.
+// Returns true if any value in the struct was written, even if the new value was equal to the existing value (existing values are not examined).
 func structValuesFromBsonM(rawStructPtr interface{}, bsonM bson.M) (updated bool) {
-	updated = false // initially returns unupdated state (updated = false)
+	// zero value is updated=false, no need to explicitly set
 	if rawStructPtr == nil {
 		log.Panic("rawStructPtr interface{} cannot be nil")
 	}
-	if len(bsonM) == 0 {
-		log.Panic("bsonM bson.M cannot be empty")
-	}
+	//
+	// if len(bsonM) == 0 { // an empty bson.M is okay, but nothing will change
+	// 	return false // so we can return early
+	// }
 	log.Trace("structValuesFromBsonM(<detecting>)")
 	handleType := reflect.TypeOf(rawStructPtr)
 	if handleType.Kind() != reflect.Ptr { // ensure handleType is always a pointer to a struct
-		log.Panic("rawStructPtr interface{} type.Kind() must be reflect.Ptr, found ", handleType.Kind())
+		log.Panic("rawStructPtr interface{} type.Kind() must be reflect.Ptr, but found: ", handleType.Kind())
 	}
 	handleStructType := handleType.Elem()
 	log.Tracef("structValuesFromBsonM(%s) = %v", handleStructType, bsonM)
@@ -36,13 +39,10 @@ func structValuesFromBsonM(rawStructPtr interface{}, bsonM bson.M) (updated bool
 		// walk each field
 		// set the value according to bsonM where possible (recursion may occur)
 		field := handleStructType.Field(i) // Get the field type - https://golang.org/pkg/reflect/#StructField
-		fieldValue, found := structFieldValueFromBsonM(field, bsonM)
+		newFieldValue, found := structFieldValueFromBsonM(field, bsonM)
 		if found { // apply the given value
 			curFieldValue := handleValue.Field(i) // Get the current field value as reflect.Value - https://golang.org/pkg/reflect/#Value
-			// log.Info("updating fieldValue WAS: .", field.Name, " = ", curFieldValue)
-			// log.Info("updating fieldValue Setting: .", field.Name, " = ", fieldValue)
-			curFieldValue.Set(fieldValue)
-			// log.Info("updated fieldValue NOW: .", field.Name, " = ", curFieldValue)
+			util.SetValueByInterfacePtr(curFieldValue.Addr().Interface(), newFieldValue.Interface())
 			updated = true // record that a field was updated
 		}
 	}
@@ -50,7 +50,70 @@ func structValuesFromBsonM(rawStructPtr interface{}, bsonM bson.M) (updated bool
 	return
 }
 
-// If `found`, this will provide a fully formed value that can be Set upon the field that was given
+// Casts the given fromValue into the given intoType according to expected DB value conversions, returning an interface to the newly cast value.
+// If fromValue is already the type of intoType, it may be returned directly, but it is not guaranteed to do so.
+// If a value conversion would result in loss of data or precision, this function will panic.
+func marshalFromDB(intoType reflect.Type, fromValue interface{}) interface{} {
+	if reflect.TypeOf(fromValue) == intoType {
+		return fromValue
+	}
+
+	switch intoType.Kind() {
+	case reflect.Int8:
+		fallthrough
+	case reflect.Int16:
+		fallthrough
+	case reflect.Int32:
+		fallthrough
+	case reflect.Int64:
+		fallthrough
+	case reflect.Int:
+		dstPtr := reflect.New(intoType)
+		dst := reflect.Indirect(dstPtr)
+		src := reflect.ValueOf(fromValue)
+		if dst.OverflowInt(src.Int()) {
+			log.Errorf("Overflow detected while storing %v within %v", src.Type(), dst.Type())
+		}
+		dst.SetInt(src.Int())
+		return dst.Interface()
+	case reflect.Uint8:
+		fallthrough
+	case reflect.Uint16:
+		fallthrough
+	case reflect.Uint32:
+		fallthrough
+	case reflect.Uint64:
+		fallthrough
+	case reflect.Uint:
+		dstPtr := reflect.New(intoType)
+		dst := reflect.Indirect(dstPtr)
+		var srcStr string
+		switch fromValue.(type) {
+		case int64:
+			srcStr = strconv.FormatInt(fromValue.(int64), 10)
+		case int32:
+			srcStr = strconv.FormatInt(int64(fromValue.(int32)), 10)
+		case string:
+			srcStr = fromValue.(string)
+		}
+		srcUint64, srcUint64Err := strconv.ParseUint(srcStr, 10, 64)
+		if srcUint64Err != nil {
+			log.Errorf("Error detected while storing %v within %v: %v", reflect.TypeOf(fromValue), intoType, srcUint64Err)
+		}
+		if dst.OverflowUint(srcUint64) {
+			log.Errorf("Overflow detected while storing %v within %v", reflect.TypeOf(fromValue), intoType)
+		}
+		dst.SetUint(srcUint64)
+		return dst.Interface()
+	}
+	log.Errorf("Unhandled kind: %v", intoType.Kind())
+
+	return nil
+}
+
+// Retrieves the value for a struct field from the given bsonM, following the direction of struct field tags if present.
+// Will return found=true when a matching value was available within the given bsonM, otherwise found=false.
+// This will not assign a matching value to the struct field -- you will need to do that yourself.
 func structFieldValueFromBsonM(field reflect.StructField, bsonM bson.M) (retValue reflect.Value, found bool) {
 	// skip private fields
 	if field.PkgPath != "" {
@@ -140,18 +203,11 @@ func structFieldValueFromBsonM(field reflect.StructField, bsonM bson.M) (retValu
 		retValueInterface := valuePtrValue.Interface()
 		structValuesFromBsonM(retValueInterface, bsonMfieldValue.(bson.M))
 		retValue = valuePtrValue.Elem()
-
 	case reflect.Slice:
-		retValue = sliceValueFromBsonA(fieldType, bsonMfieldValue.(bson.A))
-		// log.Fatal("reflect.Slice: ", retValue)
-
-		// ptr to slice?
-
+		retValue = sliceValueFromUnknownAry(fieldType, bsonMfieldValue)
 	default:
 		// for default (concrete) types, we need to make a new copy on the heap (otherwise they sometimes fail CanAddr())
-		// log.Warnf("default: retValue field value type: %s", fieldType)
-		// log.Warnf("default: retValue =: %s", retValue)
-		retValue = reflect.Indirect(reflect.ValueOf(bsonMfieldValue))
+		retValue = reflect.ValueOf(marshalFromDB(fieldType, bsonMfieldValue))
 		valuePtrValue := reflect.New(retValue.Type())
 		valuePtrValue.Elem().Set(retValue)
 		retValue = valuePtrValue.Elem()
@@ -160,15 +216,15 @@ func structFieldValueFromBsonM(field reflect.StructField, bsonM bson.M) (retValu
 	// If the field type kind is a pointer, then we need to return a pointer as the new value
 	if fieldTypeKind == reflect.Ptr {
 		retValue = retValue.Addr()
-		// log.Warnf("retValue PTR field value: %v", retValue.Elem())
+		log.Warnf("retValue PTR field value: %v", retValue.Elem())
 	}
 	// log.Warnf("retValue field value: %v", retValue)
 	return retValue, true
 }
 
-// accepts input values bson.A and a destination sliceType reflect.Type (ie []int, []string, []any) and returns a new reflect.Value containing the data
-func sliceValueFromBsonA(sliceType reflect.Type, bsonA bson.A) (reflectValue reflect.Value) {
-	log.Trace("sliceValueFromBsonA")
+// accepts unknownAry input and destination sliceType (ie []int, []string, []any) and returns a new reflect.Value containing the data
+func sliceValueFromUnknownAry(sliceType reflect.Type, unknownAry interface{}) (reflectValue reflect.Value) {
+	log.Trace("sliceValueFromUnknownAry")
 
 	if sliceType.Kind() != reflect.Slice {
 		log.Panicf("reflectValueFromBsonA expects sliceType(%s).Kind() == reflect.Slice", sliceType)
@@ -182,7 +238,7 @@ func sliceValueFromBsonA(sliceType reflect.Type, bsonA bson.A) (reflectValue ref
 	// log.Warn("sliceElemType = ", sliceElemType)
 	// log.Warn("sliceElemTypeKind = ", sliceElemTypeKind)
 
-	lenBsonA := len(bsonA)
+	lenBsonA := reflect.ValueOf(unknownAry).Len() // len(bsonA)
 
 	if lenBsonA <= 0 {
 		return reflect.MakeSlice(sliceType, 0, 0)
@@ -200,8 +256,10 @@ func sliceValueFromBsonA(sliceType reflect.Type, bsonA bson.A) (reflectValue ref
 			// ptrs to custom struct type
 			// log.Warn("sliceElemBaseType = ", sliceElemBaseType)
 			for i := 0; i < lenBsonA; i++ {
-				if bsonA[i] != nil { // only process non-nil values
-					bsonM, ok := bsonA[i].(bson.M)
+				// if bsonA[i] != nil { // only process non-nil values
+				if !reflect.ValueOf(unknownAry).Index(i).IsNil() { // only process non-nil values
+					// bsonM, ok := bsonA[i].(bson.M)
+					bsonM, ok := reflect.ValueOf(unknownAry).Index(i).Interface().(bson.M)
 					if !ok {
 						log.Panicf("sliceValueFromBsonA - value at index %d must be valid bson.M when slice kind is struct of type: %s", i, sliceElemBaseType)
 					}
@@ -214,8 +272,9 @@ func sliceValueFromBsonA(sliceType reflect.Type, bsonA bson.A) (reflectValue ref
 		} else {
 			// ptrs to other built-in type
 			for i := 0; i < lenBsonA; i++ {
-				if bsonA[i] != nil { // only process non-nil values
-					bsonIndexValue := reflect.ValueOf(bsonA[i])
+				// if bsonA[i] != nil { // only process non-nil values
+				if !reflect.ValueOf(unknownAry).Index(i).IsNil() { // only process non-nil values
+					bsonIndexValue := reflect.ValueOf(unknownAry).Index(i)
 					valuePtrValue := reflect.New(bsonIndexValue.Type())
 					valuePtrValue.Elem().Set(bsonIndexValue)
 					sliceIndexValue := sliceValue.Index(i)
@@ -229,7 +288,8 @@ func sliceValueFromBsonA(sliceType reflect.Type, bsonA bson.A) (reflectValue ref
 			// log.Warn("sliceElemType = ", sliceElemType)
 			for i := 0; i < lenBsonA; i++ {
 				// log.Error("bsonA[i]= ", bsonA[i])
-				bsonM, ok := bsonA[i].(bson.M)
+				// bsonM, ok := bsonA[i].(bson.M)
+				bsonM, ok := reflect.ValueOf(unknownAry).Index(i).Interface().(bson.M)
 				if !ok {
 					log.Panicf("sliceValueFromBsonA - value at index %d must be valid bson.M when slice kind is struct of type: %s", i, sliceElemType)
 				}
@@ -243,7 +303,7 @@ func sliceValueFromBsonA(sliceType reflect.Type, bsonA bson.A) (reflectValue ref
 		} else {
 			// other built-in type
 			for i := 0; i < lenBsonA; i++ {
-				bsonIndexValue := reflect.ValueOf(bsonA[i])
+				bsonIndexValue := reflect.ValueOf(unknownAry).Index(i)
 				sliceIndexValue := sliceValue.Index(i)
 				sliceIndexValue.Set(bsonIndexValue)
 			}

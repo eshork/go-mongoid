@@ -11,7 +11,7 @@ import (
 
 // Find a document or multiple documents by their ids
 func (model *ModelType) Find(ids ...ObjectID) *Result {
-	log.Debug("ModelType.Find()")
+	log.Debugf("%v.Find(%v)", model.GetModelName(), ids)
 	q := bson.D{}
 	if len(ids) <= 0 {
 		// q = bson.D{} // default (empty) is already correct - ie, find all records

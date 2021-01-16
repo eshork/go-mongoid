@@ -14,7 +14,7 @@ import (
 
 // SetField sets a value on the document via bson field name path
 func (d *Base) SetField(fieldNamePath string, newValue interface{}) error {
-	log.Debugf("SetField(%s)", fieldNamePath)
+	log.Debugf("%v.SetField(%s)", d.Model().modelName, fieldNamePath)
 	// get a Value handle to the field we want
 	found, retVal, _ := getStructFieldValueRefByBsonPath(d.DocumentBase(), fieldNamePath)
 	if found { // if we find the field, assign the value
@@ -27,7 +27,7 @@ func (d *Base) SetField(fieldNamePath string, newValue interface{}) error {
 
 // GetField returns an interface to a value from the document via the bson field name path
 func (d *Base) GetField(fieldNamePath string) (interface{}, error) {
-	log.Debugf("GetField(%s)", fieldNamePath)
+	log.Tracef("GetField(%s)", fieldNamePath)
 	// get a Value handle to the field we want
 	found, retVal, _ := getStructFieldValueRefByBsonPath(d.DocumentBase(), fieldNamePath)
 	if found { // if we find the field, return an interface to the value

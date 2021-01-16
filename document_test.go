@@ -1,6 +1,7 @@
 package mongoid_test
 
 import (
+	"math"
 	"mongoid"
 	"mongoid/util"
 
@@ -66,29 +67,29 @@ type ExampleDocument struct {
 	// mongoid.Timestamps `bson:",inline"`
 	ID mongoid.ObjectID `bson:"_id"`
 
-	StringField    string
-	IntField       int
-	BoolField      bool
-	StringPtrField *string
-	IntPtrField    *int
-	BoolPtrField   *bool
+	StringField string
+	IntField    int
+	BoolField   bool
+	// StringPtrField *string
+	// IntPtrField    *int
+	// BoolPtrField   *bool
 
-	IntSliceField        []int
-	IntPtrSliceField     []*int
-	IntPtrSliceFieldNils []*int
+	IntSliceField []int
+	// IntPtrSliceField     []*int
+	// IntPtrSliceFieldNils []*int
 
-	// all 3 embed variations
-	SimpleEmbed       ExampleSimpleEmbeddableDocument
-	SimpleEmbedPtr    *ExampleSimpleEmbeddableDocument
-	SimpleEmbedPtrSet *ExampleSimpleEmbeddableDocument
+	// // all 3 embed variations
+	// SimpleEmbed       ExampleSimpleEmbeddableDocument
+	// SimpleEmbedPtr    *ExampleSimpleEmbeddableDocument
+	// SimpleEmbedPtrSet *ExampleSimpleEmbeddableDocument
 
-	// all 3 inline variations
-	SimpleInline       ExampleSimpeInlinableDocument1  `bson:",inline"`
-	SimpleInlinePtrSet *ExampleSimpeInlinableDocument2 `bson:",inline"`
-	SimpleInlinePtr    *ExampleSimpeInlinableDocument3 `bson:",inline"`
+	// // all 3 inline variations
+	// SimpleInline       ExampleSimpeInlinableDocument1  `bson:",inline"`
+	// SimpleInlinePtrSet *ExampleSimpeInlinableDocument2 `bson:",inline"`
+	// SimpleInlinePtr    *ExampleSimpeInlinableDocument3 `bson:",inline"`
 
-	SimpleEmbedSliceField    []ExampleSimpleEmbeddableDocument
-	SimpleEmbedPtrSliceField []*ExampleSimpleEmbeddableDocument
+	// SimpleEmbedSliceField    []ExampleSimpleEmbeddableDocument
+	// SimpleEmbedPtrSliceField []*ExampleSimpleEmbeddableDocument
 	// SimpleEmbedSlicePtr      *[]ExampleSimpleEmbeddableDocument
 
 	// StringPtrField1 *string // this little pointer gets one
@@ -96,7 +97,7 @@ type ExampleDocument struct {
 	// IntPtrField1    *int    // this little pointer gets one
 	// IntPtrField2    *int    // this little pointer gets none
 	// OmittedBoolField   bool `bson:"-"`
-	privateStringField string
+	// privateStringField string
 	// IntArrayField      []int // TODO: array known does not work yet
 
 	// DefaultEmbeddedStructPtr *ExampleEmbedableStruct1
@@ -127,16 +128,17 @@ var TmpSimpleEmbedSliceValue = []ExampleSimpleEmbeddableDocument{TmpSimpleEmbedV
 
 // register the model with some default values
 var ExampleDocuments = mongoid.Register(&ExampleDocument{
-	StringField:          "tacocat is tacocat backwards",
-	IntField:             42,
-	IntSliceField:        []int{1, 2, 4, 8, 16},
-	IntPtrSliceField:     []*int{&TmpIntFieldValue1, &TmpIntFieldValue2},
-	IntPtrSliceFieldNils: []*int{nil, nil, nil},
-	SimpleEmbedPtrSet:    &TmpSimpleEmbedValue,
-	SimpleInlinePtrSet:   &TmpSimpleInlineValue,
+	StringField: "tacocat is tacocat backwards",
+	IntField:    42,
+	BoolField:   true,
+	// IntSliceField: []int{1, 2, 4, 8, 16},
+	// IntPtrSliceField:     []*int{&TmpIntFieldValue1, &TmpIntFieldValue2},
+	// IntPtrSliceFieldNils: []*int{nil, nil, nil},
+	// SimpleEmbedPtrSet:    &TmpSimpleEmbedValue,
+	// SimpleInlinePtrSet:   &TmpSimpleInlineValue,
 
-	SimpleEmbedSliceField:    []ExampleSimpleEmbeddableDocument{TmpSimpleEmbedValue, TmpSimpleEmbedValue},
-	SimpleEmbedPtrSliceField: []*ExampleSimpleEmbeddableDocument{&TmpSimpleEmbedValue, &TmpSimpleEmbedValue},
+	// SimpleEmbedSliceField:    []ExampleSimpleEmbeddableDocument{TmpSimpleEmbedValue, TmpSimpleEmbedValue},
+	// SimpleEmbedPtrSliceField: []*ExampleSimpleEmbeddableDocument{&TmpSimpleEmbedValue, &TmpSimpleEmbedValue},
 	// SimpleEmbedSlicePtr:      &TmpSimpleEmbedSliceValue,
 
 })
@@ -174,7 +176,7 @@ var _ = Describe("Document", func() {
 
 		It("identifies a simple change via IsChanged()", func() {
 			newObj := ExampleDocuments.New().(*ExampleDocument)
-			newObj.IntSliceField = []int{}
+			// newObj.IntSliceField = []int{}
 			newObj.StringField = gofakeit.HipsterWord()
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
 		})
@@ -185,7 +187,7 @@ var _ = Describe("Document", func() {
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
 		})
 
-		It("identifies a slice field clearing via IsChanged()", func() {
+		PIt("identifies a slice field clearing via IsChanged()", func() {
 			newObj := ExampleDocuments.New().(*ExampleDocument)
 			newObj.IntSliceField = []int{}
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
@@ -209,7 +211,7 @@ var _ = Describe("Document", func() {
 			Expect(invalidList).To(BeEmpty(), "found non-marshallable complex types within BSON key path(s) from: "+fmt.Sprintf("%+v", bsonM))
 		})
 
-		PIt("can be Save()'ed and Find()'ed", func() {
+		It("can be Save()'ed and Find()'ed", func() {
 			OnlineDatabaseOnly(func() {
 
 				By("object creation")
@@ -223,6 +225,7 @@ var _ = Describe("Document", func() {
 				Expect(newObj.IsChanged()).To(BeFalse(), "expects to be unchanged")
 
 				initialObjectID := newObj.ID
+				Expect(initialObjectID).To(Equal(mongoid.ObjectID{}), "expects initialObjectID to be zero-value")
 
 				By("Save()'ing")
 				Expect(newObj.Save()).To(BeNil(), "expects no errors")
@@ -251,3 +254,247 @@ var _ = Describe("Document", func() {
 	})
 
 })
+
+var _ = Describe("Document", func() {
+
+	// Context("an unknown UnknownExampleDocument document model", func() {
+	// 	It("is not verifyably registered", func() {
+	// 		By("struct name")
+	// 		Expect(mongoid.M("UnknownExampleDocument")).To(BeNil())
+	// 		By("example ref object")
+	// 		Expect(mongoid.M(&UnknownExampleDocument{})).To(BeNil())
+	// 	})
+	// })
+	Context("verifying storage of Document field types", func() {
+		// test := func(structPtr interface{}, fieldPtr interface{}, exBson bson.M, bsonFieldName string) {
+		// 	fieldValue := reflect.Indirect(reflect.ValueOf(fieldPtr))
+		// 	_, ok := exBson[bsonFieldName]
+		// 	Expect(ok).To(Equal(true), "given bsonFieldName should be a valid key to the target value, so the test can validate successful assignment")
+		// 	Expect(fieldValue.Interface()).ToNot(Equal(exBson[bsonFieldName]), "initial struct field value should not already equal the target value of the test")
+		// 	structValuesFromBsonM(structPtr, exBson)
+		// 	Expect(fieldValue.Interface()).To(Equal(exBson[bsonFieldName]), "struct field value should equal the target value after assignment")
+		// }
+
+		// It("bool field", func() {
+		// 	boolFieldEx := struct{ BoolField bool }{true}
+		// 	test(&boolFieldEx, &boolFieldEx.BoolField, bson.M{"bool_field": false}, "bool_field")
+		// })
+
+		It("bool field", func() {
+			type BoolTestStruct struct {
+				mongoid.Base `mongoid:"collection:bool_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        bool
+			}
+			BoolTestStructs := mongoid.Register(&BoolTestStruct{Field: false})
+			newObj := BoolTestStructs.New().(*BoolTestStruct)
+			newObj.Field = true
+			newObj.Save()
+			sameObj := BoolTestStructs.Find(newObj.ID).One().(*BoolTestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = false
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = BoolTestStructs.Find(newObj.ID).One().(*BoolTestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+
+		It("int field", func() {
+			type IntTestStruct struct {
+				mongoid.Base `mongoid:"collection:int_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        int
+			}
+			IntTestStructs := mongoid.Register(&IntTestStruct{Field: 0})
+			newObj := IntTestStructs.New().(*IntTestStruct)
+			newObj.Field = 42
+			newObj.Save()
+			sameObj := IntTestStructs.Find(newObj.ID).One().(*IntTestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = 7
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = IntTestStructs.Find(newObj.ID).One().(*IntTestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+
+		It("int8 field", func() {
+			type Int8TestStruct struct {
+				mongoid.Base `mongoid:"collection:int8_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        int8
+			}
+			Int8TestStructs := mongoid.Register(&Int8TestStruct{Field: 0})
+			newObj := Int8TestStructs.New().(*Int8TestStruct)
+			newObj.Field = int8(math.MaxInt8)
+			newObj.Save()
+			sameObj := Int8TestStructs.Find(newObj.ID).One().(*Int8TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = 7
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = Int8TestStructs.Find(newObj.ID).One().(*Int8TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+		It("int16 field", func() {
+			type Int16TestStruct struct {
+				mongoid.Base `mongoid:"collection:int16_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        int16
+			}
+			Int16TestStructs := mongoid.Register(&Int16TestStruct{Field: 0})
+			newObj := Int16TestStructs.New().(*Int16TestStruct)
+			newObj.Field = int16(math.MaxInt16)
+			newObj.Save()
+			sameObj := Int16TestStructs.Find(newObj.ID).One().(*Int16TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = 7
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = Int16TestStructs.Find(newObj.ID).One().(*Int16TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+		It("int32 field", func() {
+			type Int32TestStruct struct {
+				mongoid.Base `mongoid:"collection:int32_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        int32
+			}
+			Int32TestStructs := mongoid.Register(&Int32TestStruct{Field: 0})
+			newObj := Int32TestStructs.New().(*Int32TestStruct)
+			newObj.Field = int32(math.MaxInt32)
+			newObj.Save()
+			sameObj := Int32TestStructs.Find(newObj.ID).One().(*Int32TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = 7
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = Int32TestStructs.Find(newObj.ID).One().(*Int32TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+		It("int64 field", func() {
+			type Int64TestStruct struct {
+				mongoid.Base `mongoid:"collection:int64_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        int64
+			}
+			Int64TestStructs := mongoid.Register(&Int64TestStruct{Field: 0})
+			newObj := Int64TestStructs.New().(*Int64TestStruct)
+			newObj.Field = int64(math.MaxInt64)
+			newObj.Save()
+			sameObj := Int64TestStructs.Find(newObj.ID).One().(*Int64TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = 7
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = Int64TestStructs.Find(newObj.ID).One().(*Int64TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+
+		It("no field", func() {
+			type TestStruct struct {
+				mongoid.Base `mongoid:"collection:nofield_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+			}
+			TestStructs := mongoid.Register(&TestStruct{})
+			newObj := TestStructs.New().(*TestStruct)
+			newObj.Save()
+			sameObj := TestStructs.Find(newObj.ID).One().(*TestStruct)
+			Expect(newObj.ID).To(Equal(sameObj.ID), "retrieved document should have same ID")
+		})
+
+		It("uint field", func() {
+			type UintTestStruct struct {
+				mongoid.Base `mongoid:"collection:uint_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        uint
+			}
+			UintTestStructs := mongoid.Register(&UintTestStruct{Field: 0})
+			newObj := UintTestStructs.New().(*UintTestStruct)
+			newObj.Field = uint(42)
+			newObj.Save()
+			sameObj := UintTestStructs.Find(newObj.ID).One().(*UintTestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = 7
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = UintTestStructs.Find(newObj.ID).One().(*UintTestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+
+		It("uint8 field", func() {
+			type Uint8TestStruct struct {
+				mongoid.Base `mongoid:"collection:uint8_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        uint8
+			}
+			Uint8TestStructs := mongoid.Register(&Uint8TestStruct{Field: 0})
+			newObj := Uint8TestStructs.New().(*Uint8TestStruct)
+			newObj.Field = uint8(math.MaxUint8)
+			newObj.Save()
+			sameObj := Uint8TestStructs.Find(newObj.ID).One().(*Uint8TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = 7
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = Uint8TestStructs.Find(newObj.ID).One().(*Uint8TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+		It("uint16 field", func() {
+			type Uint16TestStruct struct {
+				mongoid.Base `mongoid:"collection:uint16_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        uint16
+			}
+			Uint16TestStructs := mongoid.Register(&Uint16TestStruct{Field: 0})
+			newObj := Uint16TestStructs.New().(*Uint16TestStruct)
+			newObj.Field = uint16(math.MaxUint16)
+			newObj.Save()
+			sameObj := Uint16TestStructs.Find(newObj.ID).One().(*Uint16TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = 7
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = Uint16TestStructs.Find(newObj.ID).One().(*Uint16TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+		It("uint32 field", func() {
+			type Uint32TestStruct struct {
+				mongoid.Base `mongoid:"collection:uint32_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        uint32
+			}
+			Uint32TestStructs := mongoid.Register(&Uint32TestStruct{Field: 0})
+			newObj := Uint32TestStructs.New().(*Uint32TestStruct)
+			newObj.Field = uint32(math.MaxUint32)
+			newObj.Save()
+			sameObj := Uint32TestStructs.Find(newObj.ID).One().(*Uint32TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = 7
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = Uint32TestStructs.Find(newObj.ID).One().(*Uint32TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+		It("uint64 field", func() {
+			type Uint64TestStruct struct {
+				mongoid.Base `mongoid:"collection:uint64_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        uint64
+			}
+			Uint64TestStructs := mongoid.Register(&Uint64TestStruct{Field: 0})
+			newObj := Uint64TestStructs.New().(*Uint64TestStruct)
+			newObj.Field = uint64(math.MaxUint64)
+			newObj.Save()
+			sameObj := Uint64TestStructs.Find(newObj.ID).One().(*Uint64TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+			newObj.Field = 7
+			newObj.Save()
+			Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+			sameObj = Uint64TestStructs.Find(newObj.ID).One().(*Uint64TestStruct)
+			Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+		})
+	})
+})
+
+// var ExampleDocuments = mongoid.Register(&ExampleDocument{
