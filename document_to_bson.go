@@ -5,7 +5,6 @@ import (
 	"mongoid/util"
 
 	"reflect"
-	"strconv"
 
 	"github.com/iancoleman/strcase"
 	"go.mongodb.org/mongo-driver/bson"
@@ -161,36 +160,36 @@ func structFieldToBsonM(field reflect.StructField, fieldValue reflect.Value) bso
 			retBsonA := indexableValueToBsonA(reflect.Indirect(fieldValue))
 			return bson.M{fieldName: retBsonA}
 		case reflect.Bool:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.String:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.Int:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.Int8:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.Int16:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.Int32:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.Int64:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.Uint:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.Uint8:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.Uint16:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.Uint32:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		case reflect.Uint64:
-			return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		default:
 			log.Panicf("unhandled builtin type: %v", fieldValueKind)
-			// 	return bson.M{fieldName: marshalToDB(fieldValue.Interface())}
+			// 	return bson.M{fieldName: util.MarshalToDB(fieldValue.Interface())}
 		}
 	}
 	if oid, ok := fieldValue.Interface().(primitive.ObjectID); ok {
-		return bson.M{fieldName: marshalToDB(oid)}
+		return bson.M{fieldName: util.MarshalToDB(oid)}
 	}
 	if marshaler, ok := reflect.Indirect(fieldValue).Interface().(bsoncodec.Marshaler); ok {
 		log.Error("this code is untested (e17635b9)")
@@ -198,7 +197,7 @@ func structFieldToBsonM(field reflect.StructField, fieldValue reflect.Value) bso
 		if err != nil {
 			log.Panic(err)
 		}
-		return bson.M{fieldName: marshalToDB(marshaledValue)}
+		return bson.M{fieldName: util.MarshalToDB(marshaledValue)}
 	}
 
 	// standard values types and unknowns
@@ -214,49 +213,6 @@ func structFieldToBsonM(field reflect.StructField, fieldValue reflect.Value) bso
 	log.Error("default bson enc: ", fieldValueKind)
 	return bson.M{
 		fieldName: fieldValue.Interface(),
-	}
-}
-
-// Casts the given fromValue into a database suitable storage type, returning an interface to the newly cast value.
-// If fromValue does not require conversion, it may be returned directly, but it is not guaranteed to do so.
-// If a value conversion would result in loss of data or precision, this function will panic.
-func marshalToDB(fromValue interface{}) interface{} {
-	switch fromValue.(type) {
-	case primitive.ObjectID:
-		return fromValue
-	case bool:
-		return fromValue
-	case string:
-		return fromValue
-	case int:
-		return int32(fromValue.(int))
-	case int8:
-		return int32(fromValue.(int8))
-	case int16:
-		return int32(fromValue.(int16))
-	case int32:
-		return int32(fromValue.(int32))
-	case int64:
-		return int64(fromValue.(int64))
-	case uint:
-		return int64(fromValue.(uint))
-	case uint8:
-		return int32(fromValue.(uint8))
-	case uint16:
-		return int32(fromValue.(uint16))
-	case uint32:
-		return int64(fromValue.(uint32))
-	case uint64:
-		val := fromValue.(uint64)
-		return strconv.FormatUint(val, 10)
-	case *uint64:
-		if fromValue != nil {
-			return marshalToDB(*(fromValue.(*uint64)))
-		}
-		return nil
-	default:
-		log.Panicf("default marfshalToDB: %v ", reflect.TypeOf(fromValue))
-		return fromValue
 	}
 }
 
