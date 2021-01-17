@@ -223,7 +223,7 @@ var _ = Describe("Document", func() {
 			})
 		})
 
-		It("recalls a previous field value via Was(fieldName)", func() {
+		It("recalls a previous string field value via Was(fieldName) [t8508c303]", func() {
 			newObj := ExampleDocuments.New().(*ExampleDocument)
 			oldValue := newObj.StringField
 			newValue := gofakeit.HipsterWord()
