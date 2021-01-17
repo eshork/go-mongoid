@@ -195,7 +195,7 @@ var _ = Describe("Document", func() {
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
 		})
 
-		It("identifies a string ptr field change via IsChanged()", func() {
+		It("identifies a string ptr (*string) field change via IsChanged()", func() {
 			By("starting with a new ExampleDocument")
 			newObj := ExampleDocuments.New().(*ExampleDocument)
 			Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after creation")
