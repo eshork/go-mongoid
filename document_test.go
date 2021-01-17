@@ -223,8 +223,20 @@ var _ = Describe("Document", func() {
 			})
 		})
 
+		It("recalls a previous bool field value via Was(fieldName) [t6c81550b]", func() {
+			newObj := ExampleDocuments.New().(*ExampleDocument)
+			Expect(newObj.IsChanged()).To(BeFalse(), "expect no change")
+			oldValue := newObj.BoolField
+			newValue := false
+			newObj.BoolField = newValue
+			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
+			wasValue, changed := newObj.Was("bool_field")
+			Expect(changed).To(BeTrue(), "expect field to indicate it was changed")
+			Expect(wasValue).To(Equal(oldValue), "expect old value to be preserved")
+		})
 		It("recalls a previous string field value via Was(fieldName) [t8508c303]", func() {
 			newObj := ExampleDocuments.New().(*ExampleDocument)
+			Expect(newObj.IsChanged()).To(BeFalse(), "expect no change")
 			oldValue := newObj.StringField
 			newValue := gofakeit.HipsterWord()
 			newObj.StringField = newValue
