@@ -10,6 +10,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    env:
+      MONGOID_TEST_DB: "0"
     steps:
     - uses: actions/checkout@v2
 
