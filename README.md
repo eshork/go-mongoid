@@ -9,20 +9,23 @@ This is a (sort of) reimplementation of [Mongoid](https://github.com/mongodb/mon
 
 > Mongoid is an ODM (Object-Document Mapper) framework for MongoDB in ~Ruby~ Go
 
-Many things (most things?) don't directly translate from Ruby to Go, but the major Document-related interfaces from the Mongoid API are replicated as closely as possible, with adjustments as needed to facilitate language differences.
+Many things (most things?) don't directly translate from Ruby to Go, but major themes of the Document-related interfaces from the Mongoid API are replicated as closely as possible, with adjustments as needed to facilitate language differences.
 
-# Target features (for v1)
+# Target features for v1.0.0
 
 - Uses Go structs as the primary document interface - ie, build your own custom document definitions using native syntax
   - Supports builtin Go data-types as document field-types
   - Supports custom structs as document field-types (embedded documents)
-  - Supports maps and slices/arrays as dynamic field-types
+  - Supports maps and slices/arrays as dynamic/flexible field-types
   - Supports custom field data-types (custom structs with their own bson marshaling methods)
 - Default values for new document objects
 - Change tracking - identify which fields have been altered since new object creation or since loading from the database, as well as the previous values
 - Atomic updates - only changed fields are written to the datastore during save operations, same as Ruby Mongoid
-- Query builder interface - concatenate method calls to dynamically build queries
-  - Save and recall query Scopes (as well as default scopes per ModelType)
+- Query builder interface - concatenating method calls to build complex queries
+
+---
+# Future features
+- Save and recall query Scopes (as well as default scopes per ModelType)
 
 - Model relationships: one-to-one, one-to-many, many-to-many (and the inverses)
   - Lazy loading for cross-document associations by default
@@ -35,7 +38,6 @@ Many things (most things?) don't directly translate from Ruby to Go, but the maj
 - Plugin architecture allows for adhoc add-on functionality (think Mongoid::Paranoia, Mongoid::Versioning, etc)
 
 - MongoDB connection configuration via JSON, YAML, or ENV vars
-
 
 
 # Installation & Usage
