@@ -349,7 +349,6 @@ var _ = Describe("Document", func() {
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 			})
 		})
-
 		It("int8 field [tb575e350]", func() {
 			type Int8TestStruct struct {
 				mongoid.Base `mongoid:"collection:int8_test"`
@@ -410,7 +409,6 @@ var _ = Describe("Document", func() {
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 			})
 		})
-
 		It("int64 field [t486a2496]", func() {
 			type Int64TestStruct struct {
 				mongoid.Base `mongoid:"collection:int64_test"`
@@ -431,7 +429,6 @@ var _ = Describe("Document", func() {
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 			})
 		})
-
 		It("no field [tbf3ad97f]", func() {
 			type TestStruct struct {
 				mongoid.Base `mongoid:"collection:nofield_test"`
@@ -445,7 +442,6 @@ var _ = Describe("Document", func() {
 				Expect(newObj.ID).To(Equal(sameObj.ID), "retrieved document should have same ID")
 			})
 		})
-
 		It("uint field [te355fc16]", func() {
 			type UintTestStruct struct {
 				mongoid.Base `mongoid:"collection:uint_test"`
@@ -466,7 +462,6 @@ var _ = Describe("Document", func() {
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 			})
 		})
-
 		It("uint8 field [t1e63da25]", func() {
 			type Uint8TestStruct struct {
 				mongoid.Base `mongoid:"collection:uint8_test"`
@@ -587,6 +582,5 @@ var _ = Describe("Document", func() {
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 			})
 		})
-
 	})
 })
