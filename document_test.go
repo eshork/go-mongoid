@@ -323,7 +323,7 @@ var _ = Describe("Document", func() {
 		})
 		It("string field [tdb0f1026]", func() {
 			type StringTestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
+				mongoid.Base `mongoid:"collection:string_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        string
 			}
@@ -556,7 +556,7 @@ var _ = Describe("Document", func() {
 		})
 		It("complex64 field [t9c9d2b4e]", func() {
 			type Complex64TestStruct struct {
-				mongoid.Base `mongoid:"collection:int16_test"`
+				mongoid.Base `mongoid:"collection:complex64_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        complex64
 			}
@@ -576,7 +576,7 @@ var _ = Describe("Document", func() {
 		})
 		It("complex128 field [tb975eac8]", func() {
 			type Complex128TestStruct struct {
-				mongoid.Base `mongoid:"collection:int16_test"`
+				mongoid.Base `mongoid:"collection:complex128_test"`
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        complex128
 			}
@@ -592,6 +592,34 @@ var _ = Describe("Document", func() {
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = Complex128TestStructs.Find(newObj.ID).One().(*Complex128TestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+			})
+		})
+		It("*bool field [tdc0c98cb]", func() {
+			type BoolPtrTestStruct struct {
+				mongoid.Base `mongoid:"collection:bool_ptr_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        *bool
+			}
+			initialValue := false
+			BoolPtrTestStructs := mongoid.Register(&BoolPtrTestStruct{Field: &initialValue})
+			newObj := BoolPtrTestStructs.New().(*BoolPtrTestStruct)
+			OnlineDatabaseOnly(func() {
+				newObj.Save()
+				sameObj := BoolPtrTestStructs.Find(newObj.ID).One().(*BoolPtrTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+				newValue := true
+				newObj.Field = &newValue
+				newObj.Save()
+				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+				sameObj = BoolPtrTestStructs.Find(newObj.ID).One().(*BoolPtrTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+				newObj.Field = nil
+				newObj.Save()
+				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+				sameObj = BoolPtrTestStructs.Find(newObj.ID).One().(*BoolPtrTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+			})
+		})
 			})
 		})
 	})
