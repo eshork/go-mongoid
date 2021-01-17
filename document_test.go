@@ -309,7 +309,26 @@ var _ = Describe("Document", func() {
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 			})
 		})
-
+		It("string field [tdb0f1026]", func() {
+			type StringTestStruct struct {
+				mongoid.Base `mongoid:"collection:bool_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        string
+			}
+			StringTestStructs := mongoid.Register(&StringTestStruct{Field: "original value"})
+			newObj := StringTestStructs.New().(*StringTestStruct)
+			newObj.Field = "something else"
+			OnlineDatabaseOnly(func() {
+				newObj.Save()
+				sameObj := StringTestStructs.Find(newObj.ID).One().(*StringTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+				newObj.Field = "crystal pepsi"
+				newObj.Save()
+				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+				sameObj = StringTestStructs.Find(newObj.ID).One().(*StringTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+			})
+		})
 		It("int field [t1c6a3f54]", func() {
 			type IntTestStruct struct {
 				mongoid.Base `mongoid:"collection:int_test"`
