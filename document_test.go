@@ -620,6 +620,56 @@ var _ = Describe("Document", func() {
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 			})
 		})
+		It("*string field [t96014c1a]", func() {
+			type StringPtrTestStruct struct {
+				mongoid.Base `mongoid:"collection:string_ptr_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        *string
+			}
+			initialValue := "initial value"
+			StringPtrTestStructs := mongoid.Register(&StringPtrTestStruct{Field: &initialValue})
+			newObj := StringPtrTestStructs.New().(*StringPtrTestStruct)
+			OnlineDatabaseOnly(func() {
+				newObj.Save()
+				sameObj := StringPtrTestStructs.Find(newObj.ID).One().(*StringPtrTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+				newValue := "something else"
+				newObj.Field = &newValue
+				newObj.Save()
+				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+				sameObj = StringPtrTestStructs.Find(newObj.ID).One().(*StringPtrTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+				newObj.Field = nil
+				newObj.Save()
+				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+				sameObj = StringPtrTestStructs.Find(newObj.ID).One().(*StringPtrTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+			})
+		})
+		It("*int field [te90cddf8]", func() {
+			type IntPtrTestStruct struct {
+				mongoid.Base `mongoid:"collection:int_ptr_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        *int
+			}
+			initialValue := int(7)
+			IntPtrTestStructs := mongoid.Register(&IntPtrTestStruct{Field: &initialValue})
+			newObj := IntPtrTestStructs.New().(*IntPtrTestStruct)
+			OnlineDatabaseOnly(func() {
+				newObj.Save()
+				sameObj := IntPtrTestStructs.Find(newObj.ID).One().(*IntPtrTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+				newValue := int(42)
+				newObj.Field = &newValue
+				newObj.Save()
+				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+				sameObj = IntPtrTestStructs.Find(newObj.ID).One().(*IntPtrTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+				newObj.Field = nil
+				newObj.Save()
+				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+				sameObj = IntPtrTestStructs.Find(newObj.ID).One().(*IntPtrTestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 			})
 		})
 	})
