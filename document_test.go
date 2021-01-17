@@ -199,7 +199,9 @@ var _ = Describe("Document", func() {
 			By("starting with a new ExampleDocument")
 			newObj := ExampleDocuments.New().(*ExampleDocument)
 			Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after creation")
-
+			By("saving the ExampleDocument")
+			newObj.Save()
+			Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after save")
 			By("unsetting StringPtrField (setting it to nil)")
 			newObj.StringPtrField = nil
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
@@ -208,7 +210,6 @@ var _ = Describe("Document", func() {
 			newObj.Save()
 			Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after save")
 			// Expect(newObj.Changes()).To(Equal(bson.M(nil)), "expect no changes after save")
-
 			By("changing StringPtrField to something else")
 			newValue := "something else"
 			newObj.StringPtrField = &newValue
@@ -218,7 +219,6 @@ var _ = Describe("Document", func() {
 			newObj.Save()
 			Expect(newObj.Changes()).To(Equal(bson.M(nil)), "expect no changes after save")
 			Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after save")
-
 		})
 
 		PIt("recalls a previous field value via Was(fieldName)", func() {
