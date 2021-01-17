@@ -216,9 +216,7 @@ func structFieldValueFromBsonM(field reflect.StructField, bsonM bson.M) (retValu
 	// If the field type kind is a pointer, then we need to return a pointer as the new value
 	if fieldTypeKind == reflect.Ptr {
 		retValue = retValue.Addr()
-		log.Warnf("retValue PTR field value: %v", retValue.Elem())
 	}
-	// log.Warnf("retValue field value: %v", retValue)
 	return retValue, true
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/brianvoe/gofakeit"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // left unregistered for test purposes
@@ -67,12 +68,12 @@ type ExampleDocument struct {
 	// mongoid.Timestamps `bson:",inline"`
 	ID mongoid.ObjectID `bson:"_id"`
 
-	StringField string
-	IntField    int
-	BoolField   bool
-	// StringPtrField *string
-	// IntPtrField    *int
-	// BoolPtrField   *bool
+	StringField    string
+	IntField       int
+	BoolField      bool
+	StringPtrField *string
+	IntPtrField    *int
+	BoolPtrField   *bool
 
 	IntSliceField []int
 	// IntPtrSliceField     []*int
@@ -128,10 +129,11 @@ var TmpSimpleEmbedSliceValue = []ExampleSimpleEmbeddableDocument{TmpSimpleEmbedV
 
 // register the model with some default values
 var ExampleDocuments = mongoid.Register(&ExampleDocument{
-	StringField:   "tacocat is tacocat backwards",
-	IntField:      42,
-	BoolField:     true,
-	IntSliceField: []int{1, 2, 4, 8, 16},
+	StringField:    "tacocat is tacocat backwards",
+	IntField:       42,
+	BoolField:      true,
+	StringPtrField: func() *string { retval := "test"; return &retval }(),
+	IntSliceField:  []int{1, 2, 4, 8, 16},
 	// IntPtrSliceField:     []*int{&TmpIntFieldValue1, &TmpIntFieldValue2},
 	// IntPtrSliceFieldNils: []*int{nil, nil, nil},
 	// SimpleEmbedPtrSet:    &TmpSimpleEmbedValue,
@@ -191,6 +193,32 @@ var _ = Describe("Document", func() {
 			newObj := ExampleDocuments.New().(*ExampleDocument)
 			newObj.IntSliceField = []int{}
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
+		})
+
+		It("identifies a string ptr field change via IsChanged()", func() {
+			By("starting with a new ExampleDocument")
+			newObj := ExampleDocuments.New().(*ExampleDocument)
+			Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after creation")
+
+			By("unsetting StringPtrField (setting it to nil)")
+			newObj.StringPtrField = nil
+			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
+			Expect(newObj.Changes()).ToNot(Equal(bson.M(nil)), "expect a change")
+			By("saving the ExampleDocument")
+			newObj.Save()
+			Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after save")
+			// Expect(newObj.Changes()).To(Equal(bson.M(nil)), "expect no changes after save")
+
+			By("changing StringPtrField to something else")
+			newValue := "something else"
+			newObj.StringPtrField = &newValue
+			Expect(newObj.Changes()).ToNot(Equal(bson.M(nil)), "expect a change")
+			Expect(newObj.IsChanged()).ToNot(BeFalse(), "expect a change")
+			By("saving the ExampleDocument")
+			newObj.Save()
+			Expect(newObj.Changes()).To(Equal(bson.M(nil)), "expect no changes after save")
+			Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after save")
+
 		})
 
 		PIt("recalls a previous field value via Was(fieldName)", func() {
@@ -475,5 +503,3 @@ var _ = Describe("Document", func() {
 		})
 	})
 })
-
-// var ExampleDocuments = mongoid.Register(&ExampleDocument{

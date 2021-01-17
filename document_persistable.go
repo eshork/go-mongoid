@@ -78,6 +78,8 @@ func (d *Base) saveByUpdate() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+	d.setPersisted(true)         // this is now persisted
+	d.refreshPreviousValueBSON() // update change tracking with current values
 	return nil
 }
 
