@@ -24,8 +24,10 @@ jobs:
         run: go build -v ./...
 
       - name: Test
-        # run: go test -v ./...
-        run: go run github.com/markbates/grift test:all
+        run: go run github.com/markbates/grift test
+
+      - name: Bench
+        run: go run github.com/markbates/grift test:bench
 
       - name: Vet
         run: go vet
