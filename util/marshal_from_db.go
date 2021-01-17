@@ -62,6 +62,36 @@ func MarshalFromDB(intoType reflect.Type, fromValue interface{}) interface{} {
 		}
 		dst.SetUint(srcUint64)
 		return dst.Interface()
+	case reflect.Complex64:
+		fallthrough
+	case reflect.Complex128:
+		dstPtr := reflect.New(intoType)
+		dst := reflect.Indirect(dstPtr)
+		var srcStr string
+		switch fromValue.(type) {
+		case complex64:
+			srcStr = strconv.FormatComplex(complex128(fromValue.(complex64)), 'f', -1, 64)
+		case complex128:
+			srcStr = strconv.FormatComplex(fromValue.(complex128), 'f', -1, 128)
+		case string:
+			srcStr = fromValue.(string)
+		}
+		var dstBits int
+		switch intoType.Kind() {
+		case reflect.Complex64:
+			dstBits = 64
+		case reflect.Complex128:
+			dstBits = 128
+		}
+		srcComplex128, srcComplex128Err := strconv.ParseComplex(srcStr, dstBits)
+		if srcComplex128Err != nil {
+			log.Panicf("Error detected while storing %v within %v: %v", reflect.TypeOf(fromValue), intoType, srcComplex128Err)
+		}
+		if dst.OverflowComplex(srcComplex128) {
+			log.Panicf("Overflow detected while storing %v within %v", reflect.TypeOf(fromValue), intoType)
+		}
+		dst.SetComplex(srcComplex128)
+		return dst.Interface()
 	}
 	log.Panicf("Unhandled kind: %v", intoType.Kind())
 	return nil

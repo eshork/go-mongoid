@@ -1,11 +1,11 @@
 package mongoid_test
 
 import (
+	"fmt"
 	"math"
+	"math/cmplx"
 	"mongoid"
 	"mongoid/util"
-
-	"fmt"
 
 	"github.com/brianvoe/gofakeit"
 	. "github.com/onsi/ginkgo"
@@ -528,5 +528,46 @@ var _ = Describe("Document", func() {
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
 			})
 		})
+		It("complex64 field", func() {
+			type Complex64TestStruct struct {
+				mongoid.Base `mongoid:"collection:int16_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        complex64
+			}
+			Complex64TestStructs := mongoid.Register(&Complex64TestStruct{Field: 0})
+			newObj := Complex64TestStructs.New().(*Complex64TestStruct)
+			newObj.Field = complex64(cmplx.Inf())
+			OnlineDatabaseOnly(func() {
+				newObj.Save()
+				sameObj := Complex64TestStructs.Find(newObj.ID).One().(*Complex64TestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+				newObj.Field = 7
+				newObj.Save()
+				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+				sameObj = Complex64TestStructs.Find(newObj.ID).One().(*Complex64TestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+			})
+		})
+		It("complex128 field", func() {
+			type Complex128TestStruct struct {
+				mongoid.Base `mongoid:"collection:int16_test"`
+				ID           mongoid.ObjectID `bson:"_id"`
+				Field        complex128
+			}
+			Complex128TestStructs := mongoid.Register(&Complex128TestStruct{Field: 0})
+			newObj := Complex128TestStructs.New().(*Complex128TestStruct)
+			newObj.Field = complex128(cmplx.Inf())
+			OnlineDatabaseOnly(func() {
+				newObj.Save()
+				sameObj := Complex128TestStructs.Find(newObj.ID).One().(*Complex128TestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
+				newObj.Field = 7
+				newObj.Save()
+				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
+				sameObj = Complex128TestStructs.Find(newObj.ID).One().(*Complex128TestStruct)
+				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original after refetch")
+			})
+		})
+
 	})
 })

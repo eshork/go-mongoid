@@ -48,6 +48,10 @@ func MarshalToDB(fromValue interface{}) (interface{}, bool) {
 		return float64(fromValue.(float32)), true
 	case float64:
 		return float64(fromValue.(float64)), true
+	case complex64:
+		return strconv.FormatComplex(complex128(fromValue.(complex64)), 'f', -1, 64), true
+	case complex128:
+		return strconv.FormatComplex(fromValue.(complex128), 'f', -1, 128), true
 	case *bool:
 		if fromValue != nil {
 			return MarshalToDB(*(fromValue.(*bool)))
@@ -121,6 +125,16 @@ func MarshalToDB(fromValue interface{}) (interface{}, bool) {
 	case *float64:
 		if fromValue != nil {
 			return MarshalToDB(*(fromValue.(*float64)))
+		}
+		return nil, true
+	case *complex64:
+		if fromValue != nil {
+			return MarshalToDB(*(fromValue.(*complex64)))
+		}
+		return nil, true
+	case *complex128:
+		if fromValue != nil {
+			return MarshalToDB(*(fromValue.(*complex128)))
 		}
 		return nil, true
 	default:
