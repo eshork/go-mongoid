@@ -23,7 +23,7 @@ func TestCriteria(t *testing.T) {
 	RunSpecs(t, "Mongoid Examples")
 }
 
-var MONGOID_TEST_DB bool
+var mongoidTestDb bool
 
 var _ = BeforeSuite(func() {
 	// set up the test database connection, if we should...
@@ -43,7 +43,7 @@ var _ = BeforeSuite(func() {
 	if testDb == "1" {
 		fmt.Println("")
 		fmt.Println("MONGOID TESTS REQUIRING MONGOID_TEST_DB ACTIVATED")
-		MONGOID_TEST_DB = true
+		mongoidTestDb = true
 		gTestMongoidConfig := mongoid.Config{
 			Clients: []mongoid.Client{
 				{
@@ -74,7 +74,7 @@ var _ = BeforeEach(func() {
 // helper/wrapper function - tests that require a database can enclose their contents with this to prevent execution (and thus failure) when a db is not present
 func OnlineDatabaseOnly(f func()) {
 	// execute the given block if a database is currently usable, otherwise skip it (so it always passes) and try to announce it was skipped
-	if MONGOID_TEST_DB {
+	if mongoidTestDb {
 		f()
 	} else {
 		By("skipping test requiring online database (PASS)")

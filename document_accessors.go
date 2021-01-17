@@ -100,6 +100,6 @@ func getStructFieldValueRefByBsonName(rawStructPtr interface{}, fieldName string
 func getStructFieldValueRefByBsonPath(rawStructPtr interface{}, fieldNamePath string) (found bool, retVal reflect.Value, retField reflect.StructField) {
 	// walk each struct field
 	return getStructFieldValueRefByBsonName(rawStructPtr, fieldNamePath) // TODO FINISH ME
-	log.Fatalf("getStructFieldValueRefByBsonPath(%s)", fieldNamePath)
-	return
+	// log.Fatalf("getStructFieldValueRefByBsonPath(%s)", fieldNamePath)
+	// return
 }
