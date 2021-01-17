@@ -2,7 +2,9 @@ package mongoid
 
 import (
 	"context"
+	mongoidError "mongoid/errors"
 	"mongoid/log"
+	"reflect"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -47,8 +49,19 @@ func (d *Base) Changes() BsonDocument {
 
 // Was provides the previous field value and indicates if a change has occurred
 func (d *Base) Was(fieldPath string) (interface{}, bool) {
-	log.Panicf("NYI -Base.Was_(%s)", fieldPath)
-	return nil, false
+	value, err := d.GetField(fieldPath)
+	if err != nil {
+		log.Panic(err)
+	}
+	prevValue, prevFound := d.GetFieldPrevious(fieldPath)
+	if !prevFound {
+		log.Panic(&mongoidError.DocumentFieldNotFound{FieldName: fieldPath})
+	}
+	if !verifyBothAreSameSame(value, prevValue) {
+		// different types is definitely a change
+		return prevValue, true
+	}
+	return prevValue, !reflect.DeepEqual(value, prevValue)
 }
 
 // Save will store the changed attributes to the database atomically, or insert the document if flagged as a new record via Model#new_record?

@@ -1,7 +1,7 @@
 package mongoid
 
 /*
-	IDocumentBase implementations relating to generic field accessors: GetField() and SetField()
+	IDocumentBase implementations relating to generic field accessors: GetField(), SetField(), GetFieldWas()
 */
 
 import (
@@ -11,6 +11,16 @@ import (
 
 	"github.com/iancoleman/strcase"
 )
+
+// GetFieldPrevious returns an interface to the previous value from the document found at the given fieldNamePath and a true boolean if the path was valid
+func (d *Base) GetFieldPrevious(fieldNamePath string) (interface{}, bool) {
+	log.Tracef("GetFieldPrevious(%s)", fieldNamePath)
+	// this doesn't chase into sub-documents, will probably want to fix that one day
+	if value, found := d.previousValue[fieldNamePath]; found {
+		return value, true
+	}
+	return nil, false
+}
 
 // SetField sets a value on the document via bson field name path
 func (d *Base) SetField(fieldNamePath string, newValue interface{}) error {

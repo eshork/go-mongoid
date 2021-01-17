@@ -221,14 +221,14 @@ var _ = Describe("Document", func() {
 			Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after save")
 		})
 
-		PIt("recalls a previous field value via Was(fieldName)", func() {
-			// marked pending because .Was is currently NYI - ref gihub issue #5
+		It("recalls a previous field value via Was(fieldName)", func() {
 			newObj := ExampleDocuments.New().(*ExampleDocument)
 			oldValue := newObj.StringField
 			newValue := gofakeit.HipsterWord()
 			newObj.StringField = newValue
 			Expect(newObj.IsChanged()).To(BeTrue(), "expect a change")
-			wasValue, _ := newObj.Was("string_field")
+			wasValue, changed := newObj.Was("string_field")
+			Expect(changed).To(BeTrue(), "expect field to indicate it was changed")
 			Expect(wasValue).To(Equal(oldValue), "expect old value to be preserved")
 		})
 
