@@ -241,7 +241,7 @@ var _ = Describe("Document", func() {
 			Expect(invalidList).To(BeEmpty(), "found non-marshallable complex types within BSON key path(s) from: "+fmt.Sprintf("%+v", bsonM))
 		})
 
-		It("can be Save()'ed and Find()'ed", func() {
+		It("can be Save()'ed and Find()'ed [t62adaaca]", func() {
 			OnlineDatabaseOnly(func() {
 
 				By("object creation")
