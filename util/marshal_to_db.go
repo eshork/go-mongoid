@@ -21,8 +21,6 @@ func MarshalToDB(fromValue interface{}) (interface{}, bool) {
 		return fromValue, true
 	case string:
 		return fromValue, true
-	case error:
-		return fromValue.(error).Error(), true
 	case int:
 		return int32(fromValue.(int)), true
 	case int8:
@@ -60,11 +58,6 @@ func MarshalToDB(fromValue interface{}) (interface{}, bool) {
 	case *string:
 		if fromValue != nil {
 			return MarshalToDB(*(fromValue.(*string)))
-		}
-		return nil, true
-	case *error:
-		if fromValue != nil {
-			return MarshalToDB(*(fromValue.(*error)))
 		}
 		return nil, true
 	case *int:
