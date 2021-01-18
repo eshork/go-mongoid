@@ -14,7 +14,7 @@ Many things (most things?) don't directly translate from Ruby to Go, but major t
 # Target features for v1.0.0
 
 - Uses Go structs as the primary document interface - ie, build your own custom document definitions using native syntax
-  - Supports builtin Go data-types as document field-types
+  - Supports all builtin Go data-types as document field-types
   - Supports custom structs as document field-types (embedded documents)
   - Supports maps and slices/arrays as dynamic/flexible field-types
   - Supports custom field data-types (custom structs with their own bson marshaling methods)
