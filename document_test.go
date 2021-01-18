@@ -64,8 +64,8 @@ type ExampleSimpleEmbeddableDocument struct {
 
 // core example doc type - used as the basis of all document related tests
 type ExampleDocument struct {
-	mongoid.Base `mongoid:"collection:tacocat"`
-	// mongoid.Timestamps `bson:",inline"`
+	mongoid.Base // `mongoid:"collection:example_documents"` <- this is the collection name based on struct name
+
 	ID mongoid.ObjectID `bson:"_id"`
 
 	StringField    string
