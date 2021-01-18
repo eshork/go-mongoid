@@ -347,14 +347,16 @@ var _ = Describe("Document", func() {
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        int
 			}
-			IntTestStructs := mongoid.Register(&IntTestStruct{Field: 0})
+			IntTestStructs := mongoid.Register(&IntTestStruct{Field: int(0)})
 			newObj := IntTestStructs.New().(*IntTestStruct)
-			newObj.Field = 42
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
+			newObj.Field = int(math.MaxInt32)
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := IntTestStructs.Find(newObj.ID).One().(*IntTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newObj.Field = 7
+				newObj.Field = int(gofakeit.Int32())
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = IntTestStructs.Find(newObj.ID).One().(*IntTestStruct)
@@ -367,14 +369,16 @@ var _ = Describe("Document", func() {
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        int8
 			}
-			Int8TestStructs := mongoid.Register(&Int8TestStruct{Field: 0})
+			Int8TestStructs := mongoid.Register(&Int8TestStruct{Field: int8(0)})
 			newObj := Int8TestStructs.New().(*Int8TestStruct)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = int8(math.MaxInt8)
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Int8TestStructs.Find(newObj.ID).One().(*Int8TestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newObj.Field = 7
+				newObj.Field = gofakeit.Int8()
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = Int8TestStructs.Find(newObj.ID).One().(*Int8TestStruct)
@@ -387,14 +391,16 @@ var _ = Describe("Document", func() {
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        int16
 			}
-			Int16TestStructs := mongoid.Register(&Int16TestStruct{Field: 0})
+			Int16TestStructs := mongoid.Register(&Int16TestStruct{Field: int16(0)})
 			newObj := Int16TestStructs.New().(*Int16TestStruct)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = int16(math.MaxInt16)
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Int16TestStructs.Find(newObj.ID).One().(*Int16TestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newObj.Field = 7
+				newObj.Field = gofakeit.Int16()
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = Int16TestStructs.Find(newObj.ID).One().(*Int16TestStruct)
@@ -409,12 +415,14 @@ var _ = Describe("Document", func() {
 			}
 			Int32TestStructs := mongoid.Register(&Int32TestStruct{Field: 0})
 			newObj := Int32TestStructs.New().(*Int32TestStruct)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = int32(math.MaxInt32)
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Int32TestStructs.Find(newObj.ID).One().(*Int32TestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newObj.Field = 7
+				newObj.Field = gofakeit.Int32()
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = Int32TestStructs.Find(newObj.ID).One().(*Int32TestStruct)
@@ -429,12 +437,14 @@ var _ = Describe("Document", func() {
 			}
 			Int64TestStructs := mongoid.Register(&Int64TestStruct{Field: 0})
 			newObj := Int64TestStructs.New().(*Int64TestStruct)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = int64(math.MaxInt64)
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Int64TestStructs.Find(newObj.ID).One().(*Int64TestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newObj.Field = 7
+				newObj.Field = gofakeit.Int64()
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = Int64TestStructs.Find(newObj.ID).One().(*Int64TestStruct)
@@ -462,12 +472,14 @@ var _ = Describe("Document", func() {
 			}
 			UintTestStructs := mongoid.Register(&UintTestStruct{Field: 0})
 			newObj := UintTestStructs.New().(*UintTestStruct)
-			newObj.Field = uint(42)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
+			newObj.Field = uint(math.MaxUint32)
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := UintTestStructs.Find(newObj.ID).One().(*UintTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newObj.Field = 7
+				newObj.Field = uint(gofakeit.Uint32())
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = UintTestStructs.Find(newObj.ID).One().(*UintTestStruct)
@@ -480,14 +492,16 @@ var _ = Describe("Document", func() {
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        uint8
 			}
-			Uint8TestStructs := mongoid.Register(&Uint8TestStruct{Field: 0})
+			Uint8TestStructs := mongoid.Register(&Uint8TestStruct{Field: uint8(0)})
 			newObj := Uint8TestStructs.New().(*Uint8TestStruct)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = uint8(math.MaxUint8)
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Uint8TestStructs.Find(newObj.ID).One().(*Uint8TestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newObj.Field = 7
+				newObj.Field = gofakeit.Uint8()
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = Uint8TestStructs.Find(newObj.ID).One().(*Uint8TestStruct)
@@ -500,14 +514,16 @@ var _ = Describe("Document", func() {
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        uint16
 			}
-			Uint16TestStructs := mongoid.Register(&Uint16TestStruct{Field: 0})
+			Uint16TestStructs := mongoid.Register(&Uint16TestStruct{Field: uint16(0)})
 			newObj := Uint16TestStructs.New().(*Uint16TestStruct)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = uint16(math.MaxUint16)
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Uint16TestStructs.Find(newObj.ID).One().(*Uint16TestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newObj.Field = 7
+				newObj.Field = gofakeit.Uint16()
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = Uint16TestStructs.Find(newObj.ID).One().(*Uint16TestStruct)
@@ -520,14 +536,16 @@ var _ = Describe("Document", func() {
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        uint32
 			}
-			Uint32TestStructs := mongoid.Register(&Uint32TestStruct{Field: 0})
+			Uint32TestStructs := mongoid.Register(&Uint32TestStruct{Field: uint32(0)})
 			newObj := Uint32TestStructs.New().(*Uint32TestStruct)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = uint32(math.MaxUint32)
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Uint32TestStructs.Find(newObj.ID).One().(*Uint32TestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newObj.Field = 7
+				newObj.Field = gofakeit.Uint32()
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = Uint32TestStructs.Find(newObj.ID).One().(*Uint32TestStruct)
@@ -540,14 +558,16 @@ var _ = Describe("Document", func() {
 				ID           mongoid.ObjectID `bson:"_id"`
 				Field        uint64
 			}
-			Uint64TestStructs := mongoid.Register(&Uint64TestStruct{Field: 0})
+			Uint64TestStructs := mongoid.Register(&Uint64TestStruct{Field: uint64(0)})
 			newObj := Uint64TestStructs.New().(*Uint64TestStruct)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = uint64(math.MaxUint64)
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Uint64TestStructs.Find(newObj.ID).One().(*Uint64TestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newObj.Field = 7
+				newObj.Field = gofakeit.Uint64()
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
 				sameObj = Uint64TestStructs.Find(newObj.ID).One().(*Uint64TestStruct)
@@ -659,7 +679,7 @@ var _ = Describe("Document", func() {
 				newObj.Save()
 				sameObj := IntPtrTestStructs.Find(newObj.ID).One().(*IntPtrTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newValue := int(42)
+				newValue := int(gofakeit.Int32())
 				newObj.Field = &newValue
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
@@ -685,7 +705,7 @@ var _ = Describe("Document", func() {
 				newObj.Save()
 				sameObj := Int8PtrTestStructs.Find(newObj.ID).One().(*Int8PtrTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newValue := int8(math.MaxInt8)
+				newValue := gofakeit.Int8()
 				newObj.Field = &newValue
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
@@ -711,7 +731,7 @@ var _ = Describe("Document", func() {
 				newObj.Save()
 				sameObj := Int16PtrTestStructs.Find(newObj.ID).One().(*Int16PtrTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newValue := int16(math.MaxInt16)
+				newValue := gofakeit.Int16()
 				newObj.Field = &newValue
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
@@ -737,7 +757,7 @@ var _ = Describe("Document", func() {
 				newObj.Save()
 				sameObj := Int32PtrTestStructs.Find(newObj.ID).One().(*Int32PtrTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newValue := int32(math.MaxInt32)
+				newValue := gofakeit.Int32()
 				newObj.Field = &newValue
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
@@ -763,7 +783,7 @@ var _ = Describe("Document", func() {
 				newObj.Save()
 				sameObj := Int64PtrTestStructs.Find(newObj.ID).One().(*Int64PtrTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newValue := int64(math.MaxInt64)
+				newValue := gofakeit.Int64()
 				newObj.Field = &newValue
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
@@ -785,11 +805,15 @@ var _ = Describe("Document", func() {
 			initialValue := uint(0)
 			UintPtrTestStructs := mongoid.Register(&UintPtrTestStruct{Field: &initialValue})
 			newObj := UintPtrTestStructs.New().(*UintPtrTestStruct)
+			initialValue = uint(math.MaxUint32)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
+			newObj.Field = &initialValue
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := UintPtrTestStructs.Find(newObj.ID).One().(*UintPtrTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newValue := uint(42)
+				newValue := uint(gofakeit.Uint32())
 				newObj.Field = &newValue
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
@@ -811,11 +835,15 @@ var _ = Describe("Document", func() {
 			initialValue := uint8(0)
 			Uint8PtrTestStructs := mongoid.Register(&Uint8PtrTestStruct{Field: &initialValue})
 			newObj := Uint8PtrTestStructs.New().(*Uint8PtrTestStruct)
+			initialValue = uint8(math.MaxUint8)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
+			newObj.Field = &initialValue
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Uint8PtrTestStructs.Find(newObj.ID).One().(*Uint8PtrTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newValue := uint8(math.MaxUint8)
+				newValue := gofakeit.Uint8()
 				newObj.Field = &newValue
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
@@ -837,11 +865,15 @@ var _ = Describe("Document", func() {
 			initialValue := uint16(0)
 			Uint16PtrTestStructs := mongoid.Register(&Uint16PtrTestStruct{Field: &initialValue})
 			newObj := Uint16PtrTestStructs.New().(*Uint16PtrTestStruct)
+			initialValue = uint16(math.MaxUint16)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
+			newObj.Field = &initialValue
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Uint16PtrTestStructs.Find(newObj.ID).One().(*Uint16PtrTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newValue := uint16(math.MaxUint16)
+				newValue := gofakeit.Uint16()
 				newObj.Field = &newValue
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
@@ -863,11 +895,15 @@ var _ = Describe("Document", func() {
 			initialValue := uint32(0)
 			Uint32PtrTestStructs := mongoid.Register(&Uint32PtrTestStruct{Field: &initialValue})
 			newObj := Uint32PtrTestStructs.New().(*Uint32PtrTestStruct)
+			initialValue = uint32(math.MaxUint32)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
+			newObj.Field = &initialValue
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Uint32PtrTestStructs.Find(newObj.ID).One().(*Uint32PtrTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newValue := uint32(math.MaxUint32)
+				newValue := gofakeit.Uint32()
 				newObj.Field = &newValue
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
@@ -889,11 +925,15 @@ var _ = Describe("Document", func() {
 			initialValue := uint64(0)
 			Uint64PtrTestStructs := mongoid.Register(&Uint64PtrTestStruct{Field: &initialValue})
 			newObj := Uint64PtrTestStructs.New().(*Uint64PtrTestStruct)
+			initialValue = uint64(math.MaxUint64)
+			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
+			newObj.Field = &initialValue
+			Expect(newObj.IsChanged()).To(BeTrue(), "changes expected after a field value is altered")
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
 				sameObj := Uint64PtrTestStructs.Find(newObj.ID).One().(*Uint64PtrTestStruct)
 				Expect(sameObj.Field).To(Equal(newObj.Field), "retrieved document should have same value as original")
-				newValue := uint64(math.MaxUint64)
+				newValue := gofakeit.Uint64()
 				newObj.Field = &newValue
 				newObj.Save()
 				Expect(sameObj.Field).ToNot(Equal(newObj.Field), "retrieved document should have different value as original before refetch")
