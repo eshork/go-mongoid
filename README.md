@@ -11,6 +11,8 @@ This is a (sort of) reimplementation of [Mongoid](https://github.com/mongodb/mon
 
 Many things (most things?) don't directly translate from Ruby to Go, but major themes of the Document-related interfaces from the Mongoid API are replicated as closely as possible, with adjustments as needed to facilitate language differences.
 
+Also, I don't represent or work for MongoDB, Inc.
+
 # Target features for v1.0.0
 
 - Uses Go structs as the primary document interface - ie, build your own custom document definitions using native syntax
