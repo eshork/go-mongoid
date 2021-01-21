@@ -56,8 +56,8 @@ Within any relevant project files, import the package as usual
 import mongoid "github.com/eshork/go-mongoid"
 ```
 
-Refer to the `examples` directory for use case examples to get you started.
+Check [the wiki](https://github.com/eshork/go-mongoid/wiki) for additional setup information and examples.
 
-Run `grift docs` to start a godoc server to view embedded documentation.
+Refer to the [examples/](https://github.com/eshork/go-mongoid/tree/master/examples) directory for some use case examples to get you started.
 
-Be sure to check [the wiki](https://github.com/eshork/go-mongoid/wiki) for additional information and examples.
+Run `grift docs` to start a local godoc server to view the embedded source documentation.
