@@ -44,16 +44,55 @@ Also, I don't represent or work for MongoDB, Inc.
 
 # Installation & Usage
 
-Within your project directory, add/update the library to the latest stable release version
+Add the library to your project
 
 ```bash
+cd ~/yourGoProjectDir
 go get -u github.com/eshork/go-mongoid
 ```
 
-Within any relevant project files, import the package as usual
+Configure a MongoDB server
+
+```
+import mongoid "https://github.com/eshork/go-mongoid"
+
+gMongoidConfig := mongoid.Config{
+  Clients: []mongoid.Client{
+    {
+      Name:     "default",
+      Hosts:    []string{"localhost:27017"},
+      Database: "yourDbNameHere",
+    },
+  },
+}
+mongoid.Configure(&gMongoidConfig)
+```
+
+Define a document model and register it
+
+```
+type MyDocument struct {
+	mongoid.Base
+	MyValue string
+}
+
+var MyDocuments = mongoid.Register(&MyDocument{})
+```
+
+Make a new item and save it
+
 ```go
-// Add this basic import to your project file
-import mongoid "github.com/eshork/go-mongoid"
+newDoc := MyDocuments.New().(*MyDocument)
+newDoc.MyValue = "something noteworthy"
+newDoc.Save()
+
+var mongoid.ObjectID recordId = newDoc.ID
+```
+
+Retrieve stored records by ID
+
+```go
+foundDoc := MyDocuments.Find(recordId).One().(*MyDocument)
 ```
 
 Check [the wiki](https://github.com/eshork/go-mongoid/wiki) for additional setup information and examples.
