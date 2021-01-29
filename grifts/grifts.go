@@ -7,12 +7,26 @@ import (
 	"strings"
 	"syscall"
 
-	. "github.com/markbates/grift/grift"
+	g "github.com/markbates/grift/grift"
 )
 
-var _ = Namespace("env", func() {
-	Desc("print", "Prints out all of the ENV variables in your environment. Pass in the name of a particular ENV variable to print just that one out. (e.g. grift env:print GOPATH)")
-	Add("print", func(c *Context) error {
+func execCmd(cmd string) error {
+	args := strings.Split(cmd, " ")
+	binary, lookErr := exec.LookPath(args[0])
+	if lookErr != nil {
+		panic(lookErr)
+	}
+	env := os.Environ()
+	execErr := syscall.Exec(binary, args, env)
+	if execErr != nil {
+		return execErr
+	}
+	return nil
+}
+
+var _ = g.Namespace("env", func() {
+	g.Desc("print", "Prints out all of the ENV variables in your environment. Pass in the name of a particular ENV variable to print just that one out. (e.g. grift env:print GOPATH)")
+	g.Add("print", func(c *g.Context) error {
 		if len(c.Args) >= 1 {
 			for _, e := range c.Args {
 				fmt.Printf("%s=%s\n", e, os.Getenv(e))
@@ -27,108 +41,76 @@ var _ = Namespace("env", func() {
 	})
 })
 
-var _ = Desc("fmt", "runs gofmt in the standard project manner")
-var _ = Add("fmt", func(c *Context) error {
-	binary, lookErr := exec.LookPath("gofmt")
-	if lookErr != nil {
-		panic(lookErr)
-	}
-	args := []string{"gofmt", "-l", "-w", "."}
-	env := os.Environ()
-	execErr := syscall.Exec(binary, args, env)
+var _ = g.Desc("fmt", "runs gofmt in the standard project manner")
+var _ = g.Add("fmt", func(c *g.Context) error {
+	execErr := execCmd("gofmt -l -w .")
 	if execErr != nil {
 		panic(execErr)
 	}
 	return nil
 })
 
-var _ = Desc("docs", "run a local doc server")
-var _ = Add("docs", func(c *Context) error {
-	binary, lookErr := exec.LookPath("go")
-	if lookErr != nil {
-		panic(lookErr)
-	}
-	args := []string{"go", "run", "golang.org/x/tools/cmd/godoc", "-index", "-http", "localhost:6060", "-goroot", "./"}
-	env := os.Environ()
-	env = append(env, "GO111MODULE=on")
+var _ = g.Desc("docs", "run a local doc server")
+var _ = g.Add("docs", func(c *g.Context) error {
 	fmt.Printf("Starting godoc server at: http://localhost:6060/\n")
-	execErr := syscall.Exec(binary, args, env)
+	execErr := execCmd("go run golang.org/x/tools/cmd/godoc -index -http localhost:6060 -goroot ./")
 	if execErr != nil {
 		panic(execErr)
 	}
 	return nil
 })
 
-var _ = Desc("test", "run basic tests (no benchmarks)")
-var _ = Add("test", func(c *Context) error {
-	binary, lookErr := exec.LookPath("go")
-	if lookErr != nil {
-		panic(lookErr)
-	}
-	args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-r", "-skipMeasurements"}
-	env := os.Environ()
-	execErr := syscall.Exec(binary, args, env)
+var _ = g.Desc("test", "run basic tests (no benchmarks)")
+var _ = g.Add("test", func(c *g.Context) error {
+	execErr := execCmd("go run github.com/onsi/ginkgo/ginkgo -r -skipMeasurements")
 	if execErr != nil {
 		panic(execErr)
 	}
 	return nil
 })
 
-var _ = Namespace("test", func() {
-	Desc("watch", "run tests within a watch loop")
-	Add("watch", func(c *Context) error {
-		binary, lookErr := exec.LookPath("go")
-		if lookErr != nil {
-			panic(lookErr)
-		}
-		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "watch", "-r", "-skipMeasurements", "-succinct"}
-		env := os.Environ()
-		execErr := syscall.Exec(binary, args, env)
+var _ = g.Namespace("test", func() {
+	g.Desc("watch", "run tests within a watch loop")
+	g.Add("watch", func(c *g.Context) error {
+		execErr := execCmd("go run github.com/onsi/ginkgo/ginkgo watch -r -skipMeasurements -succinct")
 		if execErr != nil {
 			panic(execErr)
 		}
 		return nil
 	})
 
-	Desc("force", "run all tests even if some fail")
-	Add("force", func(c *Context) error {
-		binary, lookErr := exec.LookPath("go")
-		if lookErr != nil {
-			panic(lookErr)
-		}
-		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-r", "-keepGoing", "-skipMeasurements"}
-		env := os.Environ()
-		execErr := syscall.Exec(binary, args, env)
+	g.Desc("force", "run all tests even if some fail")
+	g.Add("force", func(c *g.Context) error {
+		execErr := execCmd("go run github.com/onsi/ginkgo/ginkgo -r -keepGoing -skipMeasurements")
 		if execErr != nil {
 			panic(execErr)
 		}
 		return nil
 	})
 
-	Desc("bench", "run performance benchmark tests")
-	Add("bench", func(c *Context) error {
-		binary, lookErr := exec.LookPath("go")
-		if lookErr != nil {
-			panic(lookErr)
-		}
-		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-r", "-keepGoing", "-focus", "performance"}
-		env := os.Environ()
-		execErr := syscall.Exec(binary, args, env)
+	g.Desc("bench", "run performance benchmark tests")
+	g.Add("bench", func(c *g.Context) error {
+		execErr := execCmd("go run github.com/onsi/ginkgo/ginkgo -r -keepGoing -focus performance")
 		if execErr != nil {
 			panic(execErr)
 		}
 		return nil
 	})
 
-	Desc("all", "run all tests")
-	Add("all", func(c *Context) error {
-		binary, lookErr := exec.LookPath("go")
-		if lookErr != nil {
-			panic(lookErr)
+	g.Desc("all", "run all tests")
+	g.Add("all", func(c *g.Context) error {
+		execErr := execCmd("go run github.com/onsi/ginkgo/ginkgo -r")
+		if execErr != nil {
+			panic(execErr)
 		}
-		args := []string{"go", "run", "github.com/onsi/ginkgo/ginkgo", "-r"}
-		env := os.Environ()
-		execErr := syscall.Exec(binary, args, env)
+		return nil
+	})
+
+	g.Desc("ci", "run all tests as ci expects")
+	g.Add("ci", func(c *g.Context) error {
+		// https://onsi.github.io/ginkgo/#ginkgo-and-continuous-integration
+		// -r --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress
+		execErr := execCmd("go run github.com/onsi/ginkgo/ginkgo -r --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress")
 		if execErr != nil {
 			panic(execErr)
 		}

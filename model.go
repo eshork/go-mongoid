@@ -11,7 +11,6 @@ import (
 
 // ModelType represents a mongoid model/document type and provides methods to interact with the collection
 type ModelType struct {
-	fmt.Stringer                 // implements Stringer interface
 	rootTypeRef    IDocumentBase // a reference to an object instance of the document/model type given during registration (for future type sanity)
 	modelName      string
 	modelFullName  string
@@ -21,6 +20,9 @@ type ModelType struct {
 	defaultValue   BsonDocument // bson representation of default values to be applied during creation of brand new document/model instances
 }
 
+var _ fmt.Stringer = ModelType{} // assert implements Stringer interface
+
+// String implements fmt.Stringer interface
 func (model ModelType) String() string {
 	// return "pew pew pew~!" // ModelType
 	extras := ""
@@ -99,8 +101,9 @@ func (model *ModelType) GetDatabaseName() string {
 	return model.databaseName
 }
 
-// SetClientName changes the client name used by the ModelType
-func (model *ModelType) SetClientName(newClientName string) *ModelType {
+// WithClientName returns a new ModelType that has changed the client name to the given value of newClientName,
+// and updates the model registry for future name based lookup
+func (model *ModelType) WithClientName(newClientName string) *ModelType {
 	newModelType := *model // dereferenced copy
 	newModelType.clientName = newClientName
 	// update the global registry for this ModelType

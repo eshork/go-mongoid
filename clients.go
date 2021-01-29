@@ -25,6 +25,7 @@ type Client struct {
 	Options            ClientOptions
 	mongoClient        *mongo.Client
 	mongoClientOptions *options.ClientOptions
+	context            context.Context
 }
 
 // ClientOptions define client specific options
@@ -131,9 +132,21 @@ func (c Client) String() string {
 		"}", uninitialized, c.Name, c.URI, c.Hosts, c.Database, c.AppName, c.Options)
 }
 
+func (c *Client) ensureContext() {
+	if c.context == nil {
+		c.context = context.TODO()
+	}
+}
+
+// Context returns the client's current context.Context
+func (c *Client) Context() context.Context {
+	return c.context
+}
+
 // Connect the Client to the server topology
-func (c *Client) Connect() error {
+func (c *Client) Connect() error { //
 	log.Debug("Connect()")
+	c.ensureContext()
 	// ensure client is disconnected (has no affect if was never connected)
 	if err := c.Disconnect(); err != nil {
 		return err
@@ -142,7 +155,7 @@ func (c *Client) Connect() error {
 	c.mongoClientOptions = buildMongoClientOptions(*c)
 
 	client, err := mongo.NewClient(c.mongoClientOptions)
-	ctx, cancel := context.WithTimeout(context.Background(), c.Options.GetConnectTimeout())
+	ctx, cancel := context.WithTimeout(c.context, c.Options.GetConnectTimeout())
 	defer cancel()
 	err = client.Connect(ctx)
 	if err != nil {
@@ -164,7 +177,7 @@ func (c *Client) Connect() error {
 func (c *Client) Disconnect() error {
 	if c.mongoClient != nil {
 		log.Debug("Disconnect()")
-		err := c.mongoClient.Disconnect(nil)
+		err := c.mongoClient.Disconnect(c.context)
 		c.mongoClient = nil
 		if err != nil {
 			return err
@@ -176,7 +189,8 @@ func (c *Client) Disconnect() error {
 // ConnectionTest (Client.ConnectionTest) performs a basic connectivity check upon a single Client
 // returns nil on Success, a specific error condition on failure
 func (c *Client) ConnectionTest() error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.Options.GetConnectTimeout())
+	c.ensureContext()
+	ctx, cancel := context.WithTimeout(c.context, c.Options.GetConnectTimeout())
 	defer cancel()
 	return c.connectionTest(ctx)
 }

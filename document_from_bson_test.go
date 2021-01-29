@@ -17,10 +17,10 @@ var _ = Describe("structValuesFromBsonM()", func() {
 		test := func(structPtr interface{}, fieldPtr interface{}, exBson bson.M, bsonFieldName string) {
 			fieldValue := reflect.Indirect(reflect.ValueOf(fieldPtr))
 			_, ok := exBson[bsonFieldName]
-			Expect(ok).To(Equal(true), "given bsonFieldName should be a valid key to the target value, so the test can validate successful assignment")
-			Expect(fieldValue.Interface()).ToNot(Equal(exBson[bsonFieldName]), "initial struct field value should not already equal the target value of the test")
+			ExpectWithOffset(1, ok).To(Equal(true), "given bsonFieldName should be a valid key to the target value, so the test can validate successful assignment")
+			ExpectWithOffset(1, fieldValue.Interface()).ToNot(Equal(exBson[bsonFieldName]), "initial struct field value should not already equal the target value of the test")
 			structValuesFromBsonM(structPtr, exBson)
-			Expect(fieldValue.Interface()).To(Equal(exBson[bsonFieldName]), "struct field value should equal the target value after assignment")
+			ExpectWithOffset(1, fieldValue.Interface()).To(Equal(exBson[bsonFieldName]), "struct field value should equal the target value after assignment")
 		}
 
 		It("bool field", func() {
