@@ -3,7 +3,20 @@
     "config:base",
     "schedule:weekends"
   ],
+  "enabled": true,
   "semanticCommits": "enabled",
   "prHourlyLimit": 6,
-  "prConcurrentLimit": 5
+  "prConcurrentLimit": 5,
+  "addLabels": [
+    "dependencies"
+  ],
+  "reviewers": [
+    "eshork"
+  ],
+  "assignees": [
+    "eshork"
+  ],
+  "assignAutomerge": true,
+  "dependencyDashboard": true,
+  "dependencyDashboardAutoclose": true
 }
