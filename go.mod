@@ -7,8 +7,8 @@ require (
 	github.com/iancoleman/strcase v0.1.3
 	github.com/jinzhu/inflection v1.0.0
 	github.com/markbates/grift v1.5.0
-	github.com/onsi/ginkgo v1.8.0
-	github.com/onsi/gomega v1.5.0
+	github.com/onsi/ginkgo v1.14.2
+	github.com/onsi/gomega v1.10.1
 	github.com/sirupsen/logrus v1.4.2
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.4.5
