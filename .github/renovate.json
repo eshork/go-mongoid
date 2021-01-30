@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "config:base",
+    "schedule:weekends"
+  ],
+  "semanticCommits": "enabled",
+  "prHourlyLimit": 6,
+  "prConcurrentLimit": 5
+}
