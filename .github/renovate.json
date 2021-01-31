@@ -18,6 +18,10 @@
   "assignAutomerge": true,
   "dependencyDashboard": true,
   "dependencyDashboardAutoclose": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  },
   "packageRules": [
     {
       "description": "docker images can update automatically",
@@ -32,21 +36,28 @@
       ],
       "rebaseWhen": "conflicted",
       "stabilityDays": 1,
+      "addLabels": [
+        "automerge"
+      ],
       "automerge": true
     },
     {
       "description": "packages that should auto-update",
-      "matchPackageNames": [
-        "markbates/grift",
-        "onsi/ginkgo",
-        "onsi/gomega",
-        "sirupsen/logrus"
+      "matchPackagePatterns": [
+        "gofakeit",
+        "grift",
+        "ginkgo",
+        "gomega",
+        "logrus"
       ],
       "matchUpdateTypes": [
         "minor",
         "patch",
         "pin",
         "digest"
+      ],
+      "addLabels": [
+        "automerge"
       ],
       "automerge": true
     }
