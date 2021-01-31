@@ -11,7 +11,6 @@ require (
 	github.com/onsi/ginkgo v1.14.2
 	github.com/onsi/gomega v1.10.4
 	github.com/sirupsen/logrus v1.7.0
-	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
 	go.mongodb.org/mongo-driver v1.4.4
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect

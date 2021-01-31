@@ -6,7 +6,7 @@ package mongoid_test
 
 // 	"fmt"
 
-// 	"github.com/brianvoe/gofakeit"
+// 	gofakeit "github.com/brianvoe/gofakeit/v6"
 // 	. "github.com/onsi/ginkgo"
 // 	. "github.com/onsi/gomega"
 // )
