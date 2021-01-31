@@ -63,7 +63,7 @@ func (model *ModelType) SetModelName(newModelName string) *ModelType {
 }
 
 // GetModelName returns the current friendly name for this model type
-func (model *ModelType) GetModelName() string {
+func (model ModelType) GetModelName() string {
 	return model.modelName
 }
 
@@ -80,12 +80,12 @@ func (model *ModelType) GetCollectionName() string {
 	return model.collectionName
 }
 
-// SetDatabaseName changes the database name used by the ModelType
-func (model *ModelType) SetDatabaseName(newDatabaseName string) *ModelType {
-	newModelType := *model // dereferenced copy
-	newModelType.databaseName = newDatabaseName
-	// update the global registry for this ModelType
-	return mongoidModelRegistry.updateModelTypeRegistration(&newModelType)
+// WithDatabaseName returns a ModelType with the databaseName altered as directed
+func (model ModelType) WithDatabaseName(newDatabaseName string) ModelType {
+	newModel := ModelType{}
+	newModel = model
+	newModel.databaseName = newDatabaseName
+	return newModel
 }
 
 // GetDatabaseName returns the current default database for this model type
@@ -96,13 +96,12 @@ func (model *ModelType) GetDatabaseName() string {
 	return model.databaseName
 }
 
-// WithClientName returns a new ModelType that has changed the client name to the given value of newClientName,
-// and updates the model registry for future name based lookup
-func (model *ModelType) WithClientName(newClientName string) *ModelType {
-	newModelType := *model // dereferenced copy
-	newModelType.clientName = newClientName
-	// update the global registry for this ModelType
-	return mongoidModelRegistry.updateModelTypeRegistration(&newModelType)
+// WithClientName returns a ModelType with the clientName altered as directed
+func (model ModelType) WithClientName(newClientName string) ModelType {
+	newModel := ModelType{}
+	newModel = model
+	newModel.clientName = newClientName
+	return newModel
 }
 
 // GetClientName returns the current default client name for this model type
