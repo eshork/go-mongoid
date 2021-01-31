@@ -7,6 +7,8 @@
   "semanticCommits": "enabled",
   "prHourlyLimit": 6,
   "prConcurrentLimit": 5,
+  "rebaseWhen": "behind-base-branch",
+  "stabilityDays": 5,
   "addLabels": [
     "dependencies"
   ],
@@ -15,5 +17,40 @@
   ],
   "assignAutomerge": true,
   "dependencyDashboard": true,
-  "dependencyDashboardAutoclose": true
+  "dependencyDashboardAutoclose": true,
+  "packageRules": [
+    {
+      "description": "docker images can update automatically",
+      "matchLanguages": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "rebaseWhen": "conflicted",
+      "stabilityDays": 1,
+      "automerge": true
+    },
+    {
+      "description": "packages that should auto-update",
+      "matchPackageNames": [
+        "iancoleman/strcase",
+        "jinzhu/inflection",
+        "markbates/grift",
+        "onsi/ginkgo",
+        "onsi/gomega",
+        "sirupsen/logrus"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "automerge": true
+    }
+  ]
 }
