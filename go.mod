@@ -3,7 +3,7 @@ module mongoid
 go 1.12
 
 require (
-	github.com/brianvoe/gofakeit v3.18.0+incompatible
+	github.com/brianvoe/gofakeit/v6 v6.0.2
 	github.com/iancoleman/strcase v0.1.3
 	github.com/jinzhu/inflection v1.0.0
 	github.com/markbates/grift v1.5.0
