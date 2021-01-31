@@ -68,7 +68,7 @@ func (res *Result) close() {
 // Calling certain methods on a Result after Streaming is declared can result in a panic -- affected methods indicate such within their documentation.
 func (res *Result) Streaming() *Result {
 	if !res.streaming && res.cursorIndex > 0 {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Result.Streaming",
 			Reason:     "Cannot enable Streaming after random access",
 		})
@@ -87,7 +87,7 @@ func (res *Result) IsStreaming() bool {
 func (res *Result) First() IDocumentBase {
 	log.Trace("Result.First()")
 	if res.streaming {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Result.First",
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
@@ -101,7 +101,7 @@ func (res *Result) First() IDocumentBase {
 func (res *Result) Last() IDocumentBase {
 	log.Trace("Result.Last()")
 	if res.streaming {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Result.Last",
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
@@ -114,7 +114,7 @@ func (res *Result) Last() IDocumentBase {
 func (res *Result) At(index uint) IDocumentBase {
 	log.Trace("Result.At()")
 	if res.streaming {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Result.At",
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
@@ -136,7 +136,7 @@ func (res *Result) atBson(index uint) bson.M {
 	for res.cursorIndex <= index {
 		more := res.readNextToLookback()
 		if !more {
-			log.Panic(&mongoidError.IndexOutOfBounds{})
+			log.Panic(mongoidError.IndexOutOfBounds{})
 		}
 	}
 	result := res.lookback[index]
@@ -150,7 +150,7 @@ func (res *Result) atBson(index uint) bson.M {
 func (res *Result) Count() uint {
 	log.Trace("Result.Count()")
 	if res.streaming {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Result.Count",
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
@@ -170,7 +170,7 @@ func (res *Result) Count() uint {
 func (res *Result) One() IDocumentBase {
 	log.Trace("Result.One()")
 	if res.streaming {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Result.One",
 			Reason:     "Cannot perform random access when Result.IsStreaming()",
 		})
@@ -180,9 +180,9 @@ func (res *Result) One() IDocumentBase {
 	if count := res.Count(); count <= 0 || count > 1 {
 		// panic here, because we have the wrong number of results
 		if count == 0 {
-			log.Panic(&mongoidError.ResultNotFound{})
+			log.Panic(mongoidError.ResultNotFound{})
 		} else {
-			log.Panic(&mongoidError.ResultNotExpected{}) // this could be a better type, maybe we need a new one
+			log.Panic(mongoidError.ResultNotExpected{}) // this could be a better type, maybe we need a new one
 		}
 	}
 	return res.at(0)
@@ -220,7 +220,7 @@ func (res *Result) readNextToLookback() bool {
 func (res *Result) readNext(v *bson.M) bool {
 	log.Trace("Result.readNext()")
 	if !res.streaming {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Result.readNext",
 			Reason:     "Expected Result.IsStreaming()",
 		})

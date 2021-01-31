@@ -8,13 +8,12 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-type ErrorTestModel struct {
-	mongoid.Base
-	ID mongoid.ObjectID `bson:"_id"`
-}
-
-var ErrorTestModels = mongoid.Register(&ErrorTestModel{})
 var _ = Describe("Result", func() {
+	type ErrorTestModel struct {
+		mongoid.Base
+		ID mongoid.ObjectID `bson:"_id"`
+	}
+	var ErrorTestModels = mongoid.Register(&ErrorTestModel{})
 	Context(".Streaming()", func() {
 		Context(".At()", func() {
 			It("should panic InvalidOperation", func() {

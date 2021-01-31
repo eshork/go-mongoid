@@ -18,25 +18,25 @@ var _ = Describe("SetValueByInterfacePtr()", func() {
 		handleStructField := handleStructValue.Field(0)
 		if handleStructField.Kind() == reflect.Ptr {
 			if handleStructField.IsNil() {
-				Expect(handleStructField.Interface()).ToNot(Equal(newVal), "testStructPtr.Field(nil) and newVal should not be equal before assignment")
+				ExpectWithOffset(1, handleStructField.Interface()).ToNot(Equal(newVal), "testStructPtr.Field(nil) and newVal should not be equal before assignment")
 			} else {
-				Expect(reflect.Indirect(handleStructField).Interface()).ToNot(Equal(newVal), "testStructPtr.Field and newVal should not be equal before assignment")
+				ExpectWithOffset(1, reflect.Indirect(handleStructField).Interface()).ToNot(Equal(newVal), "testStructPtr.Field and newVal should not be equal before assignment")
 			}
 			SetValueByInterfacePtr(handleStructField.Addr().Interface(), newVal)
 			if handleStructField.IsNil() {
-				Expect(handleStructField.Interface()).To(BeNil(), "testStructPtr.Field(nil) and newVal should both be nil after nil assignment")
-				Expect(newVal).To(BeNil(), "testStructPtr.Field(nil) and newVal should both be nil after nil assignment")
+				ExpectWithOffset(1, handleStructField.Interface()).To(BeNil(), "testStructPtr.Field(nil) and newVal should both be nil after nil assignment")
+				ExpectWithOffset(1, newVal).To(BeNil(), "testStructPtr.Field(nil) and newVal should both be nil after nil assignment")
 			} else {
 				if reflect.ValueOf(newVal).Kind() == reflect.Ptr {
-					Expect(reflect.Indirect(handleStructField).Interface()).To(Equal(reflect.Indirect(reflect.ValueOf(newVal)).Interface()), "*testStructPtr.Field and *newVal should be equal after assignment")
+					ExpectWithOffset(1, reflect.Indirect(handleStructField).Interface()).To(Equal(reflect.Indirect(reflect.ValueOf(newVal)).Interface()), "*testStructPtr.Field and *newVal should be equal after assignment")
 				} else {
-					Expect(reflect.Indirect(handleStructField).Interface()).To(Equal(newVal), "testStructPtr.Field and newVal should be equal after assignment")
+					ExpectWithOffset(1, reflect.Indirect(handleStructField).Interface()).To(Equal(newVal), "testStructPtr.Field and newVal should be equal after assignment")
 				}
 			}
 		} else {
-			Expect(handleStructField.Interface()).ToNot(Equal(newVal), "src and dst should not be equal before assignment")
+			ExpectWithOffset(1, handleStructField.Interface()).ToNot(Equal(newVal), "src and dst should not be equal before assignment")
 			SetValueByInterfacePtr(handleStructField.Addr().Interface(), newVal)
-			Expect(handleStructField.Interface()).To(Equal(newVal), "src and dst should be equal after assignment")
+			ExpectWithOffset(1, handleStructField.Interface()).To(Equal(newVal), "src and dst should be equal after assignment")
 		}
 	}
 

@@ -55,7 +55,7 @@ func (d *Base) Was(fieldPath string) (interface{}, bool) {
 	}
 	prevValue, prevFound := d.GetFieldPrevious(fieldPath)
 	if !prevFound {
-		log.Panic(&mongoidError.DocumentFieldNotFound{FieldName: fieldPath})
+		log.Panic(mongoidError.DocumentFieldNotFound{FieldName: fieldPath})
 	}
 	if !verifyBothAreSameSame(value, prevValue) {
 		// different types is definitely a change

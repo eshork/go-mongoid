@@ -7,11 +7,11 @@ import (
 
 // Configure sets up the given Config to be used by future requests to the module.
 // Calling Configure more than once is specifically prohibited to call attention to multiple-initialization scenarios,
-// but if that is your intent, you can safely call ReConfigure() for any configureation call (whether first or subsequent)
+// but if that is your intent, you can safely call ReConfigure() for any configuration call (whether first or subsequent)
 func Configure(config *Config) {
 	log.Debugf("Configure(%+v)\n", config)
 	if config == nil {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Configure",
 			Reason:     "Given config was nil",
 		})
@@ -19,13 +19,13 @@ func Configure(config *Config) {
 	mongoidConfigMutex.Lock()
 	defer mongoidConfigMutex.Unlock()
 	if mongoidConfig != nil { // fail badly if there is already an existing Config
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Configure",
 			Reason:     "Already configured",
 		})
 	}
 	if err := configure(config); err != nil {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Configure",
 			Reason:     err.Error(),
 		})
@@ -36,7 +36,7 @@ func Configure(config *Config) {
 // This is safe to perform as the first-time configure action, if that is desired.
 func ReConfigure(config *Config) {
 	if config == nil {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Configure",
 			Reason:     "Given config was nil",
 		})
@@ -47,7 +47,7 @@ func ReConfigure(config *Config) {
 	mongoidConfig = nil // blow away any existing Config
 
 	if err := configure(config); err != nil {
-		log.Panic(&mongoidError.InvalidOperation{
+		log.Panic(mongoidError.InvalidOperation{
 			MethodName: "Configure",
 			Reason:     err.Error(),
 		})

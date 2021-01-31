@@ -2,16 +2,60 @@ package mongoid
 
 import (
 	"context"
+	"runtime"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
 	"mongoid/log"
+	"mongoid/util"
 )
 
 // Find a document or multiple documents by their ids
 func (model *ModelType) Find(ids ...ObjectID) *Result {
 	log.Debugf("%v.Find(%v)", model.GetModelName(), ids)
+	return model.find(nil, ids...)
+}
+
+// FindCtx finds a document or multiple documents by their ids, bound by a new context
+func (model *ModelType) FindCtx(ctx context.Context, ids ...ObjectID) *Result {
+	log.Debugf("%v.FindCtx(%v)", model.GetModelName(), ids)
+	return model.find(ctx, ids...)
+}
+
+// FindByDeadline locates a document or multiple documents by their ids, bound by a time deadline.
+func (model *ModelType) FindByDeadline(d time.Time, ids ...ObjectID) *Result {
+	log.Debugf("%v.FindByDeadline(%v)", model.GetModelName(), ids)
+	ctx := model.GetClient().Context()
+	newCtx, cancel := context.WithDeadline(ctx, d)
+	res := model.find(newCtx, ids...)
+	runtime.SetFinalizer(res, func(r *Result) {
+		cancel()
+	})
+	return res
+}
+
+// FindByTimeout locates a document or multiple documents by their ids, bound by a timeout duration.
+func (model *ModelType) FindByTimeout(t time.Duration, ids ...ObjectID) *Result {
+	log.Debugf("%v.FindByTimeout(%v)", model.GetModelName(), ids)
+	ctx := model.GetClient().Context()
+	newCtx, cancel := context.WithTimeout(ctx, t)
+	res := model.find(newCtx, ids...)
+	runtime.SetFinalizer(res, func(r *Result) {
+		cancel()
+	})
+	return res
+}
+
+func (model *ModelType) find(ctx context.Context, ids ...ObjectID) *Result {
+	modelContext := model.GetClient().Context()
+	if ctx == nil {
+		ctx = modelContext
+	} else {
+		ctx = util.ContextWithContext(ctx, modelContext)
+	}
+
 	q := bson.D{}
 	if len(ids) <= 0 {
 		// q = bson.D{} // default (empty) is already correct - ie, find all records
@@ -30,13 +74,10 @@ func (model *ModelType) Find(ids ...ObjectID) *Result {
 	}
 
 	collection := model.getMongoCollectionHandle()
-	// ctx, cancel := context.WithTimeout(context.TODO(), 5*time.Second) // todo context with arbitrary 5sec timeout
-	// defer cancel()
-	ctx := context.TODO() // TODO context with unlimited timeout
 	cur, err := collection.Find(ctx, q)
 	if err != nil {
 		// this is a panic at the moment, because no one has yet looked to see what these errors might be, so we can't assume any of them are recoverable
 		log.Panic(err) // unknown bad stuff happened within the driver
 	}
-	return makeResult(ctx, cur, model)
+	return makeResult(modelContext, cur, model)
 }
