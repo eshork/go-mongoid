@@ -37,8 +37,6 @@
     {
       "description": "packages that should auto-update",
       "matchPackageNames": [
-        "iancoleman/strcase",
-        "jinzhu/inflection",
         "markbates/grift",
         "onsi/ginkgo",
         "onsi/gomega",
