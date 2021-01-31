@@ -24,23 +24,18 @@ var _ fmt.Stringer = ModelType{} // assert implements Stringer interface
 
 // String implements fmt.Stringer interface
 func (model ModelType) String() string {
-	// return "pew pew pew~!" // ModelType
+	// ModelType(model.modelFullName)[client:cName,database:dbName,collection:colName]
 	extras := ""
-
-	// [clientName, databaseName, collectionName]
-	if model.collectionName != "" {
-		extras += "collection:" + model.collectionName + ","
+	appendExtras := func(name, value string) {
+		if extras != "" {
+			extras = fmt.Sprintf("%s,%s:%s", extras, name, value)
+		}
+		extras = fmt.Sprintf("%s:%s", name, value)
 	}
-	if model.databaseName != "" {
-		extras += "database:" + model.databaseName + ","
-	}
-	if model.clientName != "" {
-		extras += "client:" + model.clientName + ","
-	}
-	if len(extras) > 0 {
-		extras = " [" + extras[:len(extras)-1] + "]"
-	}
-	return fmt.Sprintf("%s (%s)%s", model.modelName, model.modelFullName, extras)
+	appendExtras("client", model.clientName)
+	appendExtras("database", model.databaseName)
+	appendExtras("collection", model.collectionName)
+	return fmt.Sprintf("ModelType(%s/%s)[%s]", model.modelName, model.modelFullName, extras)
 }
 
 // reflect-ive rootTypeRef type equality check
