@@ -1,6 +1,8 @@
 package mongoid
 
 import (
+	"fmt"
+	mongoidErr "mongoid/errors"
 	"mongoid/log"
 	"reflect"
 	"strings"
@@ -58,8 +60,28 @@ func getRegisteredModelTypeByDocRef(modelTypeDocRef IDocumentBase) *ModelType {
 }
 
 // Register a new documentType
-func Register(documentType IDocumentBase) *ModelType {
-	return mongoidModelRegistry.register(documentType)
+func Register(documentType interface{}) *ModelType {
+	// passed as &MyModelStruct{} (and implements IDocumentBase)
+	if v, ok := documentType.(IDocumentBase); ok {
+		return mongoidModelRegistry.register(v)
+	}
+
+	// ensure kind is struct
+	if documentTypeValue := reflect.ValueOf(documentType); documentTypeValue.Kind() == reflect.Struct {
+		// if passed as MyModelStruct{} (and implements IDocumentBase) ...
+		newDupeVP := reflect.New(reflect.TypeOf(documentType))
+		if v, ok := newDupeVP.Interface().(IDocumentBase); ok {
+			newDupeVP.Elem().Set(documentTypeValue)
+			return mongoidModelRegistry.register(v) // send it onward as the expected struct pointer kind
+		}
+	}
+
+	// not one of the two things we know how to handle, so have a nice error message
+	log.Panic(mongoidErr.InvalidOperation{
+		MethodName: "Register",
+		Reason:     fmt.Sprintf("documentType must implement IDocumentBase. Found: %s", reflect.ValueOf(documentType).String()),
+	})
+	return nil // unreachable
 }
 
 func (registry *modelRegistry) register(documentType IDocumentBase) *ModelType {

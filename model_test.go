@@ -2,7 +2,7 @@ package mongoid_test
 
 import (
 	"mongoid"
-	// gofakeit "github.com/brianvoe/gofakeit/v6"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -14,12 +14,15 @@ type TestModel1 struct {
 
 var TestModel1s = mongoid.Register(&TestModel1{})
 
+const testModel2SomeFieldValue = 42 // f9e2fea7 #44 - registered by value and default preserved
+
 type TestModel2 struct {
 	mongoid.Base `mongoid:"collection:otherCollection"`
 	ID           mongoid.ObjectID `bson:"_id"`
+	SomeField    int
 }
 
-var TestModel2s = mongoid.Register(&TestModel2{})
+var TestModel2s = mongoid.Register(TestModel2{SomeField: testModel2SomeFieldValue}) // f9e2fea7 #44 - registered by value and default preserved
 
 type TestModel3 struct {
 	mongoid.Base `mongoid:"database:otherDatabase"`
@@ -28,7 +31,7 @@ type TestModel3 struct {
 
 var TestModel3s = mongoid.Register(&TestModel3{})
 
-var _ = Describe("Model", func() {
+var _ = Describe("Document Model Registry", func() {
 	Context("TestModel1", func() {
 		It("is verifyably registered", func() {
 			By("struct name")
@@ -54,7 +57,9 @@ var _ = Describe("Model", func() {
 	})
 	Context("TestModel2", func() {
 		It("reports struct-tag declared Collection name", func() {
-			Expect(mongoid.M("TestModel2").GetCollectionName()).To(Equal("otherCollection"))
+			Expect(mongoid.M("TestModel2").GetCollectionName()).To(Equal("otherCollection")) // f9e2fea7 #44 - registered by value
+			t := mongoid.M("TestModel2").New().(*TestModel2)
+			Expect(t.SomeField).To(Equal(testModel2SomeFieldValue)) // f9e2fea7 #44 - registered default value preserved
 		})
 	})
 	Context("TestModel3", func() {
