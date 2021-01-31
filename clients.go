@@ -140,6 +140,7 @@ func (c *Client) ensureContext() {
 
 // Context returns the client's current context.Context
 func (c *Client) Context() context.Context {
+	c.ensureContext()
 	return c.context
 }
 
