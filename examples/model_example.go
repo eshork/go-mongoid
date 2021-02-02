@@ -43,7 +43,7 @@ type Pet struct {
 //
 // The following example is a typical way to register a model type while storing a global convenience handle for future use.
 // rather than name, so name overlap is technically permitted (convenience handles like this one make those situations easier to deal with)
-var Pets = mongoid.Register(&Pet{})
+var Pets = mongoid.Register(&Pet{}).WithCollectionName("our_pets").Register()
 
 // If you'd rather not create a convenience handle at the module-global level, you can simply discard the return value like so.
 //     var _ = mongoid.Register(&Pet{})
@@ -59,10 +59,10 @@ func init() {
 
 	// You can reconfigure various options after a model has been registered (once mongoid.Configured() is true, these may generate warning log messages)
 	// For instace you can change the name of the collection that will be used
-	Pets = Pets.SetCollectionName("our_pets")
+	// Pets = Pets.WithCollectionName("our_pets")
 
 	// You can even redefine the model name as used by `mongoid.M("MyModelName")` and  `mongoid.Model("MyModelName")`
-	Pets = Pets.SetModelName("OurPets")
+	// Pets = Pets.WithModelName("OurPets")
 
 	// Take note that the above registration changes also updated the convenience handle value - these are stored by value, so you can create different convenience handles based on different application needs
 

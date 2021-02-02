@@ -147,15 +147,6 @@ var ExampleDocuments = mongoid.Register(&ExampleDocument{
 
 var _ = Describe("Document", func() {
 
-	Context("an unknown UnknownExampleDocument document model", func() {
-		It("is not verifyably registered", func() {
-			By("struct name")
-			Expect(mongoid.M("UnknownExampleDocument")).To(BeNil())
-			By("example ref object")
-			Expect(mongoid.M(&UnknownExampleDocument{})).To(BeNil())
-		})
-	})
-
 	Context("ExampleDocument document model", func() {
 
 		It("can be New()'ed", func() {

@@ -29,7 +29,7 @@ type TestModel3 struct {
 	ID           mongoid.ObjectID `bson:"_id"`
 }
 
-var TestModel3s = mongoid.Register(&TestModel3{})
+var TestModel3s = mongoid.Register(&TestModel3{}).WithClientName("taco_stand")
 
 var _ = Describe("Document Model Registry", func() {
 	Context("TestModel1", func() {

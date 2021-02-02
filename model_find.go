@@ -13,19 +13,19 @@ import (
 )
 
 // Find a document or multiple documents by their ids
-func (model *ModelType) Find(ids ...ObjectID) *Result {
+func (model ModelType) Find(ids ...ObjectID) *Result {
 	log.Debugf("%v.Find(%v)", model.GetModelName(), ids)
 	return model.find(nil, ids...)
 }
 
 // FindCtx finds a document or multiple documents by their ids, bound by a new context
-func (model *ModelType) FindCtx(ctx context.Context, ids ...ObjectID) *Result {
+func (model ModelType) FindCtx(ctx context.Context, ids ...ObjectID) *Result {
 	log.Debugf("%v.FindCtx(%v)", model.GetModelName(), ids)
 	return model.find(ctx, ids...)
 }
 
 // FindByDeadline locates a document or multiple documents by their ids, bound by a time deadline.
-func (model *ModelType) FindByDeadline(d time.Time, ids ...ObjectID) *Result {
+func (model ModelType) FindByDeadline(d time.Time, ids ...ObjectID) *Result {
 	log.Debugf("%v.FindByDeadline(%v)", model.GetModelName(), ids)
 	ctx := model.GetClient().Context()
 	newCtx, cancel := context.WithDeadline(ctx, d)
@@ -37,7 +37,7 @@ func (model *ModelType) FindByDeadline(d time.Time, ids ...ObjectID) *Result {
 }
 
 // FindByTimeout locates a document or multiple documents by their ids, bound by a timeout duration.
-func (model *ModelType) FindByTimeout(t time.Duration, ids ...ObjectID) *Result {
+func (model ModelType) FindByTimeout(t time.Duration, ids ...ObjectID) *Result {
 	log.Debugf("%v.FindByTimeout(%v)", model.GetModelName(), ids)
 	ctx := model.GetClient().Context()
 	newCtx, cancel := context.WithTimeout(ctx, t)

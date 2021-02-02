@@ -9,15 +9,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// ModelType represents a mongoid model/document type and provides methods to interact with the collection
+// ModelType represents a mongoid model/document type and provides methods to interact with records.
+// The ModelType scopes document access to a specific collection within a specific database via a specific client.
+// Use one of the With... methods to create a new ModelType with an updated scope.
+//
 type ModelType struct {
 	rootTypeRef    IDocumentBase // a reference to an object instance of the document/model type given during registration (for future type sanity)
 	modelName      string
 	modelFullName  string
 	collectionName string
-	databaseName   string
-	clientName     string
-	defaultValue   BsonDocument // bson representation of default values to be applied during creation of brand new document/model instances
+	// Client - determined by combination of databaseName and clientName
+	databaseName string //
+	clientName   string
+	defaultValue BsonDocument // bson representation of default values to be applied during creation of brand new document/model instances
 }
 
 var _ fmt.Stringer = ModelType{} // assert implements Stringer interface
@@ -54,12 +58,11 @@ func (model *ModelType) equalsRootType(comparisonModel *ModelType) bool {
 	return false
 }
 
-// SetModelName changes the model name used by the ModelType
-func (model *ModelType) SetModelName(newModelName string) *ModelType {
-	newModelType := *model // dereferenced copy
-	newModelType.modelName = newModelName
-	// update the global registry for this ModelType
-	return mongoidModelRegistry.updateModelTypeRegistration(&newModelType)
+// WithModelName returns a ModelType with the modelName altered as directed
+func (model ModelType) WithModelName(newModelName string) ModelType {
+	var newModel ModelType = model
+	newModel.modelName = newModelName
+	return newModel
 }
 
 // GetModelName returns the current friendly name for this model type
@@ -67,29 +70,27 @@ func (model ModelType) GetModelName() string {
 	return model.modelName
 }
 
-// SetCollectionName changes the collection name used by the ModelType
-func (model *ModelType) SetCollectionName(newCollectionName string) *ModelType {
-	newModelType := *model // dereferenced copy
-	newModelType.collectionName = newCollectionName
-	// update the global registry for this ModelType
-	return mongoidModelRegistry.updateModelTypeRegistration(&newModelType)
+// WithCollectionName returns a ModelType with the collectionName altered as directed
+func (model ModelType) WithCollectionName(newCollectionName string) ModelType {
+	var newModel ModelType = model
+	newModel.collectionName = newCollectionName
+	return newModel
 }
 
 // GetCollectionName returns the current default collection name for this model type
-func (model *ModelType) GetCollectionName() string {
+func (model ModelType) GetCollectionName() string {
 	return model.collectionName
 }
 
 // WithDatabaseName returns a ModelType with the databaseName altered as directed
 func (model ModelType) WithDatabaseName(newDatabaseName string) ModelType {
-	newModel := ModelType{}
-	newModel = model
+	var newModel ModelType = model
 	newModel.databaseName = newDatabaseName
 	return newModel
 }
 
-// GetDatabaseName returns the current default database for this model type
-func (model *ModelType) GetDatabaseName() string {
+// GetDatabaseName returns the database name for this ModelType
+func (model ModelType) GetDatabaseName() string {
 	if model.databaseName == "" {
 		return model.GetClient().Database
 	}
@@ -104,14 +105,15 @@ func (model ModelType) WithClientName(newClientName string) ModelType {
 	return newModel
 }
 
-// GetClientName returns the current default client name for this model type
+// GetClientName returns the custom client name for this ModelType, or "" if using the default
 func (model *ModelType) GetClientName() string {
 	return model.clientName
 }
 
-// GetClient returns the current default client for this model type
+// GetClient returns the Client use by this ModelType
 func (model *ModelType) GetClient() *Client {
 	if clientName := model.GetClientName(); clientName != "" {
+		log.Fatal("no")
 		return ClientByName(clientName)
 	}
 	return DefaultClient()
@@ -123,15 +125,15 @@ func (model *ModelType) GetClient() *Client {
 // New intantiates a new document model object of the registered type and returns a pointer to the new object.
 // The returned object will be preset with the defaults specified during initial document/model registration.
 // Note: Due to the strongly typed nature of Go, you'll need to perform a type assertion (as the value is returned as an interface{})
-func (model *ModelType) New() IDocumentBase {
+func (model ModelType) New() IDocumentBase {
 	log.Debugf("%v.New()", model.GetModelName())
-	retAsIDocumentBase := makeDocument(model, model.GetDefaultBSON())
+	retAsIDocumentBase := makeDocument(&model, model.GetDefaultBSON())
 	return retAsIDocumentBase // return the new object as an IDocumentBase interface
 }
 
 // GetDefaultBSON provides the default values for a ModelType returned as a BsonDocument.
 // The returned value is deep-cloned to protect the original data, so you can begin using it directly without a second deep copy
-func (model *ModelType) GetDefaultBSON() BsonDocument {
+func (model ModelType) GetDefaultBSON() BsonDocument {
 	log.Trace("GetDefaultBSON()")
 	return BsonDocumentDeepCopy(model.defaultValue)
 }

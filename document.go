@@ -64,7 +64,8 @@ func (d *Base) Model() *ModelType {
 	if d.rootTypeRef == nil {
 		log.Panic("Model() requires valid rootTypeRef")
 	}
-	return Model(d.rootTypeRef)
+	model := Model(d.rootTypeRef)
+	return &model
 }
 
 // DocumentBase returns the self-reference handle, which can be used to un-cast the object from *Base into an IDocumentBase (interface{}) of the original type

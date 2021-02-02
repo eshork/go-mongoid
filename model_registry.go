@@ -59,11 +59,22 @@ func getRegisteredModelTypeByDocRef(modelTypeDocRef IDocumentBase) *ModelType {
 	return nil
 }
 
+// Register the current ModelType model under the current modelName, overwriting a previous registration of the same modelName if necessary.
+func (model ModelType) Register() ModelType {
+	return mongoidModelRegistry.upsertModel(model)
+}
+
 // Register a new documentType
-func Register(documentType interface{}) *ModelType {
+func Register(documentType interface{}) ModelType {
+
+	// special handle ModelType
+	if _, ok := documentType.(ModelType); ok {
+		log.Panic("DERP")
+	}
+
 	// passed as &MyModelStruct{} (and implements IDocumentBase)
 	if v, ok := documentType.(IDocumentBase); ok {
-		return mongoidModelRegistry.register(v)
+		return mongoidModelRegistry.upsert(v)
 	}
 
 	// ensure kind is struct
@@ -72,7 +83,7 @@ func Register(documentType interface{}) *ModelType {
 		newDupeVP := reflect.New(reflect.TypeOf(documentType))
 		if v, ok := newDupeVP.Interface().(IDocumentBase); ok {
 			newDupeVP.Elem().Set(documentTypeValue)
-			return mongoidModelRegistry.register(v) // send it onward as the expected struct pointer kind
+			return mongoidModelRegistry.upsert(v) // send it onward as the expected struct pointer kind
 		}
 	}
 
@@ -81,67 +92,24 @@ func Register(documentType interface{}) *ModelType {
 		MethodName: "Register",
 		Reason:     fmt.Sprintf("documentType must implement IDocumentBase. Found: %s", reflect.ValueOf(documentType).String()),
 	})
-	return nil // unreachable
+	return ModelType{} // unreachable
 }
 
-func (registry *modelRegistry) register(documentType IDocumentBase) *ModelType {
-	log.Trace("ModelRegistry.Register()")
-
-	modelType := generateModelTypeFromDocument(documentType)
-
-	// registry lock
+func (registry *modelRegistry) upsertModel(modelType ModelType) ModelType {
 	mongoidModelRegistryMutex.Lock()
 	defer mongoidModelRegistryMutex.Unlock()
-
-	if _, ok := mongoidModelRegistry.modelTypeMap[modelType.modelName]; ok {
-		log.Fatalf("Cannot register duplicate named model: %s (%s)", modelType.modelName, modelType.modelFullName)
-		return nil // unreachable; here to satisfy the compiler
-	}
-
-	modelType.defaultValue = structToBsonM(documentType) // build a default value record from the original type reference
-
-	log.Infof("Registered new document model: %s", modelType)
-	// log.Infof("Registered new document model: %+v", modelType.defaultValue)
+	log.Infof("Registered document model: %s", modelType)
 	mongoidModelRegistry.modelTypeMap[modelType.modelName] = modelType
-	return &modelType
+	return modelType
 }
 
-// updates an existing IDocumentBase registration with a new ModelType definition, or fails hard
-func (registry *modelRegistry) updateModelTypeRegistration(newModelType *ModelType) *ModelType {
-	// warn if configured
-	if Configured() == true {
-		log.Warnf("Updating existing document model after Configured: %s (%s)", newModelType.modelName, newModelType.modelFullName)
-	} else {
-		log.Debugf("Updating existing document model: %s (%s)", newModelType.modelName, newModelType.modelFullName)
-	}
-
-	// registry lock
+func (registry *modelRegistry) upsert(documentType IDocumentBase) ModelType {
+	modelType := generateModelTypeFromDocument(documentType)
 	mongoidModelRegistryMutex.Lock()
 	defer mongoidModelRegistryMutex.Unlock()
-
-	// find by documentType
-	var existingModelType *ModelType
-	var existingModelKey string
-	for k, v := range mongoidModelRegistry.modelTypeMap {
-		if newModelType.equalsRootType(&v) {
-			existingModelKey = k
-			existingModelType = &v
-		}
-	}
-
-	// fatal if no type match
-	if existingModelType == nil {
-		log.Fatalf("No matching registration found for document model: %s (%s)", newModelType.modelName, newModelType.modelFullName)
-		return nil
-	}
-
-	// drop the existing entry
-	delete(mongoidModelRegistry.modelTypeMap, existingModelKey)
-
-	// store the new entry
-	log.Infof("Updated existing document model: %s", newModelType)
-	mongoidModelRegistry.modelTypeMap[newModelType.modelName] = *newModelType
-	return newModelType // return the newly installed entry
+	log.Infof("Registered document model: %s", modelType)
+	mongoidModelRegistry.modelTypeMap[modelType.modelName] = modelType
+	return modelType
 }
 
 func generateModelTypeFromDocument(documentType IDocumentBase) ModelType {
@@ -153,6 +121,7 @@ func generateModelTypeFromDocument(documentType IDocumentBase) ModelType {
 		modelName:      docTypeNameStr,
 		modelFullName:  docTypeFullNameStr,
 		collectionName: strcase.ToSnake(inflection.Plural(docTypeNameStr)),
+		defaultValue:   structToBsonM(documentType), // build a default value record from the original type reference
 	}
 
 	// update attributes where overridden by struct tags
@@ -221,23 +190,4 @@ func getDocumentTypeOptions(documentType IDocumentBase) modelTypeTagOpts {
 		}
 	}
 	return tagOpts
-}
-
-// TODO this is (likely) dead code. Delete it
-func dumpFields(documentType IDocumentBase) {
-	handleType := reflect.TypeOf(documentType)
-	log.Printf("reflect.Kind: %s", handleType.Kind())
-	log.Printf("reflect.Kind: %s", handleType.Elem().Kind())
-
-	handleStructType := reflect.TypeOf(documentType)
-	if handleStructType.Kind() == reflect.Ptr {
-		handleStructType = handleType.Elem()
-	}
-	log.Printf("reflect.handleStructType.Kind: %s", handleStructType.Kind())
-
-	for i := 0; i < handleStructType.NumField(); i++ {
-		field := handleStructType.Field(i) // Get the field, returns https://golang.org/pkg/reflect/#StructField
-		log.Printf("dumpFields Name: %s", field.Name)
-		log.Printf("dumpFields Tags: %s", field.Tag)
-	}
 }
