@@ -21,7 +21,7 @@ func makeDocument(docType *ModelType, srcDoc bson.M) IDocumentBase {
 // Self-reference is used to :
 //   - store the original object-type
 //   - store a copy of the initial object values for future change tracking
-func (d *Base) initDocumentBase(modelType *ModelType, selfRef IDocumentBase, initialBSON BsonDocument) {
+func (d *Document) initDocumentBase(modelType *ModelType, selfRef IDocumentBase, initialBSON BsonDocument) {
 	d.rootTypeRef = selfRef
 	d.modelType = modelType
 	if d.rootTypeRef == nil {

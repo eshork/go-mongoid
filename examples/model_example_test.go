@@ -17,7 +17,7 @@ import (
 // Verify model registration name
 
 type unknownModel struct {
-	mongoid.Base
+	mongoid.Document
 }
 
 // Verify unknown model is not registered

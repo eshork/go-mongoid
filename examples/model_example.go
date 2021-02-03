@@ -8,7 +8,7 @@ import (
 // Pet is a record for a pet in our adoption app.
 // By default, Mongoid will store these records in a collection named after the pluralized form of the struct name. ('pets' in this case)
 type Pet struct {
-	mongoid.Base       // add Document functionality to this struct
+	mongoid.Document   // add Document functionality to this struct
 	mongoid.Timestamps // add the optional automatic record timestamp fields (created_at, updated_at)
 
 	// Every document has an ID field.

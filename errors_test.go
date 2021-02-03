@@ -10,7 +10,7 @@ import (
 
 var _ = Describe("Result", func() {
 	type ErrorTestModel struct {
-		mongoid.Base
+		mongoid.Document
 		ID mongoid.ObjectID `bson:"_id"`
 	}
 	var ErrorTestModels = mongoid.Model(&ErrorTestModel{})

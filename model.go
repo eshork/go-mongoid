@@ -199,8 +199,8 @@ func (model ModelType) getMongoCollectionHandle() *mongo.Collection {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// func AddCallback(when string, what func(*Base)) {}
-// func AddValidation(when string, what func(*Base)(error)) {}
+// func AddCallback(when string, what func(*Document)) {}
+// func AddValidation(when string, what func(*Document)(error)) {}
 // func AddIndex()
 
 // type Fields map[string]interface{}

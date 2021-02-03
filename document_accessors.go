@@ -13,7 +13,7 @@ import (
 )
 
 // GetFieldPrevious returns an interface to the previous value from the document found at the given fieldNamePath and a true boolean if the path was valid
-func (d *Base) GetFieldPrevious(fieldNamePath string) (interface{}, bool) {
+func (d *Document) GetFieldPrevious(fieldNamePath string) (interface{}, bool) {
 	log.Tracef("GetFieldPrevious(%s)", fieldNamePath)
 	// this doesn't chase into sub-documents, will probably want to fix that one day
 	if value, found := d.previousValue[fieldNamePath]; found {
@@ -23,7 +23,7 @@ func (d *Base) GetFieldPrevious(fieldNamePath string) (interface{}, bool) {
 }
 
 // SetField sets a value on the document via bson field name path
-func (d *Base) SetField(fieldNamePath string, newValue interface{}) error {
+func (d *Document) SetField(fieldNamePath string, newValue interface{}) error {
 	log.Debugf("%v.SetField(%s)", d.Model().modelName, fieldNamePath)
 	// get a Value handle to the field we want
 	found, retVal, _ := getStructFieldValueRefByBsonPath(d.DocumentBase(), fieldNamePath)
@@ -36,7 +36,7 @@ func (d *Base) SetField(fieldNamePath string, newValue interface{}) error {
 }
 
 // GetField returns an interface to a value from the document via the bson field name path
-func (d *Base) GetField(fieldNamePath string) (interface{}, error) {
+func (d *Document) GetField(fieldNamePath string) (interface{}, error) {
 	log.Tracef("GetField(%s)", fieldNamePath)
 	// get a Value handle to the field we want
 	found, retVal, _ := getStructFieldValueRefByBsonPath(d.DocumentBase(), fieldNamePath)

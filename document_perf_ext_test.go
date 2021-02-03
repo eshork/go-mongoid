@@ -10,7 +10,7 @@ import (
 )
 
 type PerfSimpleExampleDocument struct {
-	mongoid.Base
+	mongoid.Document
 	IntField    int
 	StringField string
 }

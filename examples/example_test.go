@@ -1,7 +1,7 @@
 package examples
 
 /*
-Base test suite configuration for testing the examples.
+Document test suite configuration for testing the examples.
 */
 
 import (

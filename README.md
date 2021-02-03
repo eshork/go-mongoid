@@ -72,7 +72,7 @@ Define a bespoke struct and use it to access database records
 
 ```
 type MyDocument struct {
-	mongoid.Base
+	mongoid.Document
 	MyValue string
 }
 
@@ -83,7 +83,7 @@ Make a new item and save it
 
 ```go
 newDoc := MyDocuments.New().(*MyDocument)
-newDoc.MyValue = "something noteworthy"
+newDoc.MyValue = "something worth keeping"
 newDoc.Save()
 
 var mongoid.ObjectID recordId = newDoc.ID

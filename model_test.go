@@ -8,7 +8,7 @@ package mongoid_test
 // )
 
 // type TestModel1 struct {
-// 	mongoid.Base
+// 	mongoid.Document
 // 	ID mongoid.ObjectID `bson:"_id"`
 // }
 
@@ -17,7 +17,7 @@ package mongoid_test
 // const testModel2SomeFieldValue = 42 // f9e2fea7 #44 - registered by value and default preserved
 
 // type TestModel2 struct {
-// 	mongoid.Base `mongoid:"collection:otherCollection"`
+// 	mongoid.Document `mongoid:"collection:otherCollection"`
 // 	ID           mongoid.ObjectID `bson:"_id"`
 // 	SomeField    int
 // }
@@ -25,7 +25,7 @@ package mongoid_test
 // var TestModel2s = mongoid.Register(TestModel2{SomeField: testModel2SomeFieldValue}) // f9e2fea7 #44 - registered by value and default preserved
 
 // type TestModel3 struct {
-// 	mongoid.Base `mongoid:"database:otherDatabase"`
+// 	mongoid.Document `mongoid:"database:otherDatabase"`
 // 	ID           mongoid.ObjectID `bson:"_id"`
 // }
 
