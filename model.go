@@ -21,6 +21,7 @@ type ModelType struct {
 	// Client - determined by combination of databaseName and clientName
 	databaseName string //
 	clientName   string
+	client       *Client      // populated on creation based on clientName
 	defaultValue BsonDocument // bson representation of default values to be applied during creation of brand new document/model instances
 }
 
@@ -56,13 +57,6 @@ func (model *ModelType) equalsRootType(comparisonModel *ModelType) bool {
 		}
 	}
 	return false
-}
-
-// WithModelName returns a ModelType with the modelName altered as directed
-func (model ModelType) WithModelName(newModelName string) ModelType {
-	var newModel ModelType = model
-	newModel.modelName = newModelName
-	return newModel
 }
 
 // GetModelName returns the current friendly name for this model type
@@ -106,17 +100,22 @@ func (model ModelType) WithClientName(newClientName string) ModelType {
 }
 
 // GetClientName returns the custom client name for this ModelType, or "" if using the default
-func (model *ModelType) GetClientName() string {
+func (model ModelType) GetClientName() string {
 	return model.clientName
 }
 
-// GetClient returns the Client use by this ModelType
-func (model *ModelType) GetClient() *Client {
-	if clientName := model.GetClientName(); clientName != "" {
-		log.Fatal("no")
-		return ClientByName(clientName)
+// GetClient returns the Client used by this ModelType
+func (model ModelType) GetClient() *Client {
+	if model.client != nil {
+		return model.client
 	}
-	return DefaultClient()
+	if model.clientName != "" {
+		model.client = ClientByName(model.clientName)
+	}
+	if model.client == nil {
+		model.client = DefaultClient()
+	}
+	return model.client
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -189,7 +188,7 @@ func modelTypeTagOptsFromString(tagString string) modelTypeTagOpts {
 ////////////////////////////////////////////////////////////////////////////////
 
 // returns a handle to the mongo driver collection for this ModelType
-func (model *ModelType) getMongoCollectionHandle() *mongo.Collection {
+func (model ModelType) getMongoCollectionHandle() *mongo.Collection {
 	client := model.GetClient()
 	dbName := model.GetDatabaseName()
 	collectionName := model.GetCollectionName()

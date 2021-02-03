@@ -6,9 +6,8 @@ import (
 
 // IDocumentBase ...
 type IDocumentBase interface {
-	initDocumentBase(selfRef IDocumentBase, initialBSON BsonDocument)
 	DocumentBase() IDocumentBase
-	Model() *ModelType
+	Model() ModelType
 
 	ToBson() BsonDocument
 	ToUpdateBson() BsonDocument
@@ -37,6 +36,9 @@ type IDocumentBase interface {
 
 	SetField(fieldNamePath string, newValue interface{}) error
 	GetField(fieldNamePath string) (interface{}, error)
+
+	implementIDocumentBase()
+	initDocumentBase(modelType *ModelType, selfRef IDocumentBase, initialBSON BsonDocument)
 }
 
 // Base ...
@@ -44,9 +46,12 @@ type Base struct {
 	rootTypeRef   IDocumentBase // self-reference for future type recognition via interface{}
 	persisted     bool          // persistence tracking (reflects the anticipated existence of a record within the datastore, based on the lifecycle of the instance)
 	previousValue BsonDocument  // stores a BSON representation of the last values, used for change tracking
-
+	modelType     *ModelType    // the ModelType that was used to create this object
 	// privateID     string       // internal object ID tracker (string form in case a custom ID field is provided of a non-ObjectID type)
 }
+
+// implementIDocumentBase implements IDocumentBase
+func (d *Base) implementIDocumentBase() {}
 
 // force sets previousValue (change tracking) to the given BsonDocument
 func (d *Base) setPreviousValueBSON(lastValue BsonDocument) {
@@ -58,14 +63,10 @@ func (d *Base) refreshPreviousValueBSON() {
 	d.setPreviousValueBSON(d.ToBson())
 }
 
-// Model returns the mongoid.ModelType of the document object, or nil if unknown
-func (d *Base) Model() *ModelType {
+// Model returns the ModelType of the document object
+func (d *Base) Model() ModelType {
 	log.Trace("Base.Model()")
-	if d.rootTypeRef == nil {
-		log.Panic("Model() requires valid rootTypeRef")
-	}
-	model := Model(d.rootTypeRef)
-	return &model
+	return *d.modelType
 }
 
 // DocumentBase returns the self-reference handle, which can be used to un-cast the object from *Base into an IDocumentBase (interface{}) of the original type

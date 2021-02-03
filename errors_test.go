@@ -13,7 +13,7 @@ var _ = Describe("Result", func() {
 		mongoid.Base
 		ID mongoid.ObjectID `bson:"_id"`
 	}
-	var ErrorTestModels = mongoid.Register(&ErrorTestModel{})
+	var ErrorTestModels = mongoid.Model(&ErrorTestModel{})
 	Context(".Streaming()", func() {
 		Context(".At()", func() {
 			It("should panic InvalidOperation", func() {

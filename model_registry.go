@@ -1,114 +1,42 @@
 package mongoid
 
 import (
-	"fmt"
 	mongoidErr "mongoid/errors"
 	"mongoid/log"
 	"reflect"
 	"strings"
-	"sync"
 
 	"github.com/iancoleman/strcase"
 	"github.com/jinzhu/inflection"
 )
 
-// the Config data holders & mutex
-var mongoidModelRegistry *modelRegistry  // the global modelRegistry
-var mongoidModelRegistryMutex sync.Mutex // the global modelRegistry mutex, used to synchronize access
+// Model ...
+func Model(documentType interface{}) ModelType {
 
-// type typeDocumentBaseMap map[string]IDocumentBase
-type typeModelTypeMapByName map[string]ModelType
-
-type modelRegistry struct {
-	modelTypeMap typeModelTypeMapByName
-}
-
-func init() {
-	mongoidModelRegistryMutex.Lock()
-	defer mongoidModelRegistryMutex.Unlock()
-	if mongoidModelRegistry == nil {
-		mongoidModelRegistry = new(modelRegistry)
-		mongoidModelRegistry.modelTypeMap = make(typeModelTypeMapByName)
-	}
-}
-
-// retrieves a ModelType for a previously registered IDocumentBase via the model name
-// returns nil if no match was found
-func getRegisteredModelTypeByName(modelTypeName string) *ModelType {
-	// TODO - make read lock vs write lock more efficient (ie exclusive and non-exclusive locks)
-	mongoidModelRegistryMutex.Lock()
-	defer mongoidModelRegistryMutex.Unlock()
-	for i, v := range mongoidModelRegistry.modelTypeMap {
-		if i == modelTypeName {
-			return &v
+	// if not passed as &MyModelStruct{} (that implements IDocumentBase)
+	if _, ok := documentType.(IDocumentBase); !ok {
+		// ensure kind is struct
+		if documentTypeValue := reflect.ValueOf(documentType); documentTypeValue.Kind() != reflect.Struct {
+			log.Panic(mongoidErr.InvalidOperation{
+				MethodName: "Model",
+				Reason:     "",
+			})
 		}
-	}
-	return nil
-}
-
-// retrieves a ModelType for a previously registered IDocumentBase via an example IDocumentBase implementing object ref
-func getRegisteredModelTypeByDocRef(modelTypeDocRef IDocumentBase) *ModelType {
-	// TODO - make read lock vs write lock more efficient (ie exclusive and non-exclusive locks)
-	mongoidModelRegistryMutex.Lock()
-	defer mongoidModelRegistryMutex.Unlock()
-	for _, v := range mongoidModelRegistry.modelTypeMap {
-		if verifyBothAreSameSame(modelTypeDocRef, v.rootTypeRef) == true {
-			return &v
-		}
-	}
-	return nil
-}
-
-// Register the current ModelType model under the current modelName, overwriting a previous registration of the same modelName if necessary.
-func (model ModelType) Register() ModelType {
-	return mongoidModelRegistry.upsertModel(model)
-}
-
-// Register a new documentType
-func Register(documentType interface{}) ModelType {
-
-	// special handle ModelType
-	if _, ok := documentType.(ModelType); ok {
-		log.Panic("DERP")
-	}
-
-	// passed as &MyModelStruct{} (and implements IDocumentBase)
-	if v, ok := documentType.(IDocumentBase); ok {
-		return mongoidModelRegistry.upsert(v)
-	}
-
-	// ensure kind is struct
-	if documentTypeValue := reflect.ValueOf(documentType); documentTypeValue.Kind() == reflect.Struct {
 		// if passed as MyModelStruct{} (and implements IDocumentBase) ...
 		newDupeVP := reflect.New(reflect.TypeOf(documentType))
 		if v, ok := newDupeVP.Interface().(IDocumentBase); ok {
-			newDupeVP.Elem().Set(documentTypeValue)
-			return mongoidModelRegistry.upsert(v) // send it onward as the expected struct pointer kind
+			// TODO value assignment documentType => (*newDupeVP) to preserve any given default state
+			documentType = v
 		}
 	}
-
-	// not one of the two things we know how to handle, so have a nice error message
-	log.Panic(mongoidErr.InvalidOperation{
-		MethodName: "Register",
-		Reason:     fmt.Sprintf("documentType must implement IDocumentBase. Found: %s", reflect.ValueOf(documentType).String()),
-	})
-	return ModelType{} // unreachable
-}
-
-func (registry *modelRegistry) upsertModel(modelType ModelType) ModelType {
-	mongoidModelRegistryMutex.Lock()
-	defer mongoidModelRegistryMutex.Unlock()
-	log.Infof("Registered document model: %s", modelType)
-	mongoidModelRegistry.modelTypeMap[modelType.modelName] = modelType
-	return modelType
-}
-
-func (registry *modelRegistry) upsert(documentType IDocumentBase) ModelType {
-	modelType := generateModelTypeFromDocument(documentType)
-	mongoidModelRegistryMutex.Lock()
-	defer mongoidModelRegistryMutex.Unlock()
-	log.Infof("Registered document model: %s", modelType)
-	mongoidModelRegistry.modelTypeMap[modelType.modelName] = modelType
+	docType, ok := documentType.(IDocumentBase)
+	if !ok {
+		log.Panic(mongoidErr.InvalidOperation{
+			MethodName: "Model",
+			Reason:     "Given struct fails requirements. Must implement the IDocumentBase interface",
+		})
+	}
+	modelType := generateModelTypeFromDocument(docType)
 	return modelType
 }
 

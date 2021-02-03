@@ -10,10 +10,10 @@ import (
 // makeDocument creates a new object of type docType, populated with the given srcDoc
 func makeDocument(docType *ModelType, srcDoc bson.M) IDocumentBase {
 	log.Trace("makeDocument()")
-	typeRef := reflect.Indirect(reflect.ValueOf(docType.rootTypeRef)) // model.rootTypeRef is always a ptr to an example object, so we need to use Indirect()
-	ret := reflect.New(typeRef.Type())                                // finally have a solid object type, so make one
-	retAsIDocumentBase := ret.Interface().(IDocumentBase)             // convert into a IDocumentBase interface
-	retAsIDocumentBase.initDocumentBase(retAsIDocumentBase, srcDoc)   // call the self init
+	typeRef := reflect.Indirect(reflect.ValueOf(docType.rootTypeRef))        // model.rootTypeRef is always a ptr to an example object, so we need to use Indirect()
+	ret := reflect.New(typeRef.Type())                                       // finally have a solid object type, so make one
+	retAsIDocumentBase := ret.Interface().(IDocumentBase)                    // convert into a IDocumentBase interface
+	retAsIDocumentBase.initDocumentBase(docType, retAsIDocumentBase, srcDoc) // call the self init
 	return retAsIDocumentBase
 }
 
@@ -21,10 +21,14 @@ func makeDocument(docType *ModelType, srcDoc bson.M) IDocumentBase {
 // Self-reference is used to :
 //   - store the original object-type
 //   - store a copy of the initial object values for future change tracking
-func (d *Base) initDocumentBase(selfRef IDocumentBase, initialBSON BsonDocument) {
+func (d *Base) initDocumentBase(modelType *ModelType, selfRef IDocumentBase, initialBSON BsonDocument) {
 	d.rootTypeRef = selfRef
+	d.modelType = modelType
 	if d.rootTypeRef == nil {
 		panic("cannot initDocumentBase without a valid selfRef handle")
+	}
+	if d.modelType == nil {
+		panic("cannot initDocumentBase without a valid modelType handle")
 	}
 	if initialBSON != nil {
 		structValuesFromBsonM(selfRef, initialBSON)

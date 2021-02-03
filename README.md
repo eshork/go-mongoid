@@ -68,7 +68,7 @@ gMongoidConfig := mongoid.Config{
 mongoid.Configure(&gMongoidConfig)
 ```
 
-Define a document model and register it
+Define a bespoke struct and use it to access database records
 
 ```
 type MyDocument struct {
@@ -76,7 +76,7 @@ type MyDocument struct {
 	MyValue string
 }
 
-var MyDocuments = mongoid.Register(&MyDocument{})
+var MyDocuments = mongoid.Model(&MyDocument{})
 ```
 
 Make a new item and save it
