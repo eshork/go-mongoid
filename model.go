@@ -18,11 +18,10 @@ type ModelType struct {
 	modelName      string
 	modelFullName  string
 	collectionName string
-	// Client - determined by combination of databaseName and clientName
-	databaseName string //
-	clientName   string
-	client       *Client      // populated on creation based on clientName
-	defaultValue BsonDocument // bson representation of default values to be applied during creation of brand new document/model instances
+	databaseName   string
+	clientName     string
+	client         *Client      // populated on creation based on clientName
+	defaultValue   BsonDocument // bson representation of default values to be applied during creation of brand new document/model instances
 }
 
 var _ fmt.Stringer = ModelType{} // assert implements Stringer interface
