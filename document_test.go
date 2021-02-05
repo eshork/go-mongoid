@@ -201,7 +201,6 @@ var _ = Describe("Document", func() {
 				By("saving the ExampleDocument")
 				newObj.Save()
 				Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after save")
-				// Expect(newObj.Changes()).To(Equal(bson.M(nil)), "expect no changes after save")
 				By("changing StringPtrField to something else")
 				newValue := "something else"
 				newObj.StringPtrField = &newValue
