@@ -133,20 +133,11 @@ func (model ModelType) New() IDocumentBase {
 // The returned value is deep-cloned to protect the original data, so you can begin using it directly without a second deep copy
 func (model ModelType) GetDefaultBSON() BsonDocument {
 	log.Trace("GetDefaultBSON()")
+	if model.defaultValue == nil {
+		return BsonDocument{} // empty document if no defaults available
+	}
 	return BsonDocumentDeepCopy(model.defaultValue)
 }
-
-// NYI - ref: https://github.com/eshork/go-mongoid/issues/17
-// func (model *ModelType) SetDefaultScope() {
-// 	// log.Panic("NYI")
-// 	log.Error("NYI - ModelType.SetDefaultScope")
-// }
-
-// NYI - ref: https://github.com/eshork/go-mongoid/issues/18
-// func (model *ModelType) AddIndex() {
-// 	// log.Panic("NYI")
-// 	log.Error("NYI - ModelType.AddIndex")
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -194,17 +185,3 @@ func (model ModelType) getMongoCollectionHandle() *mongo.Collection {
 	collectionRef := client.getMongoCollectionHandle(dbName, collectionName)
 	return collectionRef
 }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-// func AddCallback(when string, what func(*Document)) {}
-// func AddValidation(when string, what func(*Document)(error)) {}
-// func AddIndex()
-
-// type Fields map[string]interface{}
-
-// CreateCollection creates a collection on the Client's connected topology with the given databaseName and collectionName pair
-// func (c *Client) CreateCollection(databaseName string, collectionName string) error {
-// 	return nil
-// }

@@ -24,7 +24,7 @@ func (d *Document) GetFieldPrevious(fieldNamePath string) (interface{}, bool) {
 
 // SetField sets a value on the document via bson field name path
 func (d *Document) SetField(fieldNamePath string, newValue interface{}) error {
-	log.Debugf("%v.SetField(%s)", d.Model().modelName, fieldNamePath)
+	log.Debugf("%v.SetField(%s)", d.ModelType().modelName, fieldNamePath)
 	// get a Value handle to the field we want
 	found, retVal, _ := getStructFieldValueRefByBsonPath(d.DocumentBase(), fieldNamePath)
 	if found { // if we find the field, assign the value

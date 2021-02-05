@@ -7,7 +7,7 @@ import (
 // IDocumentBase ...
 type IDocumentBase interface {
 	DocumentBase() IDocumentBase
-	Model() ModelType
+	ModelType() ModelType
 
 	ToBson() BsonDocument
 	ToUpdateBson() BsonDocument
@@ -63,9 +63,14 @@ func (d *Document) refreshPreviousValueBSON() {
 	d.setPreviousValueBSON(d.ToBson())
 }
 
-// Model returns the ModelType of the document object
-func (d *Document) Model() ModelType {
+// ModelType returns the ModelType of the document object
+func (d *Document) ModelType() ModelType {
 	log.Trace("Document.Model()")
+	if d.modelType == nil {
+		log.Trace("Document.Model() d.modelType is nil; creating ModelType on demand")
+		mt := Model(d)
+		d.modelType = &mt
+	}
 	return *d.modelType
 }
 
