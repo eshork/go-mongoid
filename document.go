@@ -4,7 +4,14 @@ import (
 	"mongoid/log"
 )
 
-// IDocumentBase ...
+// IDocumentBase is the foundational interface for go-mongoid documents/records - every go-mongoid document struct must implement this interface.
+// To implement this interface, add the the Document struct type as an anonymous field within your custom struct definition.
+//
+// For example:
+//     type ExampleMinimalDocumentStruct struct {
+//         mongoid.Document // implements IDocumentBase
+//     }
+// Refer to examples/ for additional usage examples.
 type IDocumentBase interface {
 	DocumentBase() IDocumentBase
 	ModelType() ModelType
