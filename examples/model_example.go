@@ -34,7 +34,7 @@ type Pet struct {
 
 // Call the Model function with an example object to obtain a ModelType that can be used to create, save,
 // and find records based on that struct.
-var Pets = mongoid.Model(&Pet{
+var Pets = mongoid.Collection(&Pet{
 	Name: "spot", // the current field values will be used as default values for your Documents
 })
 

@@ -15,7 +15,7 @@ import (
 // Refer to examples/ for additional usage examples.
 type IDocument interface {
 	DocumentBase() IDocument
-	ModelType() ModelType
+	Collection() ICollection
 
 	ToBson() BsonDocument
 	ToUpdateBson() BsonDocument
@@ -65,12 +65,12 @@ func (d *Document) refreshPreviousValueBSON() {
 	d.setPreviousValueBSON(d.ToBson())
 }
 
-// ModelType returns the ModelType of the document object
-func (d *Document) ModelType() ModelType {
-	log.Trace("Document.Model()")
+// Collection returns the ICollection of the document object
+func (d *Document) Collection() ICollection {
+	log.Trace("Document.Collection()")
 	if d.modelType == nil {
-		log.Trace("Document.Model() d.modelType is nil; creating ModelType on demand")
-		mt := Model(d)
+		log.Trace("Document.Collection() d.modelType is nil; creating ModelType on demand")
+		mt := Collection(d).(ModelType)
 		d.modelType = &mt
 	}
 	return *d.modelType

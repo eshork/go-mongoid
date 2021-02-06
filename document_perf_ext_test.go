@@ -15,7 +15,7 @@ type PerfSimpleExampleDocument struct {
 	StringField string
 }
 
-var PerfSimpleExampleDocuments = mongoid.Model(&PerfSimpleExampleDocument{})
+var PerfSimpleExampleDocuments = mongoid.Collection(&PerfSimpleExampleDocument{})
 
 // helper to provide better reporting for sub-second bench times
 func BenchLoop(b Benchmarker, interations int, fn func()) {

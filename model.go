@@ -25,6 +25,7 @@ type ModelType struct {
 }
 
 var _ fmt.Stringer = ModelType{} // assert implements Stringer interface
+var _ ICollection = ModelType{}  // assert implements ICollection interface
 
 // String implements fmt.Stringer interface
 func (model ModelType) String() string {
@@ -40,6 +41,11 @@ func (model ModelType) String() string {
 	appendExtras("database", model.databaseName)
 	appendExtras("collection", model.collectionName)
 	return fmt.Sprintf("ModelType(%s/%s)[%s]", model.modelName, model.modelFullName, extras)
+}
+
+// Name implements ICollection.Name
+func (model ModelType) Name() string {
+	return model.modelName
 }
 
 // reflect-ive rootTypeRef type equality check
@@ -64,7 +70,7 @@ func (model ModelType) GetModelName() string {
 }
 
 // WithCollectionName returns a ModelType with the collectionName altered as directed
-func (model ModelType) WithCollectionName(newCollectionName string) ModelType {
+func (model ModelType) WithCollectionName(newCollectionName string) ICollection {
 	var newModel ModelType = model
 	newModel.collectionName = newCollectionName
 	return newModel
@@ -76,7 +82,7 @@ func (model ModelType) GetCollectionName() string {
 }
 
 // WithDatabaseName returns a ModelType with the databaseName altered as directed
-func (model ModelType) WithDatabaseName(newDatabaseName string) ModelType {
+func (model ModelType) WithDatabaseName(newDatabaseName string) ICollection {
 	var newModel ModelType = model
 	newModel.databaseName = newDatabaseName
 	return newModel
@@ -91,7 +97,7 @@ func (model ModelType) GetDatabaseName() string {
 }
 
 // WithClientName returns a ModelType with the clientName altered as directed
-func (model ModelType) WithClientName(newClientName string) ModelType {
+func (model ModelType) WithClientName(newClientName string) ICollection {
 	newModel := ModelType{}
 	newModel = model
 	newModel.clientName = newClientName

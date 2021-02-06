@@ -60,7 +60,7 @@ type MyDocument struct {
 	MyValue string
 }
 
-var MyDocuments = mongoid.Model(&MyDocument{})
+var MyDocuments = mongoid.Collection(&MyDocument{})
 ```
 
 Make a new item and save it

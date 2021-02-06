@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Model()", func() {
+var _ = Describe("Collection()", func() {
 	type ModelTest struct {
 		mongoid.Document
 		ID           mongoid.ObjectID `bson:"_id"`
@@ -16,13 +16,13 @@ var _ = Describe("Model()", func() {
 	Context("document struct by value", func() {
 		It("accepts inscope variable", func() {
 			var doc ModelTest = ModelTest{ExampleField: "by value variable!"}
-			m := mongoid.Model(doc)
+			m := mongoid.Collection(doc)
 			By("checking default value")
 			Expect(m.New().(*ModelTest).ExampleField).To(Equal(doc.ExampleField), "expects default value to be preset on new object")
 		})
 		It("accepts inline", func() {
 			const exampleStr = "by value inline!"
-			m := mongoid.Model(ModelTest{ExampleField: exampleStr})
+			m := mongoid.Collection(ModelTest{ExampleField: exampleStr})
 			By("checking default value")
 			Expect(m.New().(*ModelTest).ExampleField).To(Equal(exampleStr), "expects default value to be preset on new object")
 		})
@@ -30,20 +30,20 @@ var _ = Describe("Model()", func() {
 	Context("document struct by reference", func() {
 		It("accepts inscope variable", func() {
 			var docPtr *ModelTest = &ModelTest{ExampleField: "by reference variable!"}
-			m := mongoid.Model(docPtr)
+			m := mongoid.Collection(docPtr)
 			By("checking default value")
 			Expect(m.New().(*ModelTest).ExampleField).To(Equal(docPtr.ExampleField), "expects default value to be preset on new object")
 		})
 		It("accepts 'new' allocated variable", func() {
 			var docPtr *ModelTest = new(ModelTest)
 			docPtr.ExampleField = "by new'ed variable!"
-			m := mongoid.Model(docPtr)
+			m := mongoid.Collection(docPtr)
 			By("checking default value")
 			Expect(m.New().(*ModelTest).ExampleField).To(Equal(docPtr.ExampleField), "expects default value to be preset on new object")
 		})
 		It("accepts inline", func() {
 			const exampleStr = "by reference inline!"
-			m := mongoid.Model(&ModelTest{ExampleField: exampleStr})
+			m := mongoid.Collection(&ModelTest{ExampleField: exampleStr})
 			By("checking default value")
 			Expect(m.New().(*ModelTest).ExampleField).To(Equal(exampleStr), "expects default value to be preset on new object")
 		})

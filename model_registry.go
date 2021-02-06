@@ -10,27 +10,27 @@ import (
 	"github.com/jinzhu/inflection"
 )
 
-// Model returns a ModelType for the given document
-func Model(documentType interface{}) ModelType {
+// Collection returns ICollection for the given document
+func Collection(document interface{}) ICollection {
 	// function sig uses interface{} param instead of IDocument so that we can accept either a value or reference
 
 	// if not passed as &MyModelStruct{} (that implements IDocument), we need to make our own pointer
-	if _, ok := documentType.(IDocument); !ok {
+	if _, ok := document.(IDocument); !ok {
 		// ensure object kind is struct
-		if documentTypeValue := reflect.ValueOf(documentType); documentTypeValue.Kind() != reflect.Struct {
+		if documentTypeValue := reflect.ValueOf(document); documentTypeValue.Kind() != reflect.Struct {
 			log.Panic(mongoidErr.InvalidOperation{
 				MethodName: "Model",
 				Reason:     "",
 			})
 		}
 		// if passed as MyModelStruct{} (and implements IDocument) ...
-		newDupeVP := reflect.New(reflect.TypeOf(documentType))
+		newDupeVP := reflect.New(reflect.TypeOf(document))
 		if v, ok := newDupeVP.Interface().(IDocument); ok {
-			newDupeVP.Elem().Set(reflect.ValueOf(documentType)) // value assignment documentType => (*newDupeVP) to preserve any given default state
-			documentType = v
+			newDupeVP.Elem().Set(reflect.ValueOf(document)) // value assignment documentType => (*newDupeVP) to preserve any given default state
+			document = v
 		}
 	}
-	docType, ok := documentType.(IDocument)
+	docType, ok := document.(IDocument)
 	if !ok {
 		log.Panic(mongoidErr.InvalidOperation{
 			MethodName: "Model",
