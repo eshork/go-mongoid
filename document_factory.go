@@ -8,7 +8,7 @@ import (
 )
 
 // makeDocument creates a new object of type docType, populated with the given srcDoc
-func makeDocument(docType *ModelType, srcDoc bson.M) IDocument {
+func makeDocument(docType *collectionHandle, srcDoc bson.M) IDocument {
 	log.Trace("makeDocument()")
 	typeRef := reflect.Indirect(reflect.ValueOf(docType.rootTypeRef))        // model.rootTypeRef is always a ptr to an example object, so we need to use Indirect()
 	ret := reflect.New(typeRef.Type())                                       // finally have a solid object type, so make one
@@ -21,7 +21,7 @@ func makeDocument(docType *ModelType, srcDoc bson.M) IDocument {
 // Self-reference is used to :
 //   - store the original object-type
 //   - store a copy of the initial object values for future change tracking
-func (d *Document) initDocumentBase(modelType *ModelType, selfRef IDocument, initialBSON BsonDocument) {
+func (d *Document) initDocumentBase(modelType *collectionHandle, selfRef IDocument, initialBSON BsonDocument) {
 	d.rootTypeRef = selfRef
 	d.modelType = modelType
 	if d.rootTypeRef == nil {

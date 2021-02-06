@@ -8,8 +8,8 @@ package mongoid
 // )
 
 // // Find a document or multiple documents by their ids
-// func (model *ModelType) Find(ids ...ObjectID) Criteria {
-// 	log.Debug("ModelType.Find ", ids)
+// func (model *collectionHandle) Find(ids ...ObjectID) Criteria {
+// 	log.Debug("collectionHandle.Find ", ids)
 // 	return criteriaFind(nil, ids...)
 // }
 

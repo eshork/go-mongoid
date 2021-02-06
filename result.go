@@ -26,16 +26,16 @@ type Result struct {
 	// ToAry() []IDocument
 	// ToBsonAry() []bson.M
 
-	context     context.Context // context to pass to any future driver calls
-	model       *ModelType      // the ModelType associated with the query
-	streaming   bool            // track streaming access
-	lookback    []bson.M        // cache of records to support random access via At(), First(), Last(), etc
-	cursor      *mongo.Cursor   // the mongo driver cursor for the query
-	cursorIndex uint            // the current index of the driver cursor, what the next read will yield
-	closed      bool            // track cursor closed state
+	context     context.Context   // context to pass to any future driver calls
+	model       *collectionHandle // the collectionHandle associated with the query
+	streaming   bool              // track streaming access
+	lookback    []bson.M          // cache of records to support random access via At(), First(), Last(), etc
+	cursor      *mongo.Cursor     // the mongo driver cursor for the query
+	cursorIndex uint              // the current index of the driver cursor, what the next read will yield
+	closed      bool              // track cursor closed state
 }
 
-func makeResult(ctx context.Context, cursor *mongo.Cursor, model *ModelType) *Result {
+func makeResult(ctx context.Context, cursor *mongo.Cursor, model *collectionHandle) *Result {
 	// finalizer to ensure that given cursor is properly Close()'d, even if caller later forgets
 	runtime.SetFinalizer(cursor, func(c *mongo.Cursor) {
 		c.Close(context.Background())

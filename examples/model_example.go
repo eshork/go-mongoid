@@ -32,12 +32,12 @@ type Pet struct {
 	AdoptionDate *time.Time
 }
 
-// Call the Model function with an example object to obtain a ModelType that can be used to create, save,
+// Call the Model function with an example object to obtain a collectionHandle that can be used to create, save,
 // and find records based on that struct.
 var Pets = mongoid.Collection(&Pet{
 	Name: "spot", // the current field values will be used as default values for your Documents
 })
 
-// Some ModelType attributes can be changed via the With... methods, which return a new ModelType.
+// Some collectionHandle attributes can be changed via the With... methods, which return a new collectionHandle.
 // For example, the WithClientName method can be used to work with records across multiple database server connections.
 var LostPets = Pets.WithCollectionName("lost_pets").WithDatabaseName("LostPetsDB")

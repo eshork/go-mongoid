@@ -67,7 +67,7 @@ func (d *Document) Was(fieldPath string) (interface{}, bool) {
 // Save will store the changed attributes to the database atomically, or insert the document if flagged as a new record via Model#new_record?
 // Can bypass validations if wanted.
 func (d *Document) Save() error {
-	log.Debugf("%v.Save()", d.Collection().Name())
+	log.Debugf("%v.Save()", d.Collection().TypeName())
 
 	// if already persisted, this is an update, otherwise it's a new insert
 	if d.IsPersisted() {
@@ -141,6 +141,6 @@ func (d *Document) saveByInsert() error {
 
 // returns a handle to the mongo driver collection for this document instance
 func (d *Document) getMongoCollectionHandle() *mongo.Collection {
-	dModel := d.Collection().(ModelType)
+	dModel := d.Collection().(collectionHandle)
 	return dModel.getMongoCollectionHandle()
 }

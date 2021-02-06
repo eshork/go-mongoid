@@ -31,24 +31,19 @@ type IDocument interface {
 
 	Save() error
 
-	// Changes()
-	// Changed_(fieldName)
-	// Reset_(fieldName)
-	// Was_(fieldName)
-
 	SetField(fieldNamePath string, newValue interface{}) error
 	GetField(fieldNamePath string) (interface{}, error)
 
 	implementIDocumentBase()
-	initDocumentBase(modelType *ModelType, selfRef IDocument, initialBSON BsonDocument)
+	initDocumentBase(modelType *collectionHandle, selfRef IDocument, initialBSON BsonDocument)
 }
 
 // Document ...
 type Document struct {
-	rootTypeRef   IDocument    // self-reference for future type recognition via interface{}
-	persisted     bool         // persistence tracking (reflects the anticipated existence of a record within the datastore, based on the lifecycle of the instance)
-	previousValue BsonDocument // stores a BSON representation of the last values, used for change tracking
-	modelType     *ModelType   // the ModelType that was used to create this object
+	rootTypeRef   IDocument         // self-reference for future type recognition via interface{}
+	persisted     bool              // persistence tracking (reflects the anticipated existence of a record within the datastore, based on the lifecycle of the instance)
+	previousValue BsonDocument      // stores a BSON representation of the last values, used for change tracking
+	modelType     *collectionHandle // the collectionHandle that was used to create this object
 	// privateID     string       // internal object ID tracker (string form in case a custom ID field is provided of a non-ObjectID type)
 }
 
@@ -69,8 +64,8 @@ func (d *Document) refreshPreviousValueBSON() {
 func (d *Document) Collection() ICollection {
 	log.Trace("Document.Collection()")
 	if d.modelType == nil {
-		log.Trace("Document.Collection() d.modelType is nil; creating ModelType on demand")
-		mt := Collection(d).(ModelType)
+		log.Trace("Document.Collection() d.modelType is nil; creating collectionHandle on demand")
+		mt := Collection(d).(collectionHandle)
 		d.modelType = &mt
 	}
 	return *d.modelType

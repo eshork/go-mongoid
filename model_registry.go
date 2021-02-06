@@ -41,11 +41,11 @@ func Collection(document interface{}) ICollection {
 	return modelType
 }
 
-func generateModelTypeFromDocument(documentType IDocument) ModelType {
+func generateModelTypeFromDocument(documentType IDocument) collectionHandle {
 	// start with the defaults
 	docTypeNameStr := getDocumentTypeStructName(documentType)
 	docTypeFullNameStr := getDocumentTypeFullStructName(documentType)
-	modelType := ModelType{
+	modelType := collectionHandle{
 		rootTypeRef:    documentType,
 		modelName:      docTypeNameStr,
 		modelFullName:  docTypeFullNameStr,
