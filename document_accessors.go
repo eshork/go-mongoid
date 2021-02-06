@@ -1,7 +1,7 @@
 package mongoid
 
 /*
-	IDocumentBase implementations relating to generic field accessors: GetField(), SetField(), GetFieldWas()
+	IDocument implementations relating to generic field accessors: GetField(), SetField(), GetFieldWas()
 */
 
 import (
@@ -96,7 +96,7 @@ func getStructFieldValueRefByBsonName(rawStructPtr interface{}, fieldName string
 	return
 }
 
-// like getStructFieldValueRefByBson but follows a bson path
+// like getStructFieldValueRefByBsonName but follows a bson path
 func getStructFieldValueRefByBsonPath(rawStructPtr interface{}, fieldNamePath string) (found bool, retVal reflect.Value, retField reflect.StructField) {
 	// walk each struct field
 	return getStructFieldValueRefByBsonName(rawStructPtr, fieldNamePath) // TODO FINISH ME

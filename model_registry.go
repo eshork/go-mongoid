@@ -12,10 +12,10 @@ import (
 
 // Model returns a ModelType for the given document
 func Model(documentType interface{}) ModelType {
-	// function sig uses interface{} param instead of IDocumentBase so that we can accept either a value or reference
+	// function sig uses interface{} param instead of IDocument so that we can accept either a value or reference
 
-	// if not passed as &MyModelStruct{} (that implements IDocumentBase), we need to make our own pointer
-	if _, ok := documentType.(IDocumentBase); !ok {
+	// if not passed as &MyModelStruct{} (that implements IDocument), we need to make our own pointer
+	if _, ok := documentType.(IDocument); !ok {
 		// ensure object kind is struct
 		if documentTypeValue := reflect.ValueOf(documentType); documentTypeValue.Kind() != reflect.Struct {
 			log.Panic(mongoidErr.InvalidOperation{
@@ -23,25 +23,25 @@ func Model(documentType interface{}) ModelType {
 				Reason:     "",
 			})
 		}
-		// if passed as MyModelStruct{} (and implements IDocumentBase) ...
+		// if passed as MyModelStruct{} (and implements IDocument) ...
 		newDupeVP := reflect.New(reflect.TypeOf(documentType))
-		if v, ok := newDupeVP.Interface().(IDocumentBase); ok {
+		if v, ok := newDupeVP.Interface().(IDocument); ok {
 			newDupeVP.Elem().Set(reflect.ValueOf(documentType)) // value assignment documentType => (*newDupeVP) to preserve any given default state
 			documentType = v
 		}
 	}
-	docType, ok := documentType.(IDocumentBase)
+	docType, ok := documentType.(IDocument)
 	if !ok {
 		log.Panic(mongoidErr.InvalidOperation{
 			MethodName: "Model",
-			Reason:     "Given struct fails requirements. Must implement the IDocumentBase interface",
+			Reason:     "Given struct fails requirements. Must implement the IDocument interface",
 		})
 	}
 	modelType := generateModelTypeFromDocument(docType)
 	return modelType
 }
 
-func generateModelTypeFromDocument(documentType IDocumentBase) ModelType {
+func generateModelTypeFromDocument(documentType IDocument) ModelType {
 	// start with the defaults
 	docTypeNameStr := getDocumentTypeStructName(documentType)
 	docTypeFullNameStr := getDocumentTypeFullStructName(documentType)
@@ -72,7 +72,7 @@ func generateModelTypeFromDocument(documentType IDocumentBase) ModelType {
 }
 
 // return the original full struct name
-func getDocumentTypeFullStructName(documentType IDocumentBase) string {
+func getDocumentTypeFullStructName(documentType IDocument) string {
 	handleType := reflect.TypeOf(documentType)
 	handleTypeStr := handleType.String()
 	if handleTypeStr[:1] == "*" { //drop leading * when present
@@ -82,7 +82,7 @@ func getDocumentTypeFullStructName(documentType IDocumentBase) string {
 }
 
 // return the original struct name
-func getDocumentTypeStructName(documentType IDocumentBase) string {
+func getDocumentTypeStructName(documentType IDocument) string {
 	handleType := reflect.TypeOf(documentType)
 	handleTypeStr := handleType.String()
 	dotIndex := strings.Index(handleTypeStr, ".")
@@ -102,7 +102,7 @@ func getDocumentTypeStructName(documentType IDocumentBase) string {
 const structTagName = "mongoid"
 
 // extract struct tag options for documentType, returning a fully compiled list
-func getDocumentTypeOptions(documentType IDocumentBase) modelTypeTagOpts {
+func getDocumentTypeOptions(documentType IDocument) modelTypeTagOpts {
 	tagOpts := modelTypeTagOpts{}
 	// get a handleStructType that always represents the top struct definition
 	handleType := reflect.TypeOf(documentType)

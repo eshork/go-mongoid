@@ -4,16 +4,17 @@ import (
 	"mongoid/log"
 )
 
-// IDocumentBase is the foundational interface for go-mongoid documents/records - every go-mongoid document struct must implement this interface.
-// To implement this interface, add the the Document struct type as an anonymous field within your custom struct definition.
+// IDocument is the interface that structs must implement to be used with go-mongoid.
+// The Document struct implements this interface, and it can be easily applied to your
+// own structs by anonymous field.
 //
 // For example:
 //     type ExampleMinimalDocumentStruct struct {
-//         mongoid.Document // implements IDocumentBase
+//         mongoid.Document // implements IDocument
 //     }
 // Refer to examples/ for additional usage examples.
-type IDocumentBase interface {
-	DocumentBase() IDocumentBase
+type IDocument interface {
+	DocumentBase() IDocument
 	ModelType() ModelType
 
 	ToBson() BsonDocument
@@ -22,19 +23,13 @@ type IDocumentBase interface {
 	GetID() interface{}
 
 	IsPersisted() bool
-	setPersisted(bool)
 	IsChanged() bool
 	Changes() BsonDocument
+	Was(fieldPath string) (interface{}, bool)
+	// Reset(fieldPath string)
+	// ResetAll()
 
 	Save() error
-
-	// SetCollection(*mgo.Collection)
-	// SetDocument(document IDocumentBase)
-	// SetConnection(*Connection)
-
-	// Create()
-	// Create_()
-	// Validate() error
 
 	// Changes()
 	// Changed_(fieldName)
@@ -45,19 +40,19 @@ type IDocumentBase interface {
 	GetField(fieldNamePath string) (interface{}, error)
 
 	implementIDocumentBase()
-	initDocumentBase(modelType *ModelType, selfRef IDocumentBase, initialBSON BsonDocument)
+	initDocumentBase(modelType *ModelType, selfRef IDocument, initialBSON BsonDocument)
 }
 
 // Document ...
 type Document struct {
-	rootTypeRef   IDocumentBase // self-reference for future type recognition via interface{}
-	persisted     bool          // persistence tracking (reflects the anticipated existence of a record within the datastore, based on the lifecycle of the instance)
-	previousValue BsonDocument  // stores a BSON representation of the last values, used for change tracking
-	modelType     *ModelType    // the ModelType that was used to create this object
+	rootTypeRef   IDocument    // self-reference for future type recognition via interface{}
+	persisted     bool         // persistence tracking (reflects the anticipated existence of a record within the datastore, based on the lifecycle of the instance)
+	previousValue BsonDocument // stores a BSON representation of the last values, used for change tracking
+	modelType     *ModelType   // the ModelType that was used to create this object
 	// privateID     string       // internal object ID tracker (string form in case a custom ID field is provided of a non-ObjectID type)
 }
 
-// implementIDocumentBase implements IDocumentBase
+// implementIDocumentBase implements IDocument
 func (d *Document) implementIDocumentBase() {}
 
 // force sets previousValue (change tracking) to the given BsonDocument
@@ -81,8 +76,8 @@ func (d *Document) ModelType() ModelType {
 	return *d.modelType
 }
 
-// DocumentBase returns the self-reference handle, which can be used to un-cast the object from *Document into an IDocumentBase (interface{}) of the original type
-func (d *Document) DocumentBase() IDocumentBase {
+// DocumentBase returns the self-reference handle, which can be used to un-cast the object from *Document into an IDocument (interface{}) of the original type
+func (d *Document) DocumentBase() IDocument {
 	if d.rootTypeRef == nil {
 		log.Panic("DocumentBase() requires valid rootTypeRef")
 	}

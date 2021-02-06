@@ -14,7 +14,7 @@ import (
 // Use one of the With... methods to create a new ModelType with an updated scope.
 //
 type ModelType struct {
-	rootTypeRef    IDocumentBase // a reference to an object instance of the document/model type given during registration (for future type sanity)
+	rootTypeRef    IDocument // a reference to an object instance of the document/model type given during registration (for future type sanity)
 	modelName      string
 	modelFullName  string
 	collectionName string
@@ -123,10 +123,10 @@ func (model ModelType) GetClient() *Client {
 // New intantiates a new document model object of the registered type and returns a pointer to the new object.
 // The returned object will be preset with the defaults specified during initial document/model registration.
 // Note: Due to the strongly typed nature of Go, you'll need to perform a type assertion (as the value is returned as an interface{})
-func (model ModelType) New() IDocumentBase {
+func (model ModelType) New() IDocument {
 	log.Debugf("%v.New()", model.GetModelName())
 	retAsIDocumentBase := makeDocument(&model, model.GetDefaultBSON())
-	return retAsIDocumentBase // return the new object as an IDocumentBase interface
+	return retAsIDocumentBase // return the new object as an IDocument interface
 }
 
 // GetDefaultBSON provides the default values for a ModelType returned as a BsonDocument.

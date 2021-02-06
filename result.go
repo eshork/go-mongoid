@@ -17,13 +17,13 @@ type Result struct {
 	// Streaming() *Result
 	// IsStreaming() bool
 	// Count() uint
-	// At(index uint) IDocumentBase
-	// One() IDocumentBase
-	// First() IDocumentBase
-	// Last() IDocumentBase
-	// ForEach(fn func(IDocumentBase) error) error
+	// At(index uint) IDocument
+	// One() IDocument
+	// First() IDocument
+	// Last() IDocument
+	// ForEach(fn func(IDocument) error) error
 	// ForEachBson(fn func(bson.M) error) error
-	// ToAry() []IDocumentBase
+	// ToAry() []IDocument
 	// ToBsonAry() []bson.M
 
 	context     context.Context // context to pass to any future driver calls
@@ -84,7 +84,7 @@ func (res *Result) IsStreaming() bool {
 
 // First returns an interface to the first document in the Result set, or nil if the Result contains no records.
 // This method will panic if Streaming() was enabled.
-func (res *Result) First() IDocumentBase {
+func (res *Result) First() IDocument {
 	log.Trace("Result.First()")
 	if res.streaming {
 		log.Panic(mongoidError.InvalidOperation{
@@ -98,7 +98,7 @@ func (res *Result) First() IDocumentBase {
 
 // Last returns an interface to the last document in the result set
 // This method will panic if Streaming() was enabled.
-func (res *Result) Last() IDocumentBase {
+func (res *Result) Last() IDocument {
 	log.Trace("Result.Last()")
 	if res.streaming {
 		log.Panic(mongoidError.InvalidOperation{
@@ -111,7 +111,7 @@ func (res *Result) Last() IDocumentBase {
 
 // At returns an interface to the Document in the result set at the given index (range is 0 to count-1)
 // This method will panic if Streaming() was enabled.
-func (res *Result) At(index uint) IDocumentBase {
+func (res *Result) At(index uint) IDocument {
 	log.Trace("Result.At()")
 	if res.streaming {
 		log.Panic(mongoidError.InvalidOperation{
@@ -124,7 +124,7 @@ func (res *Result) At(index uint) IDocumentBase {
 }
 
 // retrieves the record at the given index, reading additional records from the db driver as needed
-func (res *Result) at(index uint) IDocumentBase {
+func (res *Result) at(index uint) IDocument {
 	result := res.atBson(index)
 	retAsIDocumentBase := makeDocument(res.model, result)
 	return retAsIDocumentBase
@@ -167,7 +167,7 @@ func (res *Result) Count() uint {
 // One returns a single document from the Result, also ensuring that only exactly one record was available to be read.
 // One will panic if the Result contains more than one record or zero records.
 // This method will panic if Streaming() was enabled.
-func (res *Result) One() IDocumentBase {
+func (res *Result) One() IDocument {
 	log.Trace("Result.One()")
 	if res.streaming {
 		log.Panic(mongoidError.InvalidOperation{
@@ -246,11 +246,11 @@ func (res *Result) readNext(v *bson.M) bool {
 }
 
 // ForEach will call the given function once for each result, in the order they were returned by the server.
-// The given function "fn" should accept an IDocumentBase as the only parameter.
+// The given function "fn" should accept an IDocument as the only parameter.
 // The given function "fn" may return a non-nil error value to halt further iterations - the return value is passed upward and returned by ForEach.
 //
 // Example:
-//    ret := myResult.ForEach(func(v IDocumentBase) error {
+//    ret := myResult.ForEach(func(v IDocument) error {
 //    	// do something with v
 //    	v.Attribute = "New Value" // change it...
 //    	v.Save() = "New Value" // save it...
@@ -261,7 +261,7 @@ func (res *Result) readNext(v *bson.M) bool {
 //    	// return error.New("done") // or we could return some non-nil error value to signal that we would like to halt, skipping any remaining records
 //    })
 //
-func (res *Result) ForEach(fn func(IDocumentBase) error) error {
+func (res *Result) ForEach(fn func(IDocument) error) error {
 	// the heavy lifting is within ForEachBson
 	return res.ForEachBson(func(v bson.M) error {
 		asIDocumentBase := makeDocument(res.model, v)
@@ -269,7 +269,7 @@ func (res *Result) ForEach(fn func(IDocumentBase) error) error {
 	})
 }
 
-// ForEachBson is similar to ForEach, but provides the raw bson.M instead of an IDocumentBase object
+// ForEachBson is similar to ForEach, but provides the raw bson.M instead of an IDocument object
 func (res *Result) ForEachBson(fn func(bson.M) error) error {
 	if !res.streaming { // non-streaming implementation (records are stored to lookback cache as they are read)
 		count := res.Count() // this will read all records and close the mongo driver cursor for us
@@ -300,10 +300,10 @@ func (res *Result) ForEachBson(fn func(bson.M) error) error {
 	return nil
 }
 
-// ToAry returns the results as a slice of []IDocumentBase
-func (res *Result) ToAry() []IDocumentBase {
-	resultAry := make([]IDocumentBase, 0)
-	res.ForEach(func(v IDocumentBase) error {
+// ToAry returns the results as a slice of []IDocument
+func (res *Result) ToAry() []IDocument {
+	resultAry := make([]IDocument, 0)
+	res.ForEach(func(v IDocument) error {
 		resultAry = append(resultAry, v)
 		return nil
 	})
