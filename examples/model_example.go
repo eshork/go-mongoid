@@ -18,7 +18,7 @@ type Pet struct {
 	// Mongoid automatically determines the field storage type based on the struct field type.
 	// You can optionally specify the field name to be used in the database via the bson struct tag, otherwise exported struct fields will be
 	// stored as a snake_case variant of their struct field name.
-	Name string `bson:"name"`
+	Name string `bson:"store_given_name"`
 
 	// You can optionally exclude exported struct fields from the database by setting the bson name to "-"
 	UnstoredField string `bson:"-"`
@@ -32,12 +32,11 @@ type Pet struct {
 	AdoptionDate *time.Time
 }
 
-// Call the Model function with an example object to obtain a collectionHandle that can be used to create, save,
-// and find records based on that struct.
+// Call the Collection function with an example object to obtain an ICollection interface that can be used to create,
+// save, and find records based on that struct type.
 var Pets = mongoid.Collection(&Pet{
-	Name: "spot", // the current field values will be used as default values for your Documents
+	Name: "spot", // current field values will be used as default values for new Documents
 })
 
-// Some collectionHandle attributes can be changed via the With... methods, which return a new collectionHandle.
-// For example, the WithClientName method can be used to work with records across multiple database server connections.
-var LostPets = Pets.WithCollectionName("lost_pets").WithDatabaseName("LostPetsDB")
+// ICollection attributes can be changed via the With... methods, which return a new ICollection.
+var AdoptedPets = Pets.WithCollectionName("adopted_pets").WithDatabaseName("AdoptedPetsDB")
