@@ -8,7 +8,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0
 	github.com/markbates/grift v1.5.0
 	github.com/onsi/ginkgo v1.16.4
-	github.com/onsi/gomega v1.13.0
+	github.com/onsi/gomega v1.14.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/objx v0.1.1 // indirect
 	github.com/xdg/stringprep v1.0.0 // indirect
