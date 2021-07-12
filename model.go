@@ -9,46 +9,47 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// ModelType represents a mongoid model/document type and provides methods to interact with the collection
-type ModelType struct {
-	rootTypeRef    IDocumentBase // a reference to an object instance of the document/model type given during registration (for future type sanity)
+type collectionHandle struct {
+	rootTypeRef    IDocument // a reference to an object instance of the document/model type given during registration (for future type sanity)
 	modelName      string
 	modelFullName  string
 	collectionName string
 	databaseName   string
 	clientName     string
+	client         *Client      // populated on creation based on clientName
 	defaultValue   BsonDocument // bson representation of default values to be applied during creation of brand new document/model instances
 }
 
-var _ fmt.Stringer = ModelType{} // assert implements Stringer interface
+var _ fmt.Stringer = collectionHandle{} // assert implements Stringer interface
+var _ ICollection = collectionHandle{}  // assert implements ICollection interface
 
 // String implements fmt.Stringer interface
-func (model ModelType) String() string {
-	// return "pew pew pew~!" // ModelType
+func (col collectionHandle) String() string {
+	// collectionHandle(col.modelFullName)[client:cName,database:dbName,collection:colName]
 	extras := ""
+	appendExtras := func(name, value string) {
+		if extras != "" {
+			extras = fmt.Sprintf("%s,%s:%s", extras, name, value)
+		}
+		extras = fmt.Sprintf("%s:%s", name, value)
+	}
+	appendExtras("client", col.clientName)
+	appendExtras("database", col.databaseName)
+	appendExtras("collection", col.collectionName)
+	return fmt.Sprintf("Collection(%s/%s)[%s]", col.modelName, col.modelFullName, extras)
+}
 
-	// [clientName, databaseName, collectionName]
-	if model.collectionName != "" {
-		extras += "collection:" + model.collectionName + ","
-	}
-	if model.databaseName != "" {
-		extras += "database:" + model.databaseName + ","
-	}
-	if model.clientName != "" {
-		extras += "client:" + model.clientName + ","
-	}
-	if len(extras) > 0 {
-		extras = " [" + extras[:len(extras)-1] + "]"
-	}
-	return fmt.Sprintf("%s (%s)%s", model.modelName, model.modelFullName, extras)
+// Name implements ICollection.TypeName()
+func (col collectionHandle) TypeName() string {
+	return col.modelName
 }
 
 // reflect-ive rootTypeRef type equality check
-func (model *ModelType) equalsRootType(comparisonModel *ModelType) bool {
-	if model != nil && comparisonModel != nil && model.rootTypeRef != nil && comparisonModel.rootTypeRef != nil {
-		if reflect.TypeOf(model.rootTypeRef) == reflect.TypeOf(comparisonModel.rootTypeRef) {
-			if reflect.TypeOf(model.rootTypeRef).Kind() == reflect.Ptr {
-				if reflect.TypeOf(model.rootTypeRef).Elem() == reflect.TypeOf(comparisonModel.rootTypeRef).Elem() {
+func (col *collectionHandle) equalsRootType(comparisonModel *collectionHandle) bool {
+	if col != nil && comparisonModel != nil && col.rootTypeRef != nil && comparisonModel.rootTypeRef != nil {
+		if reflect.TypeOf(col.rootTypeRef) == reflect.TypeOf(comparisonModel.rootTypeRef) {
+			if reflect.TypeOf(col.rootTypeRef).Kind() == reflect.Ptr {
+				if reflect.TypeOf(col.rootTypeRef).Elem() == reflect.TypeOf(comparisonModel.rootTypeRef).Elem() {
 					return true
 				}
 				return false
@@ -59,68 +60,63 @@ func (model *ModelType) equalsRootType(comparisonModel *ModelType) bool {
 	return false
 }
 
-// SetModelName changes the model name used by the ModelType
-func (model *ModelType) SetModelName(newModelName string) *ModelType {
-	newModelType := *model // dereferenced copy
-	newModelType.modelName = newModelName
-	// update the global registry for this ModelType
-	return mongoidModelRegistry.updateModelTypeRegistration(&newModelType)
-}
-
 // GetModelName returns the current friendly name for this model type
-func (model *ModelType) GetModelName() string {
-	return model.modelName
+func (col collectionHandle) GetModelName() string {
+	return col.modelName
 }
 
-// SetCollectionName changes the collection name used by the ModelType
-func (model *ModelType) SetCollectionName(newCollectionName string) *ModelType {
-	newModelType := *model // dereferenced copy
-	newModelType.collectionName = newCollectionName
-	// update the global registry for this ModelType
-	return mongoidModelRegistry.updateModelTypeRegistration(&newModelType)
+// WithCollectionName returns a collectionHandle with the collectionName altered as directed
+func (col collectionHandle) WithCollectionName(newCollectionName string) ICollection {
+	var newCol collectionHandle = col
+	newCol.collectionName = newCollectionName
+	return newCol
 }
 
 // GetCollectionName returns the current default collection name for this model type
-func (model *ModelType) GetCollectionName() string {
-	return model.collectionName
+func (col collectionHandle) CollectionName() string {
+	return col.collectionName
 }
 
-// SetDatabaseName changes the database name used by the ModelType
-func (model *ModelType) SetDatabaseName(newDatabaseName string) *ModelType {
-	newModelType := *model // dereferenced copy
-	newModelType.databaseName = newDatabaseName
-	// update the global registry for this ModelType
-	return mongoidModelRegistry.updateModelTypeRegistration(&newModelType)
+// WithDatabaseName returns a collectionHandle with the databaseName altered as directed
+func (col collectionHandle) WithDatabaseName(newDatabaseName string) ICollection {
+	var newModel collectionHandle = col
+	newModel.databaseName = newDatabaseName
+	return newModel
 }
 
-// GetDatabaseName returns the current default database for this model type
-func (model *ModelType) GetDatabaseName() string {
-	if model.databaseName == "" {
-		return model.GetClient().Database
+// GetDatabaseName returns the database name for this collectionHandle
+func (col collectionHandle) DatabaseName() string {
+	if col.databaseName == "" {
+		return col.Client().Database
 	}
-	return model.databaseName
+	return col.databaseName
 }
 
-// WithClientName returns a new ModelType that has changed the client name to the given value of newClientName,
-// and updates the model registry for future name based lookup
-func (model *ModelType) WithClientName(newClientName string) *ModelType {
-	newModelType := *model // dereferenced copy
-	newModelType.clientName = newClientName
-	// update the global registry for this ModelType
-	return mongoidModelRegistry.updateModelTypeRegistration(&newModelType)
+// WithClientName returns a collectionHandle with the clientName altered as directed
+func (col collectionHandle) WithClientName(newClientName string) ICollection {
+	newModel := collectionHandle{}
+	newModel = col
+	newModel.clientName = newClientName
+	return newModel
 }
 
-// GetClientName returns the current default client name for this model type
-func (model *ModelType) GetClientName() string {
-	return model.clientName
+// GetClientName returns the custom client name for this collectionHandle, or "" if using the default
+func (col collectionHandle) ClientName() string {
+	return col.clientName
 }
 
-// GetClient returns the current default client for this model type
-func (model *ModelType) GetClient() *Client {
-	if clientName := model.GetClientName(); clientName != "" {
-		return ClientByName(clientName)
+// GetClient returns the Client used by this collectionHandle
+func (col collectionHandle) Client() *Client {
+	if col.client != nil {
+		return col.client
 	}
-	return DefaultClient()
+	if col.clientName != "" {
+		col.client = ClientByName(col.clientName)
+	}
+	if col.client == nil {
+		col.client = DefaultClient()
+	}
+	return col.client
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -129,30 +125,21 @@ func (model *ModelType) GetClient() *Client {
 // New intantiates a new document model object of the registered type and returns a pointer to the new object.
 // The returned object will be preset with the defaults specified during initial document/model registration.
 // Note: Due to the strongly typed nature of Go, you'll need to perform a type assertion (as the value is returned as an interface{})
-func (model *ModelType) New() IDocumentBase {
-	log.Debugf("%v.New()", model.GetModelName())
-	retAsIDocumentBase := makeDocument(model, model.GetDefaultBSON())
-	return retAsIDocumentBase // return the new object as an IDocumentBase interface
+func (col collectionHandle) New() IDocument {
+	log.Debugf("%v.New()", col.GetModelName())
+	retAsIDocumentBase := makeDocument(&col, col.DefaultBSON())
+	return retAsIDocumentBase // return the new object as an IDocument interface
 }
 
-// GetDefaultBSON provides the default values for a ModelType returned as a BsonDocument.
+// DefaultBSON provides the default values for a collectionHandle returned as a BsonDocument.
 // The returned value is deep-cloned to protect the original data, so you can begin using it directly without a second deep copy
-func (model *ModelType) GetDefaultBSON() BsonDocument {
-	log.Trace("GetDefaultBSON()")
-	return BsonDocumentDeepCopy(model.defaultValue)
+func (col collectionHandle) DefaultBSON() BsonDocument {
+	log.Trace("DefaultBSON()")
+	if col.defaultValue == nil {
+		return BsonDocument{} // empty document if no defaults available
+	}
+	return BsonDocumentDeepCopy(col.defaultValue)
 }
-
-// NYI - ref: https://github.com/eshork/go-mongoid/issues/17
-// func (model *ModelType) SetDefaultScope() {
-// 	// log.Panic("NYI")
-// 	log.Error("NYI - ModelType.SetDefaultScope")
-// }
-
-// NYI - ref: https://github.com/eshork/go-mongoid/issues/18
-// func (model *ModelType) AddIndex() {
-// 	// log.Panic("NYI")
-// 	log.Error("NYI - ModelType.AddIndex")
-// }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -192,25 +179,11 @@ func modelTypeTagOptsFromString(tagString string) modelTypeTagOpts {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// returns a handle to the mongo driver collection for this ModelType
-func (model *ModelType) getMongoCollectionHandle() *mongo.Collection {
-	client := model.GetClient()
-	dbName := model.GetDatabaseName()
-	collectionName := model.GetCollectionName()
+// returns a handle to the mongo driver collection for this collectionHandle
+func (col collectionHandle) getMongoCollectionHandle() *mongo.Collection {
+	client := col.Client()
+	dbName := col.DatabaseName()
+	collectionName := col.CollectionName()
 	collectionRef := client.getMongoCollectionHandle(dbName, collectionName)
 	return collectionRef
 }
-
-////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
-
-// func AddCallback(when string, what func(*Base)) {}
-// func AddValidation(when string, what func(*Base)(error)) {}
-// func AddIndex()
-
-// type Fields map[string]interface{}
-
-// CreateCollection creates a collection on the Client's connected topology with the given databaseName and collectionName pair
-// func (c *Client) CreateCollection(databaseName string, collectionName string) error {
-// 	return nil
-// }

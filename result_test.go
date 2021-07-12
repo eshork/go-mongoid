@@ -13,6 +13,6 @@ package mongoid_test
 
 // // left unregistered for test purposes
 // type UnknownExampleDocument struct {
-// 	mongoid.Base
+// 	mongoid.Document
 // 	StringField string
 // }

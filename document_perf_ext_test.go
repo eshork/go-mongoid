@@ -10,12 +10,12 @@ import (
 )
 
 type PerfSimpleExampleDocument struct {
-	mongoid.Base
+	mongoid.Document
 	IntField    int
 	StringField string
 }
 
-var PerfSimpleExampleDocuments = mongoid.Register(&PerfSimpleExampleDocument{})
+var PerfSimpleExampleDocuments = mongoid.Collection(&PerfSimpleExampleDocument{})
 
 // helper to provide better reporting for sub-second bench times
 func BenchLoop(b Benchmarker, interations int, fn func()) {

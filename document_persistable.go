@@ -14,20 +14,20 @@ import (
 // IsPersisted returns true if the document has been saved to the database.
 // Returns false if the document is new or has been destroyed.
 // This is not a change tracker -- see: Changed() for that
-func (d *Base) IsPersisted() bool {
-	log.Trace("Base.IsPersisted()")
+func (d *Document) IsPersisted() bool {
+	log.Trace("Document.IsPersisted()")
 	return d.persisted
 }
 
 // sets the peristed state
-func (d *Base) setPersisted(val bool) {
+func (d *Document) setPersisted(val bool) {
 	d.persisted = val
 }
 
 // IsChanged returns true if the document instance has changed from the last retrieved value from the datastore, false otherwise.
 // Newly created but documents begin in a Changed()=false state, as the document begins with all default values.
-func (d *Base) IsChanged() bool {
-	log.Trace("Base.IsChanged()")
+func (d *Document) IsChanged() bool {
+	log.Trace("Document.IsChanged()")
 	if len(d.Changes()) > 0 {
 		return true
 	}
@@ -39,8 +39,8 @@ func (d *Base) IsChanged() bool {
 // Entries that are unchanged are excluded from the output BsonDocument.
 // New or changed values will have a key/value pair that reflects the newly set entry value.
 // Unset or missing values will have an key/value pair with 'nil' as the value side, to reflect the unset status.
-func (d *Base) Changes() BsonDocument {
-	log.Trace("Base.Changes()")
+func (d *Document) Changes() BsonDocument {
+	log.Trace("Document.Changes()")
 	currentBson := d.ToBson()
 	previousBson := d.previousValue
 	diffBson := makeBsonDocumentDiff(previousBson, currentBson)
@@ -48,7 +48,7 @@ func (d *Base) Changes() BsonDocument {
 }
 
 // Was provides the previous field value and indicates if a change has occurred
-func (d *Base) Was(fieldPath string) (interface{}, bool) {
+func (d *Document) Was(fieldPath string) (interface{}, bool) {
 	value, err := d.GetField(fieldPath)
 	if err != nil {
 		log.Panic(err)
@@ -66,8 +66,8 @@ func (d *Base) Was(fieldPath string) (interface{}, bool) {
 
 // Save will store the changed attributes to the database atomically, or insert the document if flagged as a new record via Model#new_record?
 // Can bypass validations if wanted.
-func (d *Base) Save() error {
-	log.Debugf("%v.Save()", d.Model().modelName)
+func (d *Document) Save() error {
+	log.Debugf("%v.Save()", d.Collection().TypeName())
 
 	// if already persisted, this is an update, otherwise it's a new insert
 	if d.IsPersisted() {
@@ -77,7 +77,7 @@ func (d *Base) Save() error {
 	return d.saveByInsert()
 }
 
-func (d *Base) saveByUpdate() error {
+func (d *Document) saveByUpdate() error {
 	log.Trace("saveByUpdate()")
 
 	collection := d.getMongoCollectionHandle()
@@ -96,7 +96,7 @@ func (d *Base) saveByUpdate() error {
 	return nil
 }
 
-func (d *Base) saveByInsert() error {
+func (d *Document) saveByInsert() error {
 	log.Trace("saveByInsert()")
 	// insert a new object
 
@@ -140,7 +140,7 @@ func (d *Base) saveByInsert() error {
 }
 
 // returns a handle to the mongo driver collection for this document instance
-func (d *Base) getMongoCollectionHandle() *mongo.Collection {
-	dModel := d.Model()
+func (d *Document) getMongoCollectionHandle() *mongo.Collection {
+	dModel := d.Collection().(collectionHandle)
 	return dModel.getMongoCollectionHandle()
 }
