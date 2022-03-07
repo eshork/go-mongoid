@@ -10,10 +10,10 @@ import (
 
 var _ = Describe("Result", func() {
 	type ErrorTestModel struct {
-		mongoid.Base
+		mongoid.Document
 		ID mongoid.ObjectID `bson:"_id"`
 	}
-	var ErrorTestModels = mongoid.Register(&ErrorTestModel{})
+	var ErrorTestModels = mongoid.Collection(&ErrorTestModel{})
 	Context(".Streaming()", func() {
 		Context(".At()", func() {
 			It("should panic InvalidOperation", func() {
