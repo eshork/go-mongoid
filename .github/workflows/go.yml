@@ -13,7 +13,7 @@ jobs:
       MONGOID_TEST_DB: "0"
       MONGOID_LOG_LEVEL: warn
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Set up Go
         uses: actions/setup-go@v2
