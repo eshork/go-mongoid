@@ -1,6 +1,6 @@
 module mongoid
 
-go 1.12
+go 1.19
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.16.0
