@@ -4,7 +4,7 @@ go 1.12
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.16.0
-	github.com/iancoleman/strcase v0.2.0
+	github.com/iancoleman/strcase v0.3.0
 	github.com/jinzhu/inflection v1.0.0
 	github.com/markbates/grift v1.5.0
 	github.com/onsi/ginkgo v1.16.5
