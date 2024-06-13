@@ -15,7 +15,7 @@ import (
 
 // left unregistered for test purposes
 type UnknownExampleDocument struct {
-	mongoid.Base
+	mongoid.Document
 	StringField string
 }
 
@@ -64,7 +64,7 @@ type ExampleSimpleEmbeddableDocument struct {
 
 // core example doc type - used as the basis of all document related tests
 type ExampleDocument struct {
-	mongoid.Base // `mongoid:"collection:example_documents"` <- this is the collection name based on struct name
+	mongoid.Document // `mongoid:"collection:example_documents"` <- this is the collection name based on struct name
 
 	ID mongoid.ObjectID `bson:"_id"`
 
@@ -128,7 +128,7 @@ var TmpSimpleInlineValue = ExampleSimpeInlinableDocument2{Inlined2StringField: "
 var TmpSimpleEmbedSliceValue = []ExampleSimpleEmbeddableDocument{TmpSimpleEmbedValue, TmpSimpleEmbedValue}
 
 // register the model with some default values
-var ExampleDocuments = mongoid.Register(&ExampleDocument{
+var ExampleDocuments = mongoid.Collection(&ExampleDocument{
 	StringField:    "tacocat is tacocat backwards",
 	IntField:       42,
 	BoolField:      true,
@@ -146,15 +146,6 @@ var ExampleDocuments = mongoid.Register(&ExampleDocument{
 })
 
 var _ = Describe("Document", func() {
-
-	Context("an unknown UnknownExampleDocument document model", func() {
-		It("is not verifyably registered", func() {
-			By("struct name")
-			Expect(mongoid.M("UnknownExampleDocument")).To(BeNil())
-			By("example ref object")
-			Expect(mongoid.M(&UnknownExampleDocument{})).To(BeNil())
-		})
-	})
 
 	Context("ExampleDocument document model", func() {
 
@@ -210,7 +201,6 @@ var _ = Describe("Document", func() {
 				By("saving the ExampleDocument")
 				newObj.Save()
 				Expect(newObj.IsChanged()).To(BeFalse(), "expect no changes after save")
-				// Expect(newObj.Changes()).To(Equal(bson.M(nil)), "expect no changes after save")
 				By("changing StringPtrField to something else")
 				newValue := "something else"
 				newObj.StringPtrField = &newValue
@@ -257,7 +247,7 @@ var _ = Describe("Document", func() {
 			OnlineDatabaseOnly(func() {
 
 				By("object creation")
-				newObj := mongoid.M("ExampleDocument").New().(*ExampleDocument)
+				newObj := ExampleDocuments.New().(*ExampleDocument)
 				Expect(newObj).ToNot(BeNil(), "expects a real object to be created")
 
 				By("object Persisted()==false check")
@@ -287,7 +277,7 @@ var _ = Describe("Document", func() {
 				Expect(newObj.GetID().(mongoid.ObjectID)).To(Equal(newObj.ID), "expects newObj.GetID().(ObjectID) == newObj.ID")
 
 				By("Find()'ing")
-				res := mongoid.M("ExampleDocument").Find(objectID)
+				res := ExampleDocuments.Find(objectID)
 				foundObj := res.One().(*ExampleDocument)
 				Expect(foundObj.ID).To(Equal(newObj.ID), "expects foundObj.ID == newObj.ID")
 			})
@@ -303,11 +293,11 @@ var _ = Describe("Document", func() {
 
 		It("bool field [td5459dce]", func() {
 			type BoolTestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        bool
+				mongoid.Document `mongoid:"collection:bool_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            bool
 			}
-			BoolTestStructs := mongoid.Register(&BoolTestStruct{Field: false})
+			BoolTestStructs := mongoid.Collection(&BoolTestStruct{Field: false})
 			newObj := BoolTestStructs.New().(*BoolTestStruct)
 			newObj.Field = true
 			OnlineDatabaseOnly(func() {
@@ -323,11 +313,11 @@ var _ = Describe("Document", func() {
 		})
 		It("string field [tdb0f1026]", func() {
 			type StringTestStruct struct {
-				mongoid.Base `mongoid:"collection:string_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        string
+				mongoid.Document `mongoid:"collection:string_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            string
 			}
-			StringTestStructs := mongoid.Register(&StringTestStruct{Field: "original value"})
+			StringTestStructs := mongoid.Collection(&StringTestStruct{Field: "original value"})
 			newObj := StringTestStructs.New().(*StringTestStruct)
 			newObj.Field = "something else"
 			OnlineDatabaseOnly(func() {
@@ -343,11 +333,11 @@ var _ = Describe("Document", func() {
 		})
 		It("int field [t1c6a3f54]", func() {
 			type IntTestStruct struct {
-				mongoid.Base `mongoid:"collection:int_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        int
+				mongoid.Document `mongoid:"collection:int_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            int
 			}
-			IntTestStructs := mongoid.Register(&IntTestStruct{Field: int(0)})
+			IntTestStructs := mongoid.Collection(&IntTestStruct{Field: int(0)})
 			newObj := IntTestStructs.New().(*IntTestStruct)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = int(math.MaxInt32)
@@ -365,11 +355,11 @@ var _ = Describe("Document", func() {
 		})
 		It("int8 field [tb575e350]", func() {
 			type Int8TestStruct struct {
-				mongoid.Base `mongoid:"collection:int8_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        int8
+				mongoid.Document `mongoid:"collection:int8_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            int8
 			}
-			Int8TestStructs := mongoid.Register(&Int8TestStruct{Field: int8(0)})
+			Int8TestStructs := mongoid.Collection(&Int8TestStruct{Field: int8(0)})
 			newObj := Int8TestStructs.New().(*Int8TestStruct)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = int8(math.MaxInt8)
@@ -387,11 +377,11 @@ var _ = Describe("Document", func() {
 		})
 		It("int16 field [ta1075c83]", func() {
 			type Int16TestStruct struct {
-				mongoid.Base `mongoid:"collection:int16_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        int16
+				mongoid.Document `mongoid:"collection:int16_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            int16
 			}
-			Int16TestStructs := mongoid.Register(&Int16TestStruct{Field: int16(0)})
+			Int16TestStructs := mongoid.Collection(&Int16TestStruct{Field: int16(0)})
 			newObj := Int16TestStructs.New().(*Int16TestStruct)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = int16(math.MaxInt16)
@@ -409,11 +399,11 @@ var _ = Describe("Document", func() {
 		})
 		It("int32 field [t61c5309f]", func() {
 			type Int32TestStruct struct {
-				mongoid.Base `mongoid:"collection:int32_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        int32
+				mongoid.Document `mongoid:"collection:int32_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            int32
 			}
-			Int32TestStructs := mongoid.Register(&Int32TestStruct{Field: 0})
+			Int32TestStructs := mongoid.Collection(&Int32TestStruct{Field: 0})
 			newObj := Int32TestStructs.New().(*Int32TestStruct)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = int32(math.MaxInt32)
@@ -431,11 +421,11 @@ var _ = Describe("Document", func() {
 		})
 		It("int64 field [t486a2496]", func() {
 			type Int64TestStruct struct {
-				mongoid.Base `mongoid:"collection:int64_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        int64
+				mongoid.Document `mongoid:"collection:int64_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            int64
 			}
-			Int64TestStructs := mongoid.Register(&Int64TestStruct{Field: 0})
+			Int64TestStructs := mongoid.Collection(&Int64TestStruct{Field: 0})
 			newObj := Int64TestStructs.New().(*Int64TestStruct)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = int64(math.MaxInt64)
@@ -453,10 +443,10 @@ var _ = Describe("Document", func() {
 		})
 		It("no field [tbf3ad97f]", func() {
 			type TestStruct struct {
-				mongoid.Base `mongoid:"collection:nofield_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
+				mongoid.Document `mongoid:"collection:nofield_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
 			}
-			TestStructs := mongoid.Register(&TestStruct{})
+			TestStructs := mongoid.Collection(&TestStruct{})
 			newObj := TestStructs.New().(*TestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
@@ -466,11 +456,11 @@ var _ = Describe("Document", func() {
 		})
 		It("uint field [te355fc16]", func() {
 			type UintTestStruct struct {
-				mongoid.Base `mongoid:"collection:uint_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        uint
+				mongoid.Document `mongoid:"collection:uint_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            uint
 			}
-			UintTestStructs := mongoid.Register(&UintTestStruct{Field: 0})
+			UintTestStructs := mongoid.Collection(&UintTestStruct{Field: 0})
 			newObj := UintTestStructs.New().(*UintTestStruct)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = uint(math.MaxUint32)
@@ -488,11 +478,11 @@ var _ = Describe("Document", func() {
 		})
 		It("uint8 field [t1e63da25]", func() {
 			type Uint8TestStruct struct {
-				mongoid.Base `mongoid:"collection:uint8_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        uint8
+				mongoid.Document `mongoid:"collection:uint8_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            uint8
 			}
-			Uint8TestStructs := mongoid.Register(&Uint8TestStruct{Field: uint8(0)})
+			Uint8TestStructs := mongoid.Collection(&Uint8TestStruct{Field: uint8(0)})
 			newObj := Uint8TestStructs.New().(*Uint8TestStruct)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = uint8(math.MaxUint8)
@@ -510,11 +500,11 @@ var _ = Describe("Document", func() {
 		})
 		It("uint16 field [tf2960ac5]", func() {
 			type Uint16TestStruct struct {
-				mongoid.Base `mongoid:"collection:uint16_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        uint16
+				mongoid.Document `mongoid:"collection:uint16_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            uint16
 			}
-			Uint16TestStructs := mongoid.Register(&Uint16TestStruct{Field: uint16(0)})
+			Uint16TestStructs := mongoid.Collection(&Uint16TestStruct{Field: uint16(0)})
 			newObj := Uint16TestStructs.New().(*Uint16TestStruct)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = uint16(math.MaxUint16)
@@ -532,11 +522,11 @@ var _ = Describe("Document", func() {
 		})
 		It("uint32 field [t38e40270]", func() {
 			type Uint32TestStruct struct {
-				mongoid.Base `mongoid:"collection:uint32_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        uint32
+				mongoid.Document `mongoid:"collection:uint32_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            uint32
 			}
-			Uint32TestStructs := mongoid.Register(&Uint32TestStruct{Field: uint32(0)})
+			Uint32TestStructs := mongoid.Collection(&Uint32TestStruct{Field: uint32(0)})
 			newObj := Uint32TestStructs.New().(*Uint32TestStruct)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = uint32(math.MaxUint32)
@@ -554,11 +544,11 @@ var _ = Describe("Document", func() {
 		})
 		It("uint64 field [tc7be9cc8]", func() {
 			type Uint64TestStruct struct {
-				mongoid.Base `mongoid:"collection:uint64_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        uint64
+				mongoid.Document `mongoid:"collection:uint64_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            uint64
 			}
-			Uint64TestStructs := mongoid.Register(&Uint64TestStruct{Field: uint64(0)})
+			Uint64TestStructs := mongoid.Collection(&Uint64TestStruct{Field: uint64(0)})
 			newObj := Uint64TestStructs.New().(*Uint64TestStruct)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
 			newObj.Field = uint64(math.MaxUint64)
@@ -576,11 +566,11 @@ var _ = Describe("Document", func() {
 		})
 		It("complex64 field [t9c9d2b4e]", func() {
 			type Complex64TestStruct struct {
-				mongoid.Base `mongoid:"collection:complex64_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        complex64
+				mongoid.Document `mongoid:"collection:complex64_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            complex64
 			}
-			Complex64TestStructs := mongoid.Register(&Complex64TestStruct{Field: 0})
+			Complex64TestStructs := mongoid.Collection(&Complex64TestStruct{Field: 0})
 			newObj := Complex64TestStructs.New().(*Complex64TestStruct)
 			newObj.Field = complex64(cmplx.Inf())
 			OnlineDatabaseOnly(func() {
@@ -596,11 +586,11 @@ var _ = Describe("Document", func() {
 		})
 		It("complex128 field [tb975eac8]", func() {
 			type Complex128TestStruct struct {
-				mongoid.Base `mongoid:"collection:complex128_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        complex128
+				mongoid.Document `mongoid:"collection:complex128_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            complex128
 			}
-			Complex128TestStructs := mongoid.Register(&Complex128TestStruct{Field: 0})
+			Complex128TestStructs := mongoid.Collection(&Complex128TestStruct{Field: 0})
 			newObj := Complex128TestStructs.New().(*Complex128TestStruct)
 			newObj.Field = complex128(cmplx.Inf())
 			OnlineDatabaseOnly(func() {
@@ -616,12 +606,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*bool field [tdc0c98cb]", func() {
 			type BoolPtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:bool_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *bool
+				mongoid.Document `mongoid:"collection:bool_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *bool
 			}
 			initialValue := false
-			BoolPtrTestStructs := mongoid.Register(&BoolPtrTestStruct{Field: &initialValue})
+			BoolPtrTestStructs := mongoid.Collection(&BoolPtrTestStruct{Field: &initialValue})
 			newObj := BoolPtrTestStructs.New().(*BoolPtrTestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
@@ -642,12 +632,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*string field [t96014c1a]", func() {
 			type StringPtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:string_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *string
+				mongoid.Document `mongoid:"collection:string_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *string
 			}
 			initialValue := "initial value"
-			StringPtrTestStructs := mongoid.Register(&StringPtrTestStruct{Field: &initialValue})
+			StringPtrTestStructs := mongoid.Collection(&StringPtrTestStruct{Field: &initialValue})
 			newObj := StringPtrTestStructs.New().(*StringPtrTestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
@@ -668,12 +658,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*int field [te90cddf8]", func() {
 			type IntPtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:int_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *int
+				mongoid.Document `mongoid:"collection:int_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *int
 			}
 			initialValue := int(7)
-			IntPtrTestStructs := mongoid.Register(&IntPtrTestStruct{Field: &initialValue})
+			IntPtrTestStructs := mongoid.Collection(&IntPtrTestStruct{Field: &initialValue})
 			newObj := IntPtrTestStructs.New().(*IntPtrTestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
@@ -694,12 +684,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*int8 field [t8508c303]", func() {
 			type Int8PtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:int8_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *int8
+				mongoid.Document `mongoid:"collection:int8_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *int8
 			}
 			initialValue := int8(math.MinInt8)
-			Int8PtrTestStructs := mongoid.Register(&Int8PtrTestStruct{Field: &initialValue})
+			Int8PtrTestStructs := mongoid.Collection(&Int8PtrTestStruct{Field: &initialValue})
 			newObj := Int8PtrTestStructs.New().(*Int8PtrTestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
@@ -720,12 +710,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*int16 field [t508a5b66]", func() {
 			type Int16PtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:int16_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *int16
+				mongoid.Document `mongoid:"collection:int16_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *int16
 			}
 			initialValue := int16(math.MinInt16)
-			Int16PtrTestStructs := mongoid.Register(&Int16PtrTestStruct{Field: &initialValue})
+			Int16PtrTestStructs := mongoid.Collection(&Int16PtrTestStruct{Field: &initialValue})
 			newObj := Int16PtrTestStructs.New().(*Int16PtrTestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
@@ -746,12 +736,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*int32 field [t95b522f4]", func() {
 			type Int32PtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:int32_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *int32
+				mongoid.Document `mongoid:"collection:int32_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *int32
 			}
 			initialValue := int32(math.MinInt32)
-			Int32PtrTestStructs := mongoid.Register(&Int32PtrTestStruct{Field: &initialValue})
+			Int32PtrTestStructs := mongoid.Collection(&Int32PtrTestStruct{Field: &initialValue})
 			newObj := Int32PtrTestStructs.New().(*Int32PtrTestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
@@ -772,12 +762,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*int64 field [ta9af1e96]", func() {
 			type Int64PtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:int64_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *int64
+				mongoid.Document `mongoid:"collection:int64_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *int64
 			}
 			initialValue := int64(math.MinInt64)
-			Int64PtrTestStructs := mongoid.Register(&Int64PtrTestStruct{Field: &initialValue})
+			Int64PtrTestStructs := mongoid.Collection(&Int64PtrTestStruct{Field: &initialValue})
 			newObj := Int64PtrTestStructs.New().(*Int64PtrTestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
@@ -798,12 +788,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*uint field [td5408eb5]", func() {
 			type UintPtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:uint_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *uint
+				mongoid.Document `mongoid:"collection:uint_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *uint
 			}
 			initialValue := uint(0)
-			UintPtrTestStructs := mongoid.Register(&UintPtrTestStruct{Field: &initialValue})
+			UintPtrTestStructs := mongoid.Collection(&UintPtrTestStruct{Field: &initialValue})
 			newObj := UintPtrTestStructs.New().(*UintPtrTestStruct)
 			initialValue = uint(math.MaxUint32)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
@@ -828,12 +818,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*uint8 field [t96014c1a]", func() {
 			type Uint8PtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:uint8_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *uint8
+				mongoid.Document `mongoid:"collection:uint8_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *uint8
 			}
 			initialValue := uint8(0)
-			Uint8PtrTestStructs := mongoid.Register(&Uint8PtrTestStruct{Field: &initialValue})
+			Uint8PtrTestStructs := mongoid.Collection(&Uint8PtrTestStruct{Field: &initialValue})
 			newObj := Uint8PtrTestStructs.New().(*Uint8PtrTestStruct)
 			initialValue = uint8(math.MaxUint8)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
@@ -858,12 +848,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*uint16 field [td5521232]", func() {
 			type Uint16PtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:uint16_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *uint16
+				mongoid.Document `mongoid:"collection:uint16_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *uint16
 			}
 			initialValue := uint16(0)
-			Uint16PtrTestStructs := mongoid.Register(&Uint16PtrTestStruct{Field: &initialValue})
+			Uint16PtrTestStructs := mongoid.Collection(&Uint16PtrTestStruct{Field: &initialValue})
 			newObj := Uint16PtrTestStructs.New().(*Uint16PtrTestStruct)
 			initialValue = uint16(math.MaxUint16)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
@@ -888,12 +878,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*uint32 field [tf7318be5]", func() {
 			type Uint32PtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:uint32_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *uint32
+				mongoid.Document `mongoid:"collection:uint32_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *uint32
 			}
 			initialValue := uint32(0)
-			Uint32PtrTestStructs := mongoid.Register(&Uint32PtrTestStruct{Field: &initialValue})
+			Uint32PtrTestStructs := mongoid.Collection(&Uint32PtrTestStruct{Field: &initialValue})
 			newObj := Uint32PtrTestStructs.New().(*Uint32PtrTestStruct)
 			initialValue = uint32(math.MaxUint32)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
@@ -918,12 +908,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*uint64 field [ta35627d5]", func() {
 			type Uint64PtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:uint64_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *uint64
+				mongoid.Document `mongoid:"collection:uint64_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *uint64
 			}
 			initialValue := uint64(0)
-			Uint64PtrTestStructs := mongoid.Register(&Uint64PtrTestStruct{Field: &initialValue})
+			Uint64PtrTestStructs := mongoid.Collection(&Uint64PtrTestStruct{Field: &initialValue})
 			newObj := Uint64PtrTestStructs.New().(*Uint64PtrTestStruct)
 			initialValue = uint64(math.MaxUint64)
 			Expect(newObj.IsChanged()).To(BeFalse(), "no changes expected after initial creation")
@@ -948,12 +938,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*complex64 field [tcb2e673f]", func() {
 			type Complex64PtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:complex64_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *complex64
+				mongoid.Document `mongoid:"collection:complex64_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *complex64
 			}
 			initialValue := complex64(cmplx.Inf())
-			Complex64PtrTestStructs := mongoid.Register(&Complex64PtrTestStruct{Field: &initialValue})
+			Complex64PtrTestStructs := mongoid.Collection(&Complex64PtrTestStruct{Field: &initialValue})
 			newObj := Complex64PtrTestStructs.New().(*Complex64PtrTestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
@@ -975,12 +965,12 @@ var _ = Describe("Document", func() {
 		})
 		It("*complex128 field [t3bccbba7]", func() {
 			type Complex128PtrTestStruct struct {
-				mongoid.Base `mongoid:"collection:complex128_ptr_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        *complex128
+				mongoid.Document `mongoid:"collection:complex128_ptr_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            *complex128
 			}
 			initialValue := complex128(cmplx.Inf())
-			Complex128PtrTestStructs := mongoid.Register(&Complex128PtrTestStruct{Field: &initialValue})
+			Complex128PtrTestStructs := mongoid.Collection(&Complex128PtrTestStruct{Field: &initialValue})
 			newObj := Complex128PtrTestStructs.New().(*Complex128PtrTestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()
@@ -1002,12 +992,12 @@ var _ = Describe("Document", func() {
 		})
 		It("[]string field [t92a7a544]", func() {
 			type StringArrayTestStruct struct {
-				mongoid.Base `mongoid:"collection:string_ary_test"`
-				ID           mongoid.ObjectID `bson:"_id"`
-				Field        []string
+				mongoid.Document `mongoid:"collection:string_ary_test"`
+				ID               mongoid.ObjectID `bson:"_id"`
+				Field            []string
 			}
 			initialValue := []string{"this is", "a", "string array!"}
-			StringArrayTestStructs := mongoid.Register(&StringArrayTestStruct{Field: initialValue})
+			StringArrayTestStructs := mongoid.Collection(&StringArrayTestStruct{Field: initialValue})
 			newObj := StringArrayTestStructs.New().(*StringArrayTestStruct)
 			OnlineDatabaseOnly(func() {
 				newObj.Save()

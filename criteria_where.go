@@ -3,13 +3,14 @@ package mongoid
 import (
 	"mongoid/log"
 	// "fmt"
-	"go.mongodb.org/mongo-driver/bson"
 	"strings"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // Where adds criteria that must be matched in order to return results
-func (model *ModelType) Where(where ...Query) Criteria {
-	log.Debug("ModelType.Where ", where)
+func (model *collectionHandle) Where(where ...Query) Criteria {
+	log.Debug("collectionHandle.Where ", where)
 	return criteriaWhere(model, nil, where...)
 }
 
@@ -19,7 +20,7 @@ func (criteria *criteriaStruct) Where(where ...Query) Criteria {
 	return criteriaWhere(nil, criteria, where...)
 }
 
-func criteriaWhere(srcModel *ModelType, prevCriteria *criteriaStruct, where ...Query) Criteria {
+func criteriaWhere(srcModel *collectionHandle, prevCriteria *criteriaStruct, where ...Query) Criteria {
 	curPrevCriteria := prevCriteria
 	for _, thisWhereQuery := range where {
 		log.Traceln("New Criteria.Where ", thisWhereQuery)

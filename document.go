@@ -4,11 +4,18 @@ import (
 	"mongoid/log"
 )
 
-// IDocumentBase ...
-type IDocumentBase interface {
-	initDocumentBase(selfRef IDocumentBase, initialBSON BsonDocument)
-	DocumentBase() IDocumentBase
-	Model() *ModelType
+// IDocument is the interface that structs must implement to be used with go-mongoid.
+// The Document struct implements this interface, and it can be easily applied to your
+// own structs by anonymous field.
+//
+// For example:
+//     type ExampleMinimalDocumentStruct struct {
+//         mongoid.Document // implements IDocument
+//     }
+// Refer to examples/ for additional usage examples.
+type IDocument interface {
+	DocumentBase() IDocument
+	Collection() ICollection
 
 	ToBson() BsonDocument
 	ToUpdateBson() BsonDocument
@@ -16,59 +23,56 @@ type IDocumentBase interface {
 	GetID() interface{}
 
 	IsPersisted() bool
-	setPersisted(bool)
 	IsChanged() bool
 	Changes() BsonDocument
+	Was(fieldPath string) (interface{}, bool)
+	// Reset(fieldPath string)
+	// ResetAll()
 
 	Save() error
 
-	// SetCollection(*mgo.Collection)
-	// SetDocument(document IDocumentBase)
-	// SetConnection(*Connection)
-
-	// Create()
-	// Create_()
-	// Validate() error
-
-	// Changes()
-	// Changed_(fieldName)
-	// Reset_(fieldName)
-	// Was_(fieldName)
-
 	SetField(fieldNamePath string, newValue interface{}) error
 	GetField(fieldNamePath string) (interface{}, error)
+
+	implementIDocumentBase()
+	initDocumentBase(modelType *collectionHandle, selfRef IDocument, initialBSON BsonDocument)
 }
 
-// Base ...
-type Base struct {
-	rootTypeRef   IDocumentBase // self-reference for future type recognition via interface{}
-	persisted     bool          // persistence tracking (reflects the anticipated existence of a record within the datastore, based on the lifecycle of the instance)
-	previousValue BsonDocument  // stores a BSON representation of the last values, used for change tracking
-
+// Document ...
+type Document struct {
+	rootTypeRef   IDocument         // self-reference for future type recognition via interface{}
+	persisted     bool              // persistence tracking (reflects the anticipated existence of a record within the datastore, based on the lifecycle of the instance)
+	previousValue BsonDocument      // stores a BSON representation of the last values, used for change tracking
+	modelType     *collectionHandle // the collectionHandle that was used to create this object
 	// privateID     string       // internal object ID tracker (string form in case a custom ID field is provided of a non-ObjectID type)
 }
 
+// implementIDocumentBase implements IDocument
+func (d *Document) implementIDocumentBase() {}
+
 // force sets previousValue (change tracking) to the given BsonDocument
-func (d *Base) setPreviousValueBSON(lastValue BsonDocument) {
+func (d *Document) setPreviousValueBSON(lastValue BsonDocument) {
 	d.previousValue = lastValue
 }
 
 // updates the stored previousValue BSON (change tracking) with the current object values (resets value change tracking)
-func (d *Base) refreshPreviousValueBSON() {
+func (d *Document) refreshPreviousValueBSON() {
 	d.setPreviousValueBSON(d.ToBson())
 }
 
-// Model returns the mongoid.ModelType of the document object, or nil if unknown
-func (d *Base) Model() *ModelType {
-	log.Trace("Base.Model()")
-	if d.rootTypeRef == nil {
-		log.Panic("Model() requires valid rootTypeRef")
+// Collection returns the ICollection of the document object
+func (d *Document) Collection() ICollection {
+	log.Trace("Document.Collection()")
+	if d.modelType == nil {
+		log.Trace("Document.Collection() d.modelType is nil; creating collectionHandle on demand")
+		mt := Collection(d).(collectionHandle)
+		d.modelType = &mt
 	}
-	return Model(d.rootTypeRef)
+	return *d.modelType
 }
 
-// DocumentBase returns the self-reference handle, which can be used to un-cast the object from *Base into an IDocumentBase (interface{}) of the original type
-func (d *Base) DocumentBase() IDocumentBase {
+// DocumentBase returns the self-reference handle, which can be used to un-cast the object from *Document into an IDocument (interface{}) of the original type
+func (d *Document) DocumentBase() IDocument {
 	if d.rootTypeRef == nil {
 		log.Panic("DocumentBase() requires valid rootTypeRef")
 	}
@@ -77,7 +81,7 @@ func (d *Base) DocumentBase() IDocumentBase {
 
 // GetID returns an interface to the current document ID. Type assertion is left to the caller.
 // TODO: make this work whether a custom ID field was explicitly declared in the document model (bson:"_id") or not
-func (d *Base) GetID() interface{} {
+func (d *Document) GetID() interface{} {
 	res, err := d.GetField("_id")
 	if err != nil {
 		return nil

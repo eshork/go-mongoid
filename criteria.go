@@ -29,7 +29,7 @@ const (
 
 type criteriaStruct struct {
 	criteriaType   int
-	sourceModel    *ModelType
+	sourceModel    *collectionHandle
 	prevCriteria   *criteriaStruct
 	thisQuery      Query
 	thisQueryBsonD bson.D
@@ -55,11 +55,11 @@ func (criteria *criteriaStruct) toBsonD() bson.D {
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// func (criteria *ModelType) First() {
+// func (criteria *collectionHandle) First() {
 // }
 // func (criteria *Criteria) First() {
 // }
-// func (criteria *ModelType) Last() {
+// func (criteria *collectionHandle) Last() {
 // }
 // func (criteria *Criteria) Last() {
 // }

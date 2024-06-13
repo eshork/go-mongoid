@@ -56,7 +56,7 @@ func Configured() bool {
 	return false
 }
 
-// ClientByName returns the handle to the requested named client
+// ClientByName returns the handle to the requested named client, or nil if not found
 func ClientByName(clientName string) *Client {
 	mongoidConfigMutex.Lock()
 	defer mongoidConfigMutex.Unlock()
